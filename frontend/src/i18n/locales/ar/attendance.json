@@ -1,0 +1,39 @@
+{
+  "title": "إدارة الحضور",
+  "tabs": {
+    "logs": "سجلات الحضور",
+    "summary": "ملخص ساعات العمل"
+  },
+  "export": "تصدير إلى CSV",
+  "filters": {
+    "title": "الفلاتر",
+    "employeeId": "معرف الموظف",
+    "startDate": "تاريخ البداية",
+    "endDate": "تاريخ النهاية",
+    "eventType": "نوع الحدث",
+    "all": "الكل",
+    "checkIn": "تسجيل الدخول",
+    "checkOut": "تسجيل الخروج",
+    "placeholder_employee": "أدخل معرف الموظف"
+  },
+  "table": {
+    "employee": "الموظف",
+    "employeeId": "رقم الموظف",
+    "timestamp": "الوقت والتاريخ",
+    "eventType": "نوع الحدث",
+    "date": "التاريخ",
+    "checkIn": "تسجيل الدخول",
+    "checkOut": "تسجيل الخروج",
+    "status": "الحالة",
+    "device": "الجهاز",
+    "deviceId": "رقم الجهاز",
+    "matchScore": "نقاط المطابقة"
+  },
+  "status": {
+    "complete": "مكتمل",
+    "incomplete": "غير مكتمل",
+    "checkedIn": "تم تسجيل الدخول"
+  },
+  "reset": "إعادة تعيين الفلاتر",
+  "noRecords": "لم يتم العثور على سجلات حضور"
+}

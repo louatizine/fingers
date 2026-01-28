@@ -1,0 +1,113 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# Environment variables
+.env
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+
+# Build outputs
+frontend/dist/
+frontend/build/
+
+# Logs
+*.log
+logs/
+
+# Test files
+test_*.py
+check_*.py
+reset_*.py
+
+# C# / .NET
+*.exe
+*.dll
+*.pdb
+*.cache
+*.user
+*.suo
+*.sln.docstates
+bin/
+obj/
+TestResults/
+*.csproj.nuget.g.targets
+*.csproj.nuget.d.targets
+*.csproj.nuget.props
+*.csproj.nuget.cache
+*.dbmdl
+*.dbproj
+*.mdf
+*.ldf
+
+# SDK / Third-party
+SDK/Bin/
+SDK/Lib/
+SDK/Resources/
+sdk2/Bin/
+sdk2/Lib/
+sdk2/Resources/
+
+# Documentation / Misc
+*.chm
+*.htm
+*.pdf
+*.docx
+*.xlsx
+*.pptx
+
+# Others
+*.tgz
+*.tar.gz
+*.zip
+*.7z
+*.rar
+*.gz
+*.tar
+*.bak
+*.tmp
+*.old
+*.orig
+
+# Ignore build scripts output
+*.bat
+*.ps1
+
+# Ignore test output
+*.coverage
+*.testresults
+
+# Ignore generated files
+*.generated.cs
+*.designer.cs
+*.g.cs
+*.g.i.cs
+
+# Ignore local settings
+appsettings.Development.json
+appsettings.Local.json

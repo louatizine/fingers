@@ -1,0 +1,12 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment
+.env
+
+# Test files
+test_*.py
+check_*.py
+reset_*.py

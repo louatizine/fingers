@@ -1,0 +1,97 @@
+<UserControl x:Class="Fingerprint.AdminUI.Views.DashboardView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,20">
+            <TextBlock Text="Recent Attendance Logs" 
+                     Style="{StaticResource TitleStyle}"
+                     DockPanel.Dock="Left"/>
+            <Button Command="{Binding RefreshCommand}"
+                  HorizontalAlignment="Right"
+                  Style="{StaticResource MaterialDesignRaisedButton}"
+                  Margin="10,0,0,0">
+                <Button.Content>
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="Refresh" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                        <TextBlock Text="Refresh" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button.Content>
+            </Button>
+        </DockPanel>
+
+        <!-- Content -->
+        <materialDesign:Card Grid.Row="1">
+            <Grid>
+                <!-- Loading Indicator -->
+                <ProgressBar IsIndeterminate="True" 
+                           Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}"
+                           VerticalAlignment="Top"/>
+
+                <!-- Data Grid -->
+                <DataGrid ItemsSource="{Binding AttendanceLogs}"
+                        AutoGenerateColumns="False"
+                        IsReadOnly="True"
+                        CanUserAddRows="False"
+                        CanUserDeleteRows="False"
+                        SelectionMode="Single"
+                        materialDesign:DataGridAssist.CellPadding="10 8 8 8"
+                        materialDesign:DataGridAssist.ColumnHeaderPadding="10 8 8 8">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Date" 
+                                          Binding="{Binding DateDisplay}" 
+                                          Width="120"/>
+                        <DataGridTextColumn Header="Time" 
+                                          Binding="{Binding TimeDisplay}" 
+                                          Width="100"/>
+                        <DataGridTextColumn Header="Employee ID" 
+                                          Binding="{Binding EmployeeId}" 
+                                          Width="120"/>
+                        <DataGridTextColumn Header="Event" 
+                                          Binding="{Binding EventTypeDisplay}" 
+                                          Width="100">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding EventType}" Value="check_in">
+                                            <Setter Property="Foreground" Value="Green"/>
+                                            <Setter Property="FontWeight" Value="Bold"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding EventType}" Value="check_out">
+                                            <Setter Property="Foreground" Value="Blue"/>
+                                            <Setter Property="FontWeight" Value="Bold"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Device" 
+                                          Binding="{Binding DeviceId}" 
+                                          Width="150"/>
+                        <DataGridTextColumn Header="Match Score" 
+                                          Binding="{Binding MatchScore}" 
+                                          Width="100"/>
+                        <DataGridTextColumn Header="Worked Hours" 
+                                          Binding="{Binding WorkedHours, StringFormat={}{0:F2}h}" 
+                                          Width="*"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <!-- Error Message -->
+                <TextBlock Text="{Binding ErrorMessage}"
+                         Foreground="Red"
+                         Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVisibilityConverter}}"
+                         VerticalAlignment="Center"
+                         HorizontalAlignment="Center"
+                         TextWrapping="Wrap"
+                         Margin="20"/>
+            </Grid>
+        </materialDesign:Card>
+    </Grid>
+</UserControl>

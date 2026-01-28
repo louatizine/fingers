@@ -1,0 +1,38 @@
+{
+  "title": "Gestion des empreintes digitales",
+  "subtitle": "Gestion de l'identité biométrique et journaux d'inscription",
+  "enrolledUsers": "Utilisateurs inscrits",
+  "note": {
+    "title": "Remarque :",
+    "description": "L'inscription des empreintes digitales s'effectue à l'aide de l'application de bureau Windows. Cette page affiche uniquement les utilisateurs inscrits. Pour inscrire de nouveaux utilisateurs, utilisez le terminal biométrique de bureau."
+  },
+  "table": {
+    "userIdentity": "Identité de l'utilisateur",
+    "department": "Département",
+    "hardwareId": "ID matériel",
+    "dateEnrolled": "Date d'inscription",
+    "action": "Action",
+    "employeeId": "ID d'employé",
+    "name": "Nom",
+    "templateId": "ID de modèle",
+    "enrolledAt": "Inscrit le",
+    "actions": "Actions"
+  },
+  "remove": "Supprimer",
+  "removeDialog": {
+    "title": "Supprimer l'inscription d'empreinte digitale",
+    "message": "Êtes-vous sûr de vouloir supprimer l'inscription d'empreinte digitale pour",
+    "thisAction": "Cette action ne peut pas être annulée.",
+    "cancel": "Annuler",
+    "confirm": "Supprimer l'inscription"
+  },
+  "success": {
+    "removed": "Empreinte digitale supprimée avec succès"
+  },
+  "error": {
+    "removeFailed": "Échec de la suppression de l'empreinte digitale"
+  },
+  "loading": "Chargement des utilisateurs inscrits...",
+  "noUsers": "Aucun utilisateur inscrit trouvé",
+  "notAvailable": "N/D"
+}

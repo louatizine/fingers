@@ -1,0 +1,39 @@
+{
+  "title": "Attendance Management",
+  "tabs": {
+    "logs": "Attendance Logs",
+    "summary": "Worked Hours Summary"
+  },
+  "export": "Export to CSV",
+  "filters": {
+    "title": "Filters",
+    "employeeId": "Employee ID",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "eventType": "Event Type",
+    "all": "All",
+    "checkIn": "Check In",
+    "checkOut": "Check Out",
+    "placeholder_employee": "Enter employee ID"
+  },
+  "table": {
+    "employee": "Employee",
+    "employeeId": "Employee ID",
+    "timestamp": "Timestamp",
+    "eventType": "Event Type",
+    "date": "Date",
+    "checkIn": "Check In",
+    "checkOut": "Check Out",
+    "status": "Status",
+    "device": "Device",
+    "deviceId": "Device ID",
+    "matchScore": "Match Score"
+  },
+  "status": {
+    "complete": "Complete",
+    "incomplete": "Incomplete",
+    "checkedIn": "Checked In"
+  },
+  "reset": "Reset Filters",
+  "noRecords": "No attendance records found"
+}

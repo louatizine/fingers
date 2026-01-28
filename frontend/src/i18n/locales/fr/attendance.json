@@ -1,0 +1,39 @@
+{
+  "title": "Gestion des présences",
+  "tabs": {
+    "logs": "Registres de présence",
+    "summary": "Résumé des heures travaillées"
+  },
+  "export": "Exporter en CSV",
+  "filters": {
+    "title": "Filtres",
+    "employeeId": "ID d'employé",
+    "startDate": "Date de début",
+    "endDate": "Date de fin",
+    "eventType": "Type d'événement",
+    "all": "Tous",
+    "checkIn": "Entrée",
+    "checkOut": "Sortie",
+    "placeholder_employee": "Entrez l'ID de l'employé"
+  },
+  "table": {
+    "employee": "Employé",
+    "employeeId": "ID Employé",
+    "timestamp": "Horodatage",
+    "eventType": "Type d'événement",
+    "date": "Date",
+    "checkIn": "Entrée",
+    "checkOut": "Sortie",
+    "status": "Statut",
+    "device": "Appareil",
+    "deviceId": "ID Appareil",
+    "matchScore": "Score de correspondance"
+  },
+  "status": {
+    "complete": "Complet",
+    "incomplete": "Incomplet",
+    "checkedIn": "Entrée enregistrée"
+  },
+  "reset": "Réinitialiser les filtres",
+  "noRecords": "Aucun enregistrement de présence trouvé"
+}

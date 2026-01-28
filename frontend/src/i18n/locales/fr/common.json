@@ -1,0 +1,561 @@
+{
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "warning": "Avertissement",
+    "confirm": "Confirmer",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "view": "Afficher",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "export": "Exporter",
+    "import": "Importer",
+    "refresh": "Actualiser",
+    "retry": "Réessayer",
+    "saving": "Enregistrement...",
+    "close": "Fermer",
+    "submit": "Soumettre",
+    "back": "Retour",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "yes": "Oui",
+    "no": "Non",
+    "actions": "Actions",
+    "details": "Détails",
+    "noData": "Aucune donnée disponible",
+    "loading_message": "Chargement de vos données...",
+    "seeMore": "Voir Plus",
+    "seeLess": "Voir moins",
+    "notAvailable": "N/D",
+    "viewAll": "Voir Tout",
+    "thisMonth": "Ce Mois"
+  },
+  "currency": {
+    "dinar": "DT"
+  },
+  "nav": {
+    "dashboard": "Tableau de Bord",
+    "employees": "Employés",
+    "leaves": "Congés",
+    "projects": "Projets",
+    "salary_advances": "Avances sur Salaire",
+    "attendance": "Présence",
+    "fingerprint": "Empreintes digitales",
+    "settings": "Paramètres",
+    "profile": "Profil",
+    "logout": "Déconnexion"
+  },
+  "branding": {
+    "title": "Gestion RH",
+    "subtitle": "Système d'Entreprise"
+  },
+  "dashboard": {
+    "title_employee": "Mon Tableau de Bord",
+    "title_admin": "Tableau de Bord Administrateur",
+    "title_supervisor": "Tableau de Bord Superviseur",
+    "welcome": "Bon retour, {{name}} !",
+    "subtitle_employee": "Voici un aperçu de votre activité.",
+    "subtitle_admin": "Surveillez les activités et métriques de l'entreprise",
+    "subtitle_supervisor": "Suivez les performances et demandes de votre équipe",
+    "request_leave": "Demander un Congé",
+    "view_calendar": "Voir le Calendrier",
+    "stats": {
+      "annual_leave": "Congés Annuels",
+      "sick_leave": "Congés Maladie",
+      "pending_requests": "Demandes en Attente",
+      "approved_leaves": "Congés Approuvés",
+      "total_employees": "Total Employés",
+      "pending_leaves": "Congés en Attente",
+      "pending_advances": "Avances en Attente",
+      "active_projects": "Projets Actifs",
+      "days_remaining": "jours restants",
+      "days_available": "jours disponibles",
+      "awaiting_approval": "en attente d'approbation",
+      "this_year": "cette année",
+      "active_employees": "employés actifs",
+      "in_progress": "en cours"
+    },
+    "charts": {
+      "leave_requests": "Aperçu des Demandes de Congés",
+      "leave_requests_subtitle": "Répartition par statut",
+      "salary_advances": "Demandes d'Avance sur Salaire",
+      "salary_advances_subtitle": "Statut du mois en cours",
+      "leave_balance": "Solde de Congés",
+      "recent_activity": "Activité Récente",
+      "leave_trends": "Tendances des Congés",
+      "upcoming_timeoff": "Congés à Venir",
+      "system_health": "Santé du Système"
+    },
+    "recent": {
+      "leave_requests": "Demandes de Congés Récentes",
+      "leave_requests_subtitle": "Dernières soumissions",
+      "salary_advances": "Avances sur Salaire Récentes",
+      "salary_advances_subtitle": "Demandes financières"
+    }
+  },
+  "leaves": {
+    "title": "Demandes de Congés",
+    "subtitle": "Gérez vos demandes de congés et consultez vos soldes",
+    "new_request": "Nouvelle Demande",
+    "your_balance": "Votre Solde de Congés",
+    "annual_leave": "Congés Annuels (Vacances)",
+    "sick_leave": "Congé Maladie",
+    "unpaid_leave": "Congé Sans Solde",
+    "calculated_from_settings": "Calculé selon les paramètres",
+    "company_policy": "Politique de l'entreprise",
+    "insufficient_balance": "Solde insuffisant",
+    "table": {
+      "employee": "Employé",
+      "type": "Type",
+      "balance": "Solde",
+      "dates": "Dates",
+      "days": "Jours",
+      "reason": "Motif",
+      "status": "Statut",
+      "actions": "Actions"
+    },
+    "modal": {
+      "title": "Nouvelle Demande de Congé",
+      "leave_type": "Type de Congé",
+      "start_date": "Date de Début",
+      "end_date": "Date de Fin",
+      "number_of_days": "Nombre de Jours",
+      "reason": "Motif",
+      "submit": "Soumettre la Demande",
+      "cancel": "Annuler"
+    },
+    "messages": {
+      "insufficient_warning": "⚠️ Attention : Solde insuffisant ! Disponible : {{available}} jours, Demandé : {{requested}} jours. Votre demande a été soumise pour approbation.",
+      "success": "Demande de congé soumise avec succès",
+      "approved": "Demande de congé approuvée avec succès",
+      "rejected": "Demande de congé rejetée",
+      "failed": "Échec de la soumission de la demande",
+      "confirm_approve": "Approuver cette demande de congé ?",
+      "rejection_reason": "Entrez le motif du refus (optionnel) :"
+    }
+  },
+  "employees": {
+    "title": "Gestion des Employés",
+    "subtitle": "Gérez les membres de votre équipe et leurs informations",
+    "addButton": "Ajouter un Employé",
+    "listView": "Vue Liste",
+    "gridView": "Vue Grille",
+    "noEmployees": "Aucun employé trouvé",
+    "adjustFilters": "Essayez d'ajuster vos filtres",
+    "getStarted": "Commencez par ajouter votre premier employé",
+    "confirmDeactivate": "Êtes-vous sûr de vouloir désactiver cet employé ?",
+    "table": {
+      "employee": "Employé",
+      "department": "Département",
+      "contact": "Contact",
+      "status": "Statut",
+      "actions": "Actions"
+    },
+    "filters": {
+      "search": "Rechercher",
+      "searchPlaceholder": "Rechercher des employés...",
+      "department": "Département",
+      "allDepartments": "Tous les Départements",
+      "status": "Statut",
+      "allStatus": "Tous les Statuts",
+      "active": "Actif",
+      "inactive": "Inactif"
+    },
+    "stats": {
+      "total": "Total Employés",
+      "active": "Actifs",
+      "departments": "Départements",
+      "avgExperience": "Expérience Moyenne"
+    },
+    "departments": {
+      "engineering": "Ingénierie",
+      "sales": "Ventes",
+      "marketing": "Marketing",
+      "hr": "Ressources Humaines",
+      "finance": "Finance",
+      "management": "Direction",
+      "operations": "Opérations"
+    },
+    "roles": {
+      "admin": "Administrateur",
+      "supervisor": "Superviseur",
+      "employee": "Employé"
+    },
+    "employmentTypes": {
+      "fullTime": "Temps Plein",
+      "partTime": "Temps Partiel",
+      "contract": "Contractuel",
+      "intern": "Stagiaire"
+    },
+    "modal": {
+      "title": "Ajouter un Nouvel Employé",
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "email": "Email",
+      "password": "Mot de Passe",
+      "phone": "Téléphone",
+      "role": "Rôle",
+      "employmentType": "Type d'Emploi",
+      "birthday": "Date de Naissance",
+      "hireDate": "Date d'Embauche",
+      "company": "Entreprise",
+      "selectCompany": "Sélectionner une Entreprise",
+      "department": "Département",
+      "selectDepartment": "Sélectionner un Département",
+      "position": "Poste",
+      "address": "Adresse",
+      "createButton": "Créer l'Employé"
+    },
+    "detailView": {
+      "phone": "Téléphone",
+      "department": "Département",
+      "employeeId": "ID Employé",
+      "employmentType": "Type d'Emploi",
+      "role": "Rôle",
+      "additionalInfo": "Informations Complémentaires",
+      "hireDate": "Date d'Embauche",
+      "birthday": "Date de Naissance",
+      "yearsOfService": "Années de Service",
+      "address": "Adresse",
+      "teamMates": "Coéquipiers"
+    },
+    "messages": {
+      "createSuccess": "Employé créé avec succès",
+      "createError": "Échec de la création de l'employé",
+      "deactivateSuccess": "Employé désactivé avec succès",
+      "deactivateError": "Échec de la désactivation de l'employé",
+      "activateSuccess": "Employé activé avec succès",
+      "activateError": "Échec de l'activation de l'employé",
+      "confirmDeactivate": "Êtes-vous sûr de vouloir désactiver cet employé? Il perdra l'accès au système.",
+      "confirmActivate": "Êtes-vous sûr de vouloir activer cet employé? Il retrouvera l'accès au système."
+    }
+  },
+  "profile": {
+    "title": "Mon Profil",
+    "personalInfo": "Informations Personnelles",
+    "accountDetails": "Détails de votre compte et informations",
+    "editButton": "Modifier le Profil",
+    "saveButton": "Enregistrer les Modifications",
+    "notProvided": "Non renseigné",
+    "form": {
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "phone": "Téléphone",
+      "department": "Département",
+      "position": "Poste"
+    },
+    "fields": {
+      "employeeId": "ID Employé",
+      "fullName": "Nom Complet",
+      "email": "Adresse Email",
+      "phone": "Téléphone",
+      "role": "Rôle",
+      "department": "Département",
+      "position": "Poste"
+    },
+    "leaveBalance": {
+      "title": "Solde de Congés",
+      "subtitle": "Vos jours de congés disponibles",
+      "annual": "Congés Annuels (Vacances)",
+      "sick": "Congé Maladie",
+      "unpaid": "Congé Sans Solde",
+      "basedOnTenure": "Basé sur l'ancienneté et les paramètres",
+      "companyPolicy": "Politique de l'entreprise"
+    },
+    "messages": {
+      "updateSuccess": "Profil mis à jour avec succès",
+      "updateError": "Échec de la mise à jour du profil"
+    }
+  },
+  "settings": {
+    "title": "Paramètres",
+    "subtitle": "Gérez les configurations de l'application",
+    "save_recalculate": "Enregistrer et Recalculer Tous les Soldes",
+    "tabs": {
+      "holiday": "Jours Fériés Publics",
+      "language": "Langue",
+      "companies": "Entreprises"
+    },
+    "holiday": {
+      "configTitle": "Configuration du Calcul des Vacances",
+      "configSubtitle": "Définissez les paramètres de calcul automatique des congés annuels",
+      "monthlyVacationDays": "Jours de Vacances Mensuels",
+      "daysPerMonth": "jours/mois",
+      "monthlyVacationDaysHelp": "Nombre de jours de vacances accumulés par mois de service (ex: 2.5 jours/mois = 30 jours/an)",
+      "probationPeriod": "Période de Probation",
+      "probationPeriodHelp": "Nombre de mois avant que les employés commencent à accumuler des vacances",
+      "includeWeekends": "Inclure les Week-ends dans le Calcul",
+      "includeWeekendsHelp": "Cochez si les week-ends doivent être comptés comme jours de congés",
+      "maxConsecutiveDays": "Jours Consécutifs Maximum",
+      "maxConsecutiveDaysHelp": "Nombre maximum de jours de vacances consécutifs qu'un employé peut prendre",
+      "currentFormula": "Formule de Calcul Actuelle",
+      "vacationBalance": "Solde de Congés",
+      "monthsOfService": "Mois de Service",
+      "probation": "de probation",
+      "usedVacationDays": "Jours de Vacances Utilisés",
+      "formulaNote": "Cette formule sera appliquée à tous les employés lors du recalcul",
+      "recalculating": "Recalcul en cours...",
+      "saveButton": "Enregistrer les Paramètres",
+      "employeeBalances": "Soldes de Vacances des Employés",
+      "employeeBalancesSubtitle": "Vue d'ensemble des soldes calculés pour chaque employé",
+      "afterProbation": "après probation",
+      "noEmployeeData": "Aucune donnée d'employé disponible",
+      "table": {
+        "employee": "Employé",
+        "hireDate": "Date d'Embauche",
+        "service": "Ancienneté",
+        "earned": "Gagné",
+        "used": "Utilisé",
+        "balance": "Solde"
+      }
+    },
+    "language": {
+      "title": "Préférences de Langue",
+      "subtitle": "Sélectionnez la langue du système",
+      "label": "Langue du Système",
+      "saveButton": "Enregistrer la Langue"
+    },
+    "companies": {
+      "title": "Liste des Entreprises",
+      "subtitle": "Gérez les politiques de congés des entreprises",
+      "noCompanies": "Aucune entreprise enregistrée",
+      "annualLeave": "Congés Annuels",
+      "sickLeave": "Congé Maladie",
+      "unpaidLeave": "Congé Sans Solde"
+    },
+    "messages": {
+      "loadFailed": "Échec du chargement des paramètres",
+      "saveSuccess": "Paramètres enregistrés avec succès",
+      "saveFailed": "Échec de l'enregistrement des paramètres",
+      "recalculateSuccess": "Tous les soldes ont été recalculés avec succès"
+    },
+    "attendance": {
+      "title": "Paramètres de présence",
+      "subtitle": "Configurer les heures de travail et les horaires de pause déjeuner",
+      "checkInStart": "Heure de début d'entrée",
+      "checkInStartHelp": "Heure prévue pour l'arrivée des employés",
+      "checkOutEnd": "Heure de fin de sortie",
+      "checkOutEndHelp": "Heure prévue pour le départ des employés",
+      "lunchBreakStart": "Début de la pause déjeuner",
+      "lunchBreakStartHelp": "La pause déjeuner commence à cette heure",
+      "lunchBreakEnd": "Fin de la pause déjeuner",
+      "lunchBreakEndHelp": "La pause déjeuner se termine à cette heure",
+      "howItWorksTitle": "Comment ça marche:",
+      "howItWorks1": "Première empreinte de la journée = arrivée",
+      "howItWorks2": "Dernière empreinte de la journée = départ",
+      "howItWorks3": "Le temps de pause déjeuner est automatiquement soustrait des heures travaillées",
+      "howItWorks4": "Heures travaillées = (Sortie - Entrée) - Durée de la pause déjeuner",
+      "save": "Enregistrer les paramètres de présence"
+    }
+  },
+  "projects": {
+    "title": "Gestion des Projets",
+    "myProjects": "Mes Projets",
+    "subtitle": "Gérez tous vos projets et assignations",
+    "subtitleEmployee": "Consultez les projets qui vous sont assignés",
+    "add_project": "Ajouter un Projet",
+    "newProject": "Nouveau Projet",
+    "hideForm": "Masquer le Formulaire",
+    "total_projects": "Total des Projets",
+    "totalProjects": "Total des Projets",
+    "active_projects": "Projets Actifs",
+    "activeMembers": "Membres Actifs",
+    "description": "Description",
+    "noDescription": "Aucune description fournie",
+    "teamMembers": "Membres de l'Équipe",
+    "member": "membre",
+    "members": "membres",
+    "noMembers": "Aucun membre assigné",
+    "removeMember": "Retirer le membre",
+    "loading": "Chargement des projets",
+    "loadingSubtitle": "Veuillez patienter...",
+    "form": {
+      "title": "Créer un Nouveau Projet",
+      "newProject": "Créer un Nouveau Projet",
+      "projectName": "Nom du Projet",
+      "projectNamePlaceholder": "ex., Refonte du Site Web, Développement d'Application Mobile",
+      "projectDescription": "Description du Projet",
+      "projectDescriptionPlaceholder": "Décrivez les objectifs et la portée du projet...",
+      "descriptionTips": "Vous pouvez utiliser des puces ou une numérotation pour organiser les objectifs et les fonctionnalités",
+      "assignMembers": "Assigner des Membres",
+      "assignMember": "Assigner un Membre",
+      "noEmployees": "Aucun employé disponible",
+      "selected": "sélectionné(s)",
+      "multiSelectHelp": "Maintenez Ctrl/Cmd pour sélectionner plusieurs employés",
+      "creating": "Création en cours...",
+      "createButton": "Créer le Projet",
+      "selectEmployee": "Sélectionner un employé",
+      "allAssigned": "Tous les employés sont déjà assignés",
+      "assign": "Assigner"
+    },
+    "validation": {
+      "nameRequired": "Le nom du projet est requis"
+    },
+    "table": {
+      "name": "Nom du Projet",
+      "description": "Description",
+      "company": "Entreprise",
+      "start_date": "Date de Début",
+      "end_date": "Date de Fin",
+      "status": "Statut",
+      "actions": "Actions"
+    },
+    "modal": {
+      "title_add": "Ajouter un Nouveau Projet",
+      "title_edit": "Modifier le Projet",
+      "name": "Nom du Projet",
+      "description": "Description",
+      "company": "Entreprise",
+      "start_date": "Date de Début",
+      "end_date": "Date de Fin",
+      "status": "Statut",
+      "select_company": "Sélectionner une entreprise",
+      "select_status": "Sélectionner un statut"
+    },
+    "status": {
+      "active": "Actif",
+      "completed": "Terminé",
+      "on_hold": "En Attente",
+      "cancelled": "Annulé"
+    },
+    "error": {
+      "title": "Erreur de Chargement"
+    },
+    "errors": {
+      "loadFailed": "Échec du chargement des projets",
+      "createFailed": "Échec de la création du projet",
+      "addFailed": "Échec de l'ajout du projet",
+      "assignFailed": "Échec de l'assignation de l'utilisateur",
+      "removeFailed": "Échec de la suppression du membre"
+    },    "success": {
+      "userAssigned": "Utilisateur affecté avec succès",
+      "userRemoved": "Utilisateur supprimé avec succès",
+      "projectCreated": "Projet créé avec succès",
+      "projectUpdated": "Projet mis à jour avec succès",
+      "created": "Créé avec succès"
+    },    "messages": {
+      "add_success": "Projet ajouté avec succès",
+      "update_success": "Projet mis à jour avec succès",
+      "delete_success": "Projet supprimé avec succès",
+      "delete_confirm": "Êtes-vous sûr de vouloir supprimer ce projet ?",
+      "failed": "Opération échouée"
+    },
+    "confirmRemoveUser": "Êtes-vous sûr de vouloir retirer cet utilisateur du projet ?",
+    "emptyState": {
+      "noProjects": "Aucun Projet Trouvé",
+      "noProjectsSubtitle": "Commencez par créer votre premier projet pour organiser votre travail d'équipe.",
+      "noAssignedProjects": "Aucun Projet Assigné",
+      "noAssignedSubtitle": "Vous n'êtes actuellement assigné à aucun projet. Contactez votre manager pour plus d'informations.",
+      "createFirst": "Créer Votre Premier Projet"
+    },
+    "footer": {
+      "employeeNote": "Vous êtes assigné aux projets affichés ci-dessus",
+      "managerNote": "Gérer {{count}} projet actif"
+    }
+  },
+  "salaryAdvances": {
+    "title": "Avances sur Salaire",
+    "subtitle": "Gérez les demandes d'avances sur salaire",
+    "newRequest": "Nouvelle Demande",
+    "total_requests": "Total des Demandes",
+    "pending_requests": "Demandes en Attente",
+    "table": {
+      "employee": "Employé",
+      "amount": "Montant",
+      "reason": "Motif",
+      "date": "Date de Demande",
+      "status": "Statut",
+      "actions": "Actions"
+    },
+    "modal": {
+      "title": "Nouvelle Demande d'Avance",
+      "amount": "Montant",
+      "reason": "Motif",
+      "submit": "Soumettre la Demande",
+      "cancel": "Annuler"
+    },
+    "rejectModal": {
+      "title": "Rejeter la Demande d'Avance",
+      "subtitle": "Veuillez fournir une raison pour le rejet",
+      "reasonLabel": "Motif du Rejet",
+      "reasonPlaceholder": "Expliquez pourquoi cette demande est rejetée...",
+      "confirmButton": "Rejeter la Demande"
+    },
+    "messages": {
+      "createSuccess": "Demande d'avance soumise avec succès",
+      "createFailed": "Échec de la soumission de la demande",
+      "approved": "Demande d'avance approuvée avec succès",
+      "rejected": "Demande d'avance rejetée avec succès",
+      "rejectFailed": "Échec du rejet de la demande",
+      "reasonRequired": "Le motif du rejet est requis",
+      "confirmApprove": "Approuver cette demande d'avance ?"
+    }
+  },
+  "login": {
+    "title": "Gestion RH",
+    "subtitle": "Système de Planification des Ressources d'Entreprise",
+    "welcomeBack": "Bon Retour",
+    "signInMessage": "Connectez-vous pour accéder à votre compte",
+    "emailLabel": "Adresse Email",
+    "emailPlaceholder": "Entrez votre email",
+    "passwordLabel": "Mot de Passe",
+    "passwordPlaceholder": "Entrez votre mot de passe",
+    "signInButton": "Se Connecter au Tableau de Bord",
+    "signingIn": "Connexion en cours...",
+    "demoCredentials": "Identifiants de Démonstration",
+    "footer": "© 2026 Système de Gestion RH. Tous droits réservés.",
+    "loginError": "Échec de la connexion"
+  },
+  "status": {
+    "pending": "En Attente",
+    "approved": "Approuvé",
+    "rejected": "Rejeté",
+    "cancelled": "Annulé",
+    "processing": "En Cours de Traitement",
+    "completed": "Terminé",
+    "active": "Actif",
+    "inactive": "Inactif"
+  },
+  "leaveTypes": {
+    "annual": "Congés Annuels",
+    "sick": "Congé Maladie",
+    "unpaid": "Congé Sans Solde",
+    "maternity": "Congé Maternité",
+    "paternity": "Congé Paternité",
+    "medical": "Congé Médical"
+  },
+  "actions": {
+    "approve": "Approuver",
+    "reject": "Rejeter",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "view": "Afficher",
+    "download": "Télécharger",
+    "print": "Imprimer",
+    "activate": "Activer",
+    "deactivate": "Désactiver"
+  },
+  "time": {
+    "days": "jours",
+    "day": "jour",
+    "hours": "heures",
+    "hour": "heure",
+    "minutes": "minutes",
+    "minute": "minute",
+    "years": "ans",
+    "year": "an",
+    "months": "mois",
+    "month": "mois",
+    "today": "Aujourd'hui",
+    "yesterday": "Hier",
+    "tomorrow": "Demain",
+    "this_week": "Cette Semaine",
+    "this_month": "Ce Mois",
+    "this_year": "Cette Année"
+  }
+}

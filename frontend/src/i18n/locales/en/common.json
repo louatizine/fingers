@@ -1,0 +1,578 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "warning": "Warning",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "search": "Search",
+    "filter": "Filter",
+    "export": "Export",
+    "import": "Import",
+    "refresh": "Refresh",
+    "retry": "Retry",
+    "saving": "Saving...",
+    "close": "Close",
+    "submit": "Submit",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "yes": "Yes",
+    "no": "No",
+    "actions": "Actions",
+    "details": "Details",
+    "noData": "No data available",
+    "loading_message": "Loading your data...",
+    "seeMore": "See More",
+    "seeLess": "See Less",
+    "notAvailable": "N/A",
+    "viewAll": "View All",
+    "thisMonth": "This Month"
+  },
+  "currency": {
+    "dinar": "DT"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "employees": "Employees",
+    "leaves": "Leaves",
+    "projects": "Projects",
+    "salary_advances": "Salary Advances",
+    "attendance": "Attendance",
+    "fingerprint": "Fingerprint",
+    "settings": "Settings",
+    "profile": "Profile",
+    "logout": "Logout"
+  },
+  "branding": {
+    "title": "HR Management",
+    "subtitle": "Enterprise System"
+  },
+  "dashboard": {
+    "title_employee": "My Dashboard",
+    "title_admin": "Admin Dashboard",
+    "title_supervisor": "Supervisor Dashboard",
+    "welcome": "Welcome back, {{name}}!",
+    "subtitle_employee": "Here's an overview of your activity.",
+    "subtitle_admin": "Monitor company activities and metrics",
+    "subtitle_supervisor": "Track your team's performance and requests",
+    "request_leave": "Request Leave",
+    "view_calendar": "View Calendar",
+    "stats": {
+      "annual_leave": "Annual Leave",
+      "sick_leave": "Sick Leave",
+      "pending_requests": "Pending Requests",
+      "approved_leaves": "Approved Leaves",
+      "total_employees": "Total Employees",
+      "pending_leaves": "Pending Leaves",
+      "pending_advances": "Pending Advances",
+      "active_projects": "Active Projects",
+      "days_remaining": "days remaining",
+      "days_available": "days available",
+      "awaiting_approval": "awaiting approval",
+      "this_year": "this year",
+      "active_employees": "active employees",
+      "in_progress": "in progress"
+    },
+    "charts": {
+      "leave_requests": "Leave Requests Overview",
+      "leave_requests_subtitle": "Distribution by status",
+      "salary_advances": "Salary Advance Requests",
+      "salary_advances_subtitle": "Current month status",
+      "leave_balance": "Leave Balance",
+      "recent_activity": "Recent Activity",
+      "leave_trends": "Leave Trends",
+      "upcoming_timeoff": "Upcoming Time Off",
+      "system_health": "System Health"
+    },
+    "recent": {
+      "leave_requests": "Recent Leave Requests",
+      "leave_requests_subtitle": "Latest submissions",
+      "salary_advances": "Recent Salary Advances",
+      "salary_advances_subtitle": "Financial requests"
+    }
+  },
+  "leaves": {
+    "title": "Leave Requests",
+    "subtitle": "Manage your leave requests and check your balances",
+    "new_request": "New Request",
+    "your_balance": "Your Leave Balance",
+    "annual_leave": "Annual Leave (Vacation)",
+    "sick_leave": "Sick Leave",
+    "unpaid_leave": "Unpaid Leave",
+    "calculated_from_settings": "Calculated from settings",
+    "company_policy": "Company policy",
+    "insufficient_balance": "Insufficient balance",
+    "table": {
+      "employee": "Employee",
+      "type": "Type",
+      "balance": "Balance",
+      "dates": "Dates",
+      "days": "Days",
+      "reason": "Reason",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "modal": {
+      "title": "New Leave Request",
+      "leave_type": "Leave Type",
+      "start_date": "Start Date",
+      "end_date": "End Date",
+      "number_of_days": "Number of Days",
+      "reason": "Reason",
+      "submit": "Submit Request",
+      "cancel": "Cancel"
+    },
+    "messages": {
+      "insufficient_warning": "⚠️ Warning: Insufficient balance! Available: {{available}} days, Requested: {{requested}} days. Your request has been submitted for approval.",
+      "success": "Leave request submitted successfully",
+      "approved": "Leave request approved successfully",
+      "rejected": "Leave request rejected",
+      "failed": "Failed to submit request",
+      "confirm_approve": "Approve this leave request?",
+      "rejection_reason": "Enter rejection reason (optional):"
+    }
+  },
+  "employees": {
+    "title": "Employee Management",
+    "subtitle": "Manage your team members and their information",
+    "addButton": "Add Employee",
+    "listView": "List View",
+    "gridView": "Grid View",
+    "noEmployees": "No employees found",
+    "adjustFilters": "Try adjusting your filters",
+    "getStarted": "Get started by adding your first employee",
+    "confirmDeactivate": "Are you sure you want to deactivate this employee?",
+    "table": {
+      "employee": "Employee",
+      "department": "Department",
+      "contact": "Contact",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "filters": {
+      "search": "Search",
+      "searchPlaceholder": "Search employees...",
+      "department": "Department",
+      "allDepartments": "All Departments",
+      "status": "Status",
+      "allStatus": "All Statuses",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "stats": {
+      "total": "Total Employees",
+      "active": "Active",
+      "departments": "Departments",
+      "avgExperience": "Average Experience"
+    },
+    "departments": {
+      "engineering": "Engineering",
+      "sales": "Sales",
+      "marketing": "Marketing",
+      "hr": "Human Resources",
+      "finance": "Finance",
+      "management": "Management",
+      "operations": "Operations"
+    },
+    "roles": {
+      "admin": "Administrator",
+      "supervisor": "Supervisor",
+      "employee": "Employee"
+    },
+    "employmentTypes": {
+      "fullTime": "Full Time",
+      "partTime": "Part Time",
+      "contract": "Contract",
+      "intern": "Intern"
+    },
+    "modal": {
+      "title": "Add New Employee",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "password": "Password",
+      "phone": "Phone",
+      "role": "Role",
+      "employmentType": "Employment Type",
+      "birthday": "Birthday",
+      "hireDate": "Hire Date",
+      "company": "Company",
+      "selectCompany": "Select a Company",
+      "department": "Department",
+      "selectDepartment": "Select a Department",
+      "position": "Position",
+      "address": "Address",
+      "createButton": "Create Employee"
+    },
+    "detailView": {
+      "phone": "Phone",
+      "department": "Department",
+      "employeeId": "Employee ID",
+      "employmentType": "Employment Type",
+      "role": "Role",
+      "additionalInfo": "Additional Information",
+      "hireDate": "Hire Date",
+      "birthday": "Birthday",
+      "yearsOfService": "Years of Service",
+      "address": "Address",
+      "teamMates": "Team Mates"
+    },
+    "messages": {
+      "createSuccess": "Employee created successfully",
+      "createError": "Failed to create employee",
+      "deactivateSuccess": "Employee deactivated successfully",
+      "deactivateError": "Failed to deactivate employee",
+      "activateSuccess": "Employee activated successfully",
+      "activateError": "Failed to activate employee",
+      "confirmDeactivate": "Are you sure you want to deactivate this employee? They will lose access to the system.",
+      "confirmActivate": "Are you sure you want to activate this employee? They will regain access to the system."
+    }
+  },
+  "profile": {
+    "title": "My Profile",
+    "personalInfo": "Personal Information",
+    "accountDetails": "Your account details and information",
+    "editButton": "Edit Profile",
+    "saveButton": "Save Changes",
+    "notProvided": "Not provided",
+    "form": {
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "phone": "Phone",
+      "department": "Department",
+      "position": "Position"
+    },
+    "fields": {
+      "employeeId": "Employee ID",
+      "fullName": "Full Name",
+      "email": "Email Address",
+      "phone": "Phone",
+      "role": "Role",
+      "department": "Department",
+      "position": "Position"
+    },
+    "leaveBalance": {
+      "title": "Leave Balance",
+      "subtitle": "Your available leave days",
+      "annual": "Annual Leave (Vacation)",
+      "sick": "Sick Leave",
+      "unpaid": "Unpaid Leave",
+      "basedOnTenure": "Based on tenure and settings",
+      "companyPolicy": "Company policy"
+    },
+    "messages": {
+      "updateSuccess": "Profile updated successfully",
+      "updateError": "Failed to update profile"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Configure system settings and policies",
+    "save_recalculate": "Save and Recalculate All Balances",
+    "monthlyVacationDays": "Monthly Vacation Days",
+    "probationPeriodMonths": "Probation Period (Months)",
+    "maxConsecutiveDays": "Max Consecutive Days",
+    "includeWeekends": "Include weekends in vacation calculation",
+    "tabs": {
+      "holiday": "Vacation Settings",
+      "language": "Language",
+      "companies": "Companies"
+    },
+    "holiday": {
+      "configTitle": "Vacation Calculation Settings",
+      "configSubtitle": "Define automatic annual leave calculation parameters",
+      "monthlyVacationDays": "Monthly Vacation Days",
+      "daysPerMonth": "days/month",
+      "daysPerMonthHint": "Days accumulated per month (e.g., 2.5 days/month = 30 days/year)",
+      "monthlyVacationDaysHelp": "Number of vacation days accumulated per month of service (e.g., 2.5 days/month = 30 days/year)",
+      "probationPeriod": "Probation Period",
+      "probationPeriodHelp": "Number of months before employees start accumulating vacation days",
+      "includeWeekends": "Include Weekends in Calculation",
+      "includeWeekendsHelp": "Check if weekends should be counted as leave days",
+      "maxConsecutiveDays": "Maximum Consecutive Days",
+      "maxConsecutiveDaysHelp": "Maximum number of consecutive vacation days an employee can take",
+      "saveNote": "Important: Saving settings will affect vacation calculations",
+      "recalculateNote": "All employee vacation balances will be automatically recalculated",
+      "currentFormula": "Current Calculation Formula",
+      "vacationBalance": "Leave Balance",
+      "monthsOfService": "Months of Service",
+      "probation": "probation",
+      "usedVacationDays": "Used Vacation Days",
+      "formulaNote": "This formula will be applied to all employees during recalculation",
+      "recalculating": "Recalculating...",
+      "saveButton": "Save Settings"
+    },
+    "employeeBalances": {
+      "title": "Employee Vacation Balances",
+      "subtitle": "Current vacation balance for each employee",
+      "name": "Employee Name",
+      "hireDate": "Hire Date",
+      "monthsService": "Months of Service",
+      "earned": "Earned Days",
+      "used": "Used Days",
+      "balance": "Balance",
+      "noRecords": "No employee records found"
+    },
+    "language": {
+      "title": "Language Preferences",
+      "subtitle": "Select system language",
+      "label": "System Language",
+      "saveButton": "Save Language"
+    },
+    "companies": {
+      "title": "Company List",
+      "subtitle": "Manage company leave policies",
+      "noCompanies": "No companies registered",
+      "annualLeave": "Annual Leave",
+      "sickLeave": "Sick Leave",
+      "unpaidLeave": "Unpaid Leave"
+    },
+    "messages": {
+      "loadFailed": "Failed to load settings",
+      "saveSuccess": "Settings saved successfully",
+      "saveFailed": "Failed to save settings",
+      "recalculateSuccess": "All balances have been recalculated successfully"    },
+    "attendance": {
+      "title": "Attendance Settings",
+      "configTitle": "Work Schedule Configuration",
+      "configSubtitle": "Configure working hours and attendance rules",
+      "subtitle": "Configure working hours and lunch break schedules",
+      "checkInStart": "Check-in Start Time",
+      "checkInStartHelp": "Expected time for employees to check in",
+      "checkOutEnd": "Check-out End Time",
+      "checkOutEndHelp": "Expected time for employees to check out",
+      "lunchBreakStart": "Lunch Break Start",
+      "lunchBreakStartHelp": "Lunch break starts at this time",
+      "lunchBreakEnd": "Lunch Break End",
+      "lunchBreakEndHelp": "Lunch break ends at this time",
+      "workingDays": "Working Days",
+      "howItWorksTitle": "How it works:",
+      "howItWorks1": "First fingerprint of the day = check-in",
+      "howItWorks2": "Last fingerprint of the day = check-out",
+      "howItWorks3": "Lunch break time is automatically subtracted from worked hours",
+      "howItWorks4": "Worked Hours = (Check-out - Check-in) - Lunch Break Duration",
+      "save": "Save Attendance Settings"
+    },
+    "actions": {
+      "reset": "Reset",
+      "saveRecalculate": "Save & Recalculate All",
+      "saveSettings": "Save Settings",
+      "saving": "Saving...",
+      "recalculating": "Recalculating..."
+    }
+  },
+  "projects": {
+    "title": "Project Management",
+    "myProjects": "My Projects",
+    "subtitle": "Manage all your projects and assignments",
+    "subtitleEmployee": "View projects assigned to you",
+    "add_project": "Add Project",
+    "newProject": "New Project",
+    "hideForm": "Hide Form",
+    "total_projects": "Total Projects",
+    "totalProjects": "Total Projects",
+    "active_projects": "Active Projects",
+    "activeMembers": "Active Members",
+    "description": "Description",
+    "noDescription": "No description provided",
+    "teamMembers": "Team Members",
+    "member": "member",
+    "members": "members",
+    "noMembers": "No members assigned",
+    "removeMember": "Remove member",
+    "loading": "Loading projects",
+    "loadingSubtitle": "Please wait...",
+    "form": {
+      "title": "Create New Project",
+      "newProject": "Create New Project",
+      "projectName": "Project Name",
+      "projectNamePlaceholder": "e.g., Website Redesign, Mobile App Development",
+      "projectDescription": "Project Description",
+      "projectDescriptionPlaceholder": "Describe the project goals and scope...",
+      "descriptionTips": "You can use bullet points or numbering to organize objectives and features",
+      "assignMembers": "Assign Members",
+      "assignMember": "Assign a Member",
+      "noEmployees": "No employees available",
+      "selected": "selected",
+      "multiSelectHelp": "Hold Ctrl/Cmd to select multiple employees",
+      "creating": "Creating...",
+      "createButton": "Create Project",
+      "selectEmployee": "Select an employee",
+      "allAssigned": "All employees are already assigned",
+      "assign": "Assign"
+    },
+    "validation": {
+      "nameRequired": "Project name is required"
+    },
+    "table": {
+      "name": "Project Name",
+      "description": "Description",
+      "company": "Company",
+      "start_date": "Start Date",
+      "end_date": "End Date",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "modal": {
+      "title_add": "Add New Project",
+      "title_edit": "Edit Project",
+      "name": "Project Name",
+      "description": "Description",
+      "company": "Company",
+      "start_date": "Start Date",
+      "end_date": "End Date",
+      "status": "Status",
+      "select_company": "Select a company",
+      "select_status": "Select a status"
+    },
+    "status": {
+      "active": "Active",
+      "completed": "Completed",
+      "on_hold": "On Hold",
+      "cancelled": "Cancelled"
+    },
+    "error": {
+      "title": "Loading Error"
+    },
+    "errors": {
+      "loadFailed": "Failed to load projects",
+      "createFailed": "Failed to create project",
+      "addFailed": "Failed to add project",
+      "assignFailed": "Failed to assign user",
+      "removeFailed": "Failed to remove member"
+    },
+    "success": {
+      "userAssigned": "User assigned successfully",
+      "userRemoved": "User removed successfully",
+      "projectCreated": "Project created successfully",
+      "projectUpdated": "Project updated successfully",
+      "created": "Created successfully"
+    },
+    "messages": {
+      "add_success": "Project added successfully",
+      "update_success": "Project updated successfully",
+      "delete_success": "Project deleted successfully",
+      "delete_confirm": "Are you sure you want to delete this project?",
+      "failed": "Operation failed"
+    },
+    "confirmRemoveUser": "Are you sure you want to remove this user from the project?",
+    "emptyState": {
+      "noProjects": "No Projects Found",
+      "noProjectsSubtitle": "Start by creating your first project to organize your team's work.",
+      "noAssignedProjects": "No Assigned Projects",
+      "noAssignedSubtitle": "You are not currently assigned to any projects. Contact your manager for more information.",
+      "createFirst": "Create Your First Project"
+    },
+    "footer": {
+      "employeeNote": "You are assigned to the projects shown above",
+      "managerNote": "Managing {{count}} active project"
+    }
+  },
+  "salaryAdvances": {
+    "title": "Salary Advances",
+    "subtitle": "Manage salary advance requests",
+    "newRequest": "New Request",
+    "total_requests": "Total Requests",
+    "pending_requests": "Pending Requests",
+    "table": {
+      "employee": "Employee",
+      "amount": "Amount",
+      "reason": "Reason",
+      "date": "Request Date",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "modal": {
+      "title": "New Advance Request",
+      "amount": "Amount",
+      "reason": "Reason",
+      "submit": "Submit Request",
+      "cancel": "Cancel"
+    },
+    "rejectModal": {
+      "title": "Reject Salary Advance",
+      "subtitle": "Please provide a reason for rejection",
+      "reasonLabel": "Rejection Reason",
+      "reasonPlaceholder": "Explain why this request is being rejected...",
+      "confirmButton": "Reject Request"
+    },
+    "messages": {
+      "createSuccess": "Advance request submitted successfully",
+      "createFailed": "Failed to submit request",
+      "approved": "Advance request approved successfully",
+      "rejected": "Advance request rejected successfully",
+      "rejectFailed": "Failed to reject request",
+      "reasonRequired": "Rejection reason is required",
+      "confirmApprove": "Approve this advance request?"
+    }
+  },
+  "login": {
+    "title": "HR Management",
+    "subtitle": "Enterprise Resource Planning System",
+    "welcomeBack": "Welcome Back",
+    "signInMessage": "Sign in to access your account",
+    "emailLabel": "Email Address",
+    "emailPlaceholder": "Enter your email",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "signInButton": "Sign In to Dashboard",
+    "signingIn": "Signing in...",
+    "demoCredentials": "Demo Credentials",
+    "footer": "© 2026 HR Management System. All rights reserved.",
+    "loginError": "Login failed"
+  },
+  "status": {
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "cancelled": "Cancelled",
+    "processing": "Processing",
+    "completed": "Completed",
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "leaveTypes": {
+    "annual": "Annual Leave",
+    "sick": "Sick Leave",
+    "unpaid": "Unpaid Leave",
+    "maternity": "Maternity Leave",
+    "paternity": "Paternity Leave",
+    "medical": "Medical Leave"
+  },
+  "actions": {
+    "approve": "Approve",
+    "reject": "Reject",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "download": "Download",
+    "print": "Print",
+    "activate": "Activate",
+    "deactivate": "Deactivate"
+  },
+  "time": {
+    "days": "days",
+    "day": "day",
+    "hours": "hours",
+    "hour": "hour",
+    "minutes": "minutes",
+    "minute": "minute",
+    "years": "years",
+    "year": "year",
+    "months": "months",
+    "month": "month",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "tomorrow": "Tomorrow",
+    "this_week": "This Week",
+    "this_month": "This Month",
+    "this_year": "This Year"
+  }
+}

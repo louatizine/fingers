@@ -1,0 +1,38 @@
+{
+  "title": "Fingerprint Management",
+  "subtitle": "Biometric identity management and enrollment logs",
+  "enrolledUsers": "Enrolled Users",
+  "note": {
+    "title": "Note:",
+    "description": "Fingerprint enrollment is performed using the Windows Desktop Application. This page only displays enrolled users. To enroll new users, use the desktop biometric terminal."
+  },
+  "table": {
+    "userIdentity": "User Identity",
+    "department": "Department",
+    "hardwareId": "Hardware ID",
+    "dateEnrolled": "Date Enrolled",
+    "action": "Action",
+    "employeeId": "Employee ID",
+    "name": "Name",
+    "templateId": "Template ID",
+    "enrolledAt": "Enrolled At",
+    "actions": "Actions"
+  },
+  "remove": "Remove",
+  "removeDialog": {
+    "title": "Remove Fingerprint Enrollment",
+    "message": "Are you sure you want to remove fingerprint enrollment for",
+    "thisAction": "This action cannot be undone.",
+    "cancel": "Cancel",
+    "confirm": "Remove Enrollment"
+  },
+  "success": {
+    "removed": "Fingerprint removed successfully"
+  },
+  "error": {
+    "removeFailed": "Failed to remove fingerprint"
+  },
+  "loading": "Loading enrolled users...",
+  "noUsers": "No enrolled users found",
+  "notAvailable": "N/A"
+}

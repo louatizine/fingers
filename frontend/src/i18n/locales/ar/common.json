@@ -1,0 +1,577 @@
+{
+  "common": {
+    "loading": "جاري التحميل...",
+    "error": "خطأ",
+    "success": "نجح",
+    "warning": "تحذير",
+    "confirm": "تأكيد",
+    "cancel": "إلغاء",
+    "save": "حفظ",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "view": "عرض",
+    "search": "بحث",
+    "filter": "تصفية",
+    "export": "تصدير",
+    "import": "استيراد",
+    "refresh": "تحديث",
+    "retry": "إعادة المحاولة",
+    "saving": "جارٍ الحفظ...",
+    "close": "إغلاق",
+    "submit": "إرسال",
+    "back": "رجوع",
+    "next": "التالي",
+    "previous": "السابق",
+    "yes": "نعم",
+    "no": "لا",
+    "actions": "الإجراءات",
+    "details": "التفاصيل",
+    "noData": "لا توجد بيانات متاحة",
+    "loading_message": "جاري تحميل بياناتك...",
+    "seeMore": "عرض المزيد",
+    "seeLess": "عرض أقل",
+    "notAvailable": "غير متوفر",
+    "viewAll": "عرض الكل",
+    "thisMonth": "هذا الشهر"
+  },  "currency": {
+    "dinar": "د.ت"
+  },  "nav": {
+    "dashboard": "لوحة التحكم",
+    "employees": "الموظفون",
+    "leaves": "الإجازات",
+    "projects": "المشاريع",
+    "salary_advances": "السلف المالية",
+    "attendance": "الحضور",
+    "fingerprint": "بصمة الإصبع",
+    "settings": "الإعدادات",
+    "profile": "الملف الشخصي",
+    "logout": "تسجيل الخروج"
+  },
+  "branding": {
+    "title": "إدارة الموارد البشرية",
+    "subtitle": "نظام المؤسسة"
+  },
+  "dashboard": {
+    "title_employee": "لوحة التحكم الخاصة بي",
+    "title_admin": "لوحة تحكم المسؤول",
+    "title_supervisor": "لوحة تحكم المشرف",
+    "welcome": "مرحبًا بعودتك، {{name}}!",
+    "subtitle_employee": "نظرة عامة على نشاطك.",
+    "subtitle_admin": "راقب أنشطة ومقاييس الشركة",
+    "subtitle_supervisor": "تتبع أداء وطلبات فريقك",
+    "request_leave": "طلب إجازة",
+    "view_calendar": "عرض التقويم",
+    "stats": {
+      "annual_leave": "الإجازة السنوية",
+      "sick_leave": "الإجازة المرضية",
+      "pending_requests": "الطلبات المعلقة",
+      "approved_leaves": "الإجازات الموافق عليها",
+      "total_employees": "إجمالي الموظفين",
+      "pending_leaves": "الإجازات المعلقة",
+      "pending_advances": "السلف المعلقة",
+      "active_projects": "المشاريع النشطة",
+      "days_remaining": "أيام متبقية",
+      "days_available": "أيام متاحة",
+      "awaiting_approval": "في انتظار الموافقة",
+      "this_year": "هذا العام",
+      "active_employees": "الموظفون النشطون",
+      "in_progress": "قيد التنفيذ"
+    },
+    "charts": {
+      "leave_requests": "نظرة عامة على طلبات الإجازة",
+      "leave_requests_subtitle": "التوزيع حسب الحالة",
+      "salary_advances": "طلبات السلف المالية",
+      "salary_advances_subtitle": "حالة الشهر الحالي",
+      "leave_balance": "رصيد الإجازات",
+      "recent_activity": "النشاط الأخير",
+      "leave_trends": "اتجاهات الإجازات",
+      "upcoming_timeoff": "الإجازات القادمة",
+      "system_health": "صحة النظام"
+    },
+    "recent": {
+      "leave_requests": "طلبات الإجازة الأخيرة",
+      "leave_requests_subtitle": "آخر الطلبات المقدمة",
+      "salary_advances": "السلف المالية الأخيرة",
+      "salary_advances_subtitle": "الطلبات المالية"
+    }
+  },
+  "leaves": {
+    "title": "طلبات الإجازة",
+    "subtitle": "إدارة طلبات الإجازة والتحقق من أرصدتك",
+    "new_request": "طلب جديد",
+    "your_balance": "رصيد إجازاتك",
+    "annual_leave": "الإجازة السنوية (إجازة)",
+    "sick_leave": "الإجازة المرضية",
+    "unpaid_leave": "إجازة بدون أجر",
+    "calculated_from_settings": "محسوب من الإعدادات",
+    "company_policy": "سياسة الشركة",
+    "insufficient_balance": "رصيد غير كافٍ",
+    "table": {
+      "employee": "الموظف",
+      "type": "النوع",
+      "balance": "الرصيد",
+      "dates": "التواريخ",
+      "days": "الأيام",
+      "reason": "السبب",
+      "status": "الحالة",
+      "actions": "الإجراءات"
+    },
+    "modal": {
+      "title": "طلب إجازة جديد",
+      "leave_type": "نوع الإجازة",
+      "start_date": "تاريخ البدء",
+      "end_date": "تاريخ الانتهاء",
+      "number_of_days": "عدد الأيام",
+      "reason": "السبب",
+      "submit": "إرسال الطلب",
+      "cancel": "إلغاء"
+    },
+    "messages": {
+      "insufficient_warning": "⚠️ تحذير: رصيد غير كافٍ! متاح: {{available}} يوم، مطلوب: {{requested}} يوم. تم إرسال طلبك للموافقة.",
+      "success": "تم إرسال طلب الإجازة بنجاح",
+      "approved": "تمت الموافقة على طلب الإجازة بنجاح",
+      "rejected": "تم رفض طلب الإجازة",
+      "failed": "فشل في إرسال الطلب",
+      "confirm_approve": "هل تريد الموافقة على طلب الإجازة هذا؟",
+      "rejection_reason": "أدخل سبب الرفض (اختياري):"
+    }
+  },
+  "employees": {
+    "title": "إدارة الموظفين",
+    "subtitle": "إدارة أعضاء فريقك ومعلوماتهم",
+    "addButton": "إضافة موظف",
+    "listView": "عرض القائمة",
+    "gridView": "عرض الشبكة",
+    "noEmployees": "لم يتم العثور على موظفين",
+    "adjustFilters": "جرب تعديل الفلاتر الخاصة بك",
+    "getStarted": "ابدأ بإضافة موظفك الأول",
+    "confirmDeactivate": "هل أنت متأكد من أنك تريد إلغاء تفعيل هذا الموظف؟",
+    "table": {
+      "employee": "الموظف",
+      "department": "القسم",
+      "contact": "جهة الاتصال",
+      "status": "الحالة",
+      "actions": "الإجراءات"
+    },
+    "filters": {
+      "search": "بحث",
+      "searchPlaceholder": "البحث عن الموظفين...",
+      "department": "القسم",
+      "allDepartments": "جميع الأقسام",
+      "status": "الحالة",
+      "allStatus": "جميع الحالات",
+      "active": "نشط",
+      "inactive": "غير نشط"
+    },
+    "stats": {
+      "total": "إجمالي الموظفين",
+      "active": "نشط",
+      "departments": "الأقسام",
+      "avgExperience": "متوسط الخبرة"
+    },
+    "departments": {
+      "engineering": "الهندسة",
+      "sales": "المبيعات",
+      "marketing": "التسويق",
+      "hr": "الموارد البشرية",
+      "finance": "المالية",
+      "management": "الإدارة",
+      "operations": "العمليات"
+    },
+    "roles": {
+      "admin": "مسؤول",
+      "supervisor": "مشرف",
+      "employee": "موظف"
+    },
+    "employmentTypes": {
+      "fullTime": "دوام كامل",
+      "partTime": "دوام جزئي",
+      "contract": "عقد",
+      "intern": "متدرب"
+    },
+    "modal": {
+      "title": "إضافة موظف جديد",
+      "firstName": "الاسم الأول",
+      "lastName": "اسم العائلة",
+      "email": "البريد الإلكتروني",
+      "password": "كلمة المرور",
+      "phone": "الهاتف",
+      "role": "الدور",
+      "employmentType": "نوع التوظيف",
+      "birthday": "تاريخ الميلاد",
+      "hireDate": "تاريخ التوظيف",
+      "company": "الشركة",
+      "selectCompany": "اختر شركة",
+      "department": "القسم",
+      "selectDepartment": "اختر قسمًا",
+      "position": "المنصب",
+      "address": "العنوان",
+      "createButton": "إنشاء موظف"
+    },
+    "detailView": {
+      "phone": "الهاتف",
+      "department": "القسم",
+      "employeeId": "رقم الموظف",
+      "employmentType": "نوع التوظيف",
+      "role": "الدور",
+      "additionalInfo": "معلومات إضافية",
+      "hireDate": "تاريخ التوظيف",
+      "birthday": "تاريخ الميلاد",
+      "yearsOfService": "سنوات الخدمة",
+      "address": "العنوان",
+      "teamMates": "زملاء الفريق"
+    },
+    "messages": {
+      "createSuccess": "تم إنشاء الموظف بنجاح",
+      "createError": "فشل في إنشاء الموظف",
+      "deactivateSuccess": "تم إلغاء تفعيل الموظف بنجاح",
+      "deactivateError": "فشل في إلغاء تفعيل الموظف",
+      "activateSuccess": "تم تفعيل الموظف بنجاح",
+      "activateError": "فشل في تفعيل الموظف",
+      "confirmDeactivate": "هل أنت متأكد من إلغاء تفعيل هذا الموظف؟ سيفقد الوصول إلى النظام.",
+      "confirmActivate": "هل أنت متأكد من تفعيل هذا الموظف؟ سيستعيد الوصول إلى النظام."
+    }
+  },
+  "profile": {
+    "title": "ملفي الشخصي",
+    "personalInfo": "المعلومات الشخصية",
+    "accountDetails": "تفاصيل حسابك ومعلوماتك",
+    "editButton": "تعديل الملف الشخصي",
+    "saveButton": "حفظ التغييرات",
+    "notProvided": "غير متوفر",
+    "form": {
+      "firstName": "الاسم الأول",
+      "lastName": "اسم العائلة",
+      "phone": "الهاتف",
+      "department": "القسم",
+      "position": "المنصب"
+    },
+    "fields": {
+      "employeeId": "رقم الموظف",
+      "fullName": "الاسم الكامل",
+      "email": "عنوان البريد الإلكتروني",
+      "phone": "الهاتف",
+      "role": "الدور",
+      "department": "القسم",
+      "position": "المنصب"
+    },
+    "leaveBalance": {
+      "title": "رصيد الإجازات",
+      "subtitle": "أيام إجازتك المتاحة",
+      "annual": "الإجازة السنوية (إجازة)",
+      "sick": "الإجازة المرضية",
+      "unpaid": "إجازة بدون أجر",
+      "basedOnTenure": "بناءً على مدة الخدمة والإعدادات",
+      "companyPolicy": "سياسة الشركة"
+    },
+    "messages": {
+      "updateSuccess": "تم تحديث الملف الشخصي بنجاح",
+      "updateError": "فشل في تحديث الملف الشخصي"
+    }
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "subtitle": "تكوين إعدادات النظام والسياسات",
+    "save_recalculate": "حفظ وإعادة حساب جميع الأرصدة",
+    "monthlyVacationDays": "أيام الإجازة الشهرية",
+    "probationPeriodMonths": "فترة التجربة (أشهر)",
+    "maxConsecutiveDays": "الحد الأقصى للأيام المتتالية",
+    "includeWeekends": "تضمين عطلات نهاية الأسبوع في حساب الإجازة",
+    "tabs": {
+      "holiday": "إعدادات الإجازات",
+      "language": "اللغة",
+      "companies": "الشركات"
+    },
+    "holiday": {
+      "configTitle": "إعدادات حساب الإجازات",
+      "configSubtitle": "تحديد معايير الحساب التلقائي للإجازة السنوية",
+      "monthlyVacationDays": "أيام الإجازة الشهرية",
+      "daysPerMonth": "يوم/شهر",
+      "daysPerMonthHint": "الأيام المتراكمة شهريًا (مثال: 2.5 يوم/شهر = 30 يوم/سنة)",
+      "monthlyVacationDaysHelp": "عدد أيام الإجازة المتراكمة شهريًا من الخدمة (مثال: 2.5 يوم/شهر = 30 يوم/سنة)",
+      "probationPeriod": "فترة التجربة",
+      "probationPeriodHelp": "عدد الأشهر قبل أن يبدأ الموظفون في تجميع أيام الإجازة",
+      "includeWeekends": "تضمين عطلات نهاية الأسبوع في الحساب",
+      "includeWeekendsHelp": "ضع علامة إذا كان يجب حساب عطلات نهاية الأسبوع كأيام إجازة",
+      "maxConsecutiveDays": "الحد الأقصى للأيام المتتالية",
+      "maxConsecutiveDaysHelp": "الحد الأقصى لعدد أيام الإجازة المتتالية التي يمكن للموظف أخذها",
+      "saveNote": "مهم: حفظ الإعدادات سيؤثر على حسابات الإجازات",
+      "recalculateNote": "سيتم إعادة حساب أرصدة إجازات جميع الموظفين تلقائيًا",
+      "currentFormula": "صيغة الحساب الحالية",
+      "vacationBalance": "رصيد الإجازة",
+      "monthsOfService": "شهور الخدمة",
+      "probation": "تجربة",
+      "usedVacationDays": "أيام الإجازة المستخدمة",
+      "formulaNote": "سيتم تطبيق هذه الصيغة على جميع الموظفين أثناء إعادة الحساب",
+      "recalculating": "جارٍ إعادة الحساب...",
+      "saveButton": "حفظ الإعدادات"
+    },
+    "employeeBalances": {
+      "title": "أرصدة إجازات الموظفين",
+      "subtitle": "رصيد الإجازات الحالي لكل موظف",
+      "name": "اسم الموظف",
+      "hireDate": "تاريخ التوظيف",
+      "monthsService": "أشهر الخدمة",
+      "earned": "الأيام المكتسبة",
+      "used": "الأيام المستخدمة",
+      "balance": "الرصيد",
+      "noRecords": "لا توجد سجلات موظفين"
+    },
+    "language": {
+      "title": "تفضيلات اللغة",
+      "subtitle": "اختر لغة النظام",
+      "label": "لغة النظام",
+      "saveButton": "حفظ اللغة"
+    },
+    "companies": {
+      "title": "قائمة الشركات",
+      "subtitle": "إدارة سياسات إجازات الشركات",
+      "noCompanies": "لا توجد شركات مسجلة",
+      "annualLeave": "الإجازة السنوية",
+      "sickLeave": "الإجازة المرضية",
+      "unpaidLeave": "إجازة بدون أجر"
+    },
+    "messages": {
+      "loadFailed": "فشل تحميل الإعدادات",
+      "saveSuccess": "تم حفظ الإعدادات بنجاح",
+      "saveFailed": "فشل حفظ الإعدادات",
+      "recalculateSuccess": "تمت إعادة حساب جميع الأرصدة بنجاح"
+    },
+    "attendance": {
+      "title": "إعدادات الحضور",
+      "configTitle": "تكوين جدول العمل",
+      "configSubtitle": "تكوين ساعات العمل وقواعد الحضور",
+      "subtitle": "تكوين ساعات العمل وجدول استراحة الغداء",
+      "checkInStart": "وقت بدء تسجيل الدخول",
+      "checkInStartHelp": "الوقت المتوقع للموظفين لتسجيل الدخول",
+      "checkOutEnd": "وقت انتهاء تسجيل الخروج",
+      "checkOutEndHelp": "الوقت المتوقع للموظفين لتسجيل الخروج",
+      "lunchBreakStart": "بداية استراحة الغداء",
+      "lunchBreakStartHelp": "تبدأ استراحة الغداء في هذا الوقت",
+      "lunchBreakEnd": "نهاية استراحة الغداء",
+      "lunchBreakEndHelp": "تنتهي استراحة الغداء في هذا الوقت",
+      "workingDays": "أيام العمل",
+      "howItWorksTitle": "كيف يعمل:",
+      "howItWorks1": "أول بصمة في اليوم = تسجيل الدخول",
+      "howItWorks2": "آخر بصمة في اليوم = تسجيل الخروج",
+      "howItWorks3": "يتم طرح وقت استراحة الغداء تلقائيًا من ساعات العمل",
+      "howItWorks4": "ساعات العمل = (تسجيل الخروج - تسجيل الدخول) - مدة استراحة الغداء",
+      "save": "حفظ إعدادات الحضور"
+    },
+    "actions": {
+      "reset": "إعادة تعيين",
+      "saveRecalculate": "حفظ وإعادة حساب الكل",
+      "saveSettings": "حفظ الإعدادات",
+      "saving": "جارٍ الحفظ...",
+      "recalculating": "جارٍ إعادة الحساب..."
+    }
+  },
+  "projects": {
+    "title": "إدارة المشاريع",
+    "myProjects": "مشاريعي",
+    "subtitle": "إدارة جميع المشاريع والمهام",
+    "subtitleEmployee": "عرض المشاريع المسندة إليك",
+    "add_project": "إضافة مشروع",
+    "newProject": "مشروع جديد",
+    "hideForm": "إخفاء النموذج",
+    "total_projects": "إجمالي المشاريع",
+    "totalProjects": "إجمالي المشاريع",
+    "active_projects": "المشاريع النشطة",
+    "activeMembers": "الأعضاء النشطون",
+    "description": "الوصف",
+    "noDescription": "لا يوجد وصف",
+    "teamMembers": "أعضاء الفريق",
+    "member": "عضو",
+    "members": "أعضاء",
+    "noMembers": "لا يوجد أعضاء مسندين",
+    "removeMember": "إزالة العضو",
+    "loading": "جارٍ تحميل المشاريع",
+    "loadingSubtitle": "يرجى الانتظار...",
+    "form": {
+      "title": "إنشاء مشروع جديد",
+      "newProject": "إنشاء مشروع جديد",
+      "projectName": "اسم المشروع",
+      "projectNamePlaceholder": "مثل، إعادة تصميم الموقع، تطوير تطبيق الهاتف المحمول",
+      "projectDescription": "وصف المشروع",
+      "projectDescriptionPlaceholder": "صف أهداف المشروع ونطاقه...",
+      "descriptionTips": "يمكنك استخدام النقاط أو الأرقام لتنظيم الأهداف والميزات",
+      "assignMembers": "تعيين الأعضاء",
+      "assignMember": "تعيين عضو",
+      "noEmployees": "لا يوجد موظفون متاحون",
+      "selected": "محدد",
+      "multiSelectHelp": "اضغط Ctrl/Cmd لتحديد عدة موظفين",
+      "creating": "جارٍ الإنشاء...",
+      "createButton": "إنشاء المشروع",
+      "selectEmployee": "اختر موظفاً",
+      "allAssigned": "جميع الموظفين معينون بالفعل",
+      "assign": "تعيين"
+    },
+    "validation": {
+      "nameRequired": "اسم المشروع مطلوب"
+    },
+    "table": {
+      "name": "اسم المشروع",
+      "description": "الوصف",
+      "company": "الشركة",
+      "start_date": "تاريخ البدء",
+      "end_date": "تاريخ الانتهاء",
+      "status": "الحالة",
+      "actions": "الإجراءات"
+    },
+    "modal": {
+      "title_add": "إضافة مشروع جديد",
+      "title_edit": "تعديل المشروع",
+      "name": "اسم المشروع",
+      "description": "الوصف",
+      "company": "الشركة",
+      "start_date": "تاريخ البدء",
+      "end_date": "تاريخ الانتهاء",
+      "status": "الحالة",
+      "select_company": "اختر شركة",
+      "select_status": "اختر حالة"
+    },
+    "status": {
+      "active": "نشط",
+      "completed": "مكتمل",
+      "on_hold": "قيد الانتظار",
+      "cancelled": "ملغى"
+    },
+    "error": {
+      "title": "خطأ في التحميل"
+    },
+    "errors": {
+      "loadFailed": "فشل تحميل المشاريع",
+      "createFailed": "فشل إنشاء المشروع",
+      "addFailed": "فشل إضافة المشروع",
+      "assignFailed": "فشل تعيين المستخدم",
+      "removeFailed": "فشل إزالة العضو"
+    },
+    "success": {
+      "userAssigned": "تم تعيين المستخدم بنجاح",
+      "userRemoved": "تم إزالة المستخدم بنجاح",
+      "projectCreated": "تم إنشاء المشروع بنجاح",
+      "projectUpdated": "تم تحديث المشروع بنجاح",
+      "created": "تم الإنشاء بنجاح"
+    },
+    "messages": {
+      "add_success": "تمت إضافة المشروع بنجاح",
+      "update_success": "تم تحديث المشروع بنجاح",
+      "delete_success": "تم حذف المشروع بنجاح",
+      "delete_confirm": "هل أنت متأكد من أنك تريد حذف هذا المشروع؟",
+      "failed": "فشلت العملية"
+    },
+    "confirmRemoveUser": "هل أنت متأكد من إزالة هذا المستخدم من المشروع؟",
+    "emptyState": {
+      "noProjects": "لا توجد مشاريع",
+      "noProjectsSubtitle": "ابدأ بإنشاء مشروعك الأول لتنظيم عمل فريقك.",
+      "noAssignedProjects": "لا توجد مشاريع مسندة",
+      "noAssignedSubtitle": "لم يتم تعيينك حالياً لأي مشروع. اتصل بمديرك للمزيد من المعلومات.",
+      "createFirst": "إنشاء مشروعك الأول"
+    },
+    "footer": {
+      "employeeNote": "أنت معين في المشاريع المعروضة أعلاه",
+      "managerNote": "إدارة {{count}} مشروع نشط"
+    }
+  },
+  "salaryAdvances": {
+    "title": "السلف المالية",
+    "subtitle": "إدارة طلبات السلف المالية",
+    "newRequest": "طلب جديد",
+    "total_requests": "إجمالي الطلبات",
+    "pending_requests": "الطلبات المعلقة",
+    "table": {
+      "employee": "الموظف",
+      "amount": "المبلغ",
+      "reason": "السبب",
+      "date": "تاريخ الطلب",
+      "status": "الحالة",
+      "actions": "الإجراءات"
+    },
+    "modal": {
+      "title": "طلب سلفة جديدة",
+      "amount": "المبلغ",
+      "reason": "السبب",
+      "submit": "تقديم الطلب",
+      "cancel": "إلغاء"
+    },
+    "rejectModal": {
+      "title": "رفض طلب السلفة",
+      "subtitle": "يرجى تقديم سبب الرفض",
+      "reasonLabel": "سبب الرفض",
+      "reasonPlaceholder": "اشرح سبب رفض هذا الطلب...",
+      "confirmButton": "رفض الطلب"
+    },
+    "messages": {
+      "createSuccess": "تم تقديم طلب السلفة بنجاح",
+      "createFailed": "فشل تقديم الطلب",
+      "approved": "تمت الموافقة على طلب السلفة بنجاح",
+      "rejected": "تم رفض طلب السلفة بنجاح",
+      "rejectFailed": "فشل رفض الطلب",
+      "reasonRequired": "سبب الرفض مطلوب",
+      "confirmApprove": "الموافقة على طلب السلفة؟"
+    }
+  },
+  "login": {
+    "title": "إدارة الموارد البشرية",
+    "subtitle": "نظام تخطيط موارد المؤسسة",
+    "welcomeBack": "مرحبًا بعودتك",
+    "signInMessage": "تسجيل الدخول للوصول إلى حسابك",
+    "emailLabel": "عنوان البريد الإلكتروني",
+    "emailPlaceholder": "أدخل بريدك الإلكتروني",
+    "passwordLabel": "كلمة المرور",
+    "passwordPlaceholder": "أدخل كلمة المرور",
+    "signInButton": "تسجيل الدخول إلى لوحة التحكم",
+    "signingIn": "جاري تسجيل الدخول...",
+    "demoCredentials": "بيانات الاعتماد التجريبية",
+    "footer": "© 2026 نظام إدارة الموارد البشرية. جميع الحقوق محفوظة.",
+    "loginError": "فشل تسجيل الدخول"
+  },
+  "status": {
+    "pending": "قيد الانتظار",
+    "approved": "موافق عليه",
+    "rejected": "مرفوض",
+    "cancelled": "ملغى",
+    "processing": "قيد المعالجة",
+    "completed": "مكتمل",
+    "active": "نشط",
+    "inactive": "غير نشط"
+  },
+  "leaveTypes": {
+    "annual": "الإجازة السنوية",
+    "sick": "الإجازة المرضية",
+    "unpaid": "إجازة بدون أجر",
+    "maternity": "إجازة الأمومة",
+    "paternity": "إجازة الأبوة",
+    "medical": "الإجازة الطبية"
+  },
+  "actions": {
+    "approve": "موافقة",
+    "reject": "رفض",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "view": "عرض",
+    "download": "تحميل",
+    "print": "طباعة",
+    "activate": "تفعيل",
+    "deactivate": "إلغاء التفعيل"
+  },
+  "time": {
+    "days": "أيام",
+    "day": "يوم",
+    "hours": "ساعات",
+    "hour": "ساعة",
+    "minutes": "دقائق",
+    "minute": "دقيقة",
+    "years": "سنوات",
+    "year": "سنة",
+    "months": "أشهر",
+    "month": "شهر",
+    "today": "اليوم",
+    "yesterday": "أمس",
+    "tomorrow": "غدًا",
+    "this_week": "هذا الأسبوع",
+    "this_month": "هذا الشهر",
+    "this_year": "هذا العام"
+  }
+}
