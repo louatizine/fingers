@@ -8,7 +8,7 @@ from models.project_model import (
     update_project, delete_project, assign_employee_to_project,
     remove_employee_from_project
 )
-from models.user_model import find_user_by_id
+from models.user_model import find_user_by_id, get_active_users_only
 from utils.auth_utils import admin_or_supervisor_required
 import logging
 
@@ -48,17 +48,24 @@ def get_projects():
             # Get the assigned user IDs (check both field names)
             user_ids = project.get('assigned_users', []) or project.get('assigned_employees', [])
             
-            logger.info(f"Project {project.get('name')}: user_ids = {user_ids}")
+            # Convert all user IDs to strings for consistency
+            user_ids_str = []
+            for uid in user_ids:
+                if isinstance(uid, ObjectId):
+                    user_ids_str.append(str(uid))
+                else:
+                    user_ids_str.append(uid)
             
             # Convert user IDs to full user objects
             project['assigned_users'] = list(
                 filter(None, [
                     find_user_by_id(uid)
-                    for uid in user_ids
+                    for uid in user_ids_str
                 ])
             )
             
-            logger.info(f"Project {project.get('name')}: assigned_users = {project['assigned_users']}")
+            # Ensure we also keep the IDs in string format
+            project['assigned_employees'] = user_ids_str
 
         return jsonify({
             'success': True,
@@ -103,15 +110,30 @@ def create_new_project():
         # Get the created project with full details
         project = get_project_by_id(project_id)
         if project:
-            project['assigned_users'] = [
-                find_user_by_id(uid) for uid in project.get('assigned_users', [])
-            ]
-            project['assigned_users'] = [u for u in project['assigned_users'] if u]
+            # Populate assigned users with full user objects
+            user_ids = project.get('assigned_users', []) or project.get('assigned_employees', [])
+            
+            # Convert all user IDs to strings for consistency
+            user_ids_str = []
+            for uid in user_ids:
+                if isinstance(uid, ObjectId):
+                    user_ids_str.append(str(uid))
+                else:
+                    user_ids_str.append(uid)
+            
+            project['assigned_users'] = list(
+                filter(None, [
+                    find_user_by_id(uid)
+                    for uid in user_ids_str
+                ])
+            )
+            # Also include the user_ids array for compatibility
+            project['assigned_employees'] = user_ids_str
 
         return jsonify({
             'success': True,
             'message': 'Project created successfully',
-            'project': project
+            'project': project  # Return the full project object
         }), 201
 
     except Exception as e:
@@ -126,22 +148,38 @@ def assign_user_to_project(project_id, user_id):
     """Assign a user to a project"""
     try:
         from services.email_service import send_project_assignment_notification
+        from bson.objectid import ObjectId
         
         current_user_id = get_jwt_identity()
         current_user = find_user_by_id(current_user_id)
         
-        # Verify user exists
+        # Verify user exists and is active
         user = find_user_by_id(user_id)
         if not user:
             return jsonify({'success': False, 'error': 'User not found'}), 404
+        
+        # Check if user is deactivated
+        if user.get('status') == 'deactivated' or user.get('is_active') == False:
+            return jsonify({'success': False, 'error': 'Cannot assign deactivated user to project'}), 400
         
         # Verify project exists
         project = get_project_by_id(project_id)
         if not project:
             return jsonify({'success': False, 'error': 'Project not found'}), 404
         
-        # Check if user is already assigned
-        if user_id in project.get('assigned_users', []):
+        # Check if user is already assigned (check both string and ObjectId formats)
+        user_ids = project.get('assigned_users', []) or project.get('assigned_employees', [])
+        
+        # Convert user_id to ObjectId for comparison
+        user_id_obj = ObjectId(user_id) if ObjectId.is_valid(user_id) else None
+        
+        is_already_assigned = False
+        for uid in user_ids:
+            if uid == user_id or (user_id_obj and uid == user_id_obj):
+                is_already_assigned = True
+                break
+        
+        if is_already_assigned:
             return jsonify({'success': False, 'error': 'User already assigned to this project'}), 400
         
         success = assign_employee_to_project(project_id, user_id)

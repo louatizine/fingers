@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using System;
 
 namespace FingerprintAttendanceApp.Models
 {
@@ -31,8 +32,20 @@ namespace FingerprintAttendanceApp.Models
         [JsonProperty("has_fingerprint")]
         public bool HasFingerprint { get; set; }
         
+        [JsonProperty("fingerprint_device_id")]
+        public string? FingerprintDeviceId { get; set; }
+        
+        [JsonProperty("fingerprint_template_id")]
+        public string? FingerprintTemplateId { get; set; }
+        
+        [JsonProperty("fingerprint_enrolled_at")]
+        public DateTime? FingerprintEnrolledAt { get; set; }
+        
         [JsonProperty("created_at")]
         public DateTime? CreatedAt { get; set; }
+        
+        [JsonProperty("updated_at")]
+        public DateTime? UpdatedAt { get; set; }
         
         // Helper property for display
         public string DisplayName => !string.IsNullOrEmpty(FullName) ? FullName : $"{FirstName} {LastName}".Trim();

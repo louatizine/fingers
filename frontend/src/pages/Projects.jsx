@@ -11,6 +11,8 @@ import {
   TrashIcon,
   BriefcaseIcon,
   ChevronDownIcon,
+  UserCircleIcon,
+  ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';
 
 // ============================================
@@ -72,17 +74,42 @@ const GhostDangerBtn = ({ className, ...props }) => (
   />
 );
 
-const Avatar = ({ initials, className }) => (
+const Avatar = ({ initials, className, isActive = true }) => (
   <div
     className={cn(
       'grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-[#deecf9] to-white text-[#0078d4]',
-      'text-xs font-bold ring-1 ring-black/5',
+      'text-xs font-bold ring-1 ring-black/5 relative',
+      !isActive && 'opacity-60 grayscale',
       className
     )}
   >
     {initials}
+    {!isActive && (
+      <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-red-500 ring-2 ring-white" />
+    )}
   </div>
 );
+
+// User status badge component
+const UserStatusBadge = ({ isActive }) => {
+  const { t } = useTranslation();
+  
+  if (isActive) {
+    return (
+      <div className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-700">
+        <div className="mr-1 h-2 w-2 rounded-full bg-emerald-500" />
+        {t('users.status.active')}
+      </div>
+    );
+  }
+  
+  return (
+    <div className="inline-flex items-center rounded-full bg-red-50 px-2 py-1 text-xs font-semibold text-red-700">
+      <ExclamationTriangleIcon className="mr-1 h-3 w-3" />
+      {t('users.status.deactivated')}
+    </div>
+  );
+};
 
 // ============================================
 // Redesigned Project Card Component
@@ -101,7 +128,11 @@ const ProjectCard = ({ project, userRole, users, onRemoveUser, onAssignSubmit })
 
   const availableUsers = useMemo(() => {
     const assignedIds = new Set(assignedUsers.map(a => a._id));
-    return (users || []).filter(u => !assignedIds.has(u._id) && u.role === 'employee');
+    return (users || []).filter(u => 
+      !assignedIds.has(u._id) && 
+      u.role === 'employee' && 
+      (u.status !== 'deactivated' && u.is_active !== false)
+    );
   }, [users, assignedUsers]);
 
   const handleAssignSubmit = async (e) => {
@@ -152,22 +183,39 @@ const ProjectCard = ({ project, userRole, users, onRemoveUser, onAssignSubmit })
           <SoftBadge>{t('projects.status.active')}</SoftBadge>
         </div>
 
-        {/* Avatars */}
+        {/* Avatars - Show active users first */}
         <div className={cn('mt-5 flex items-center justify-between', isRTL && 'flex-row-reverse')}>
           <div className={cn('flex items-center', isRTL ? 'space-x-reverse -space-x-2' : '-space-x-2')}>
-            {assignedUsers.slice(0, 4).map((u) => (
-              <div
-                key={u._id}
-                className="relative"
-                title={`${u.first_name} ${u.last_name}`}
-              >
-                <Avatar initials={`${u.first_name?.[0] || ''}${u.last_name?.[0] || ''}`} className="ring-2 ring-white" />
-              </div>
-            ))}
+            {assignedUsers
+              .filter(user => user.status !== 'deactivated' && user.is_active !== false)
+              .slice(0, 4)
+              .map((u) => (
+                <div
+                  key={u._id}
+                  className="relative"
+                  title={`${u.first_name} ${u.last_name} (${t('users.status.active')})`}
+                >
+                  <Avatar 
+                    initials={`${u.first_name?.[0] || ''}${u.last_name?.[0] || ''}`} 
+                    className="ring-2 ring-white"
+                    isActive={true}
+                  />
+                </div>
+              ))}
 
-            {assignedUsers.length > 4 && (
+            {/* Show deactivated users with different styling */}
+            {assignedUsers.some(u => u.status === 'deactivated' || u.is_active === false) && (
+              <div 
+                className="grid h-9 w-9 place-items-center rounded-xl bg-red-50 text-xs font-bold text-red-700 ring-2 ring-white ring-black/5"
+                title={t('projects.hasDeactivatedUsers')}
+              >
+                <ExclamationTriangleIcon className="h-4 w-4" />
+              </div>
+            )}
+
+            {assignedUsers.filter(u => u.status !== 'deactivated' && u.is_active !== false).length > 4 && (
               <div className="grid h-9 w-9 place-items-center rounded-xl bg-black/[0.03] text-xs font-bold text-[#6b7280] ring-2 ring-white ring-black/5">
-                +{assignedUsers.length - 4}
+                +{assignedUsers.filter(u => u.status !== 'deactivated' && u.is_active !== false).length - 4}
               </div>
             )}
           </div>
@@ -202,37 +250,57 @@ const ProjectCard = ({ project, userRole, users, onRemoveUser, onAssignSubmit })
         {/* Members list */}
         <div className="mt-5 space-y-2">
           <div className="max-h-44 space-y-1 overflow-y-auto pr-1 custom-scrollbar">
-            {assignedUsers.map(user => (
-              <div
-                key={user._id}
-                className={cn(
-                  'flex items-center justify-between rounded-xl border border-black/5 bg-white px-3 py-2',
-                  'transition-all hover:bg-black/[0.02]',
-                  isRTL && 'flex-row-reverse'
-                )}
-              >
-                <div className={cn('flex items-center gap-3', isRTL && 'flex-row-reverse')}>
-                  <Avatar initials={`${user.first_name?.[0] || ''}${user.last_name?.[0] || ''}`} className="h-8 w-8" />
-                  <div className="leading-tight">
-                    <div className="text-sm font-semibold text-[#111827]">
-                      {user.first_name} {user.last_name}
-                    </div>
-                    <div className="text-xs text-[#6b7280]">
-                      {t('projects.member')}
+            {assignedUsers.map(user => {
+              const isUserActive = !(user.status === 'deactivated' || user.is_active === false);
+              
+              return (
+                <div
+                  key={user._id}
+                  className={cn(
+                    'flex items-center justify-between rounded-xl border border-black/5 px-3 py-2',
+                    'transition-all',
+                    isUserActive 
+                      ? 'bg-white hover:bg-black/[0.02]' 
+                      : 'bg-red-50/50 border-red-200',
+                    isRTL && 'flex-row-reverse'
+                  )}
+                >
+                  <div className={cn('flex items-center gap-3', isRTL && 'flex-row-reverse')}>
+                    <Avatar 
+                      initials={`${user.first_name?.[0] || ''}${user.last_name?.[0] || ''}`} 
+                      className="h-8 w-8"
+                      isActive={isUserActive}
+                    />
+                    <div className="leading-tight">
+                      <div className={cn(
+                        'text-sm font-semibold',
+                        isUserActive ? 'text-[#111827]' : 'text-red-700 line-through'
+                      )}>
+                        {user.first_name} {user.last_name}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="text-xs text-[#6b7280]">
+                          {t('projects.member')}
+                        </div>
+                        <UserStatusBadge isActive={isUserActive} />
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {userRole !== 'employee' && (
-                  <GhostDangerBtn onClick={() => onRemoveUser(project._id, user._id)}>
-                    <TrashIcon className="h-4 w-4" />
-                  </GhostDangerBtn>
-                )}
-              </div>
-            ))}
+                  {userRole !== 'employee' && (
+                    <GhostDangerBtn 
+                      onClick={() => onRemoveUser(project._id, user._id)}
+                      className={!isUserActive ? 'text-red-400 hover:text-red-600' : ''}
+                    >
+                      <TrashIcon className="h-4 w-4" />
+                    </GhostDangerBtn>
+                  )}
+                </div>
+              );
+            })}
           </div>
 
-          {/* Assign */}
+          {/* Assign - Only show active users */}
           {userRole !== 'employee' && (
             <div className="pt-3">
               {!showAssign ? (
@@ -263,8 +331,13 @@ const ProjectCard = ({ project, userRole, users, onRemoveUser, onAssignSubmit })
                     >
                       <option value="">{t('projects.form.selectEmployee')}</option>
                       {availableUsers.map(u => (
-                        <option key={u._id} value={u._id}>
+                        <option 
+                          key={u._id} 
+                          value={u._id}
+                          className={u.status === 'deactivated' || u.is_active === false ? 'text-red-500 bg-red-50' : ''}
+                        >
                           {u.first_name} {u.last_name}
+                          {(u.status === 'deactivated' || u.is_active === false) && ` (${t('users.status.deactivated')})`}
                         </option>
                       ))}
                     </select>
@@ -278,7 +351,11 @@ const ProjectCard = ({ project, userRole, users, onRemoveUser, onAssignSubmit })
                   </div>
 
                   <div className={cn('flex gap-2', isRTL && 'flex-row-reverse')}>
-                    <PrimaryBtn type="submit" disabled={assignLoading || !assignUserId}>
+                    <PrimaryBtn 
+                      type="submit" 
+                      disabled={assignLoading || !assignUserId}
+                      className={assignUserId && availableUsers.find(u => u._id === assignUserId)?.status === 'deactivated' ? 'bg-red-500 hover:bg-red-600' : ''}
+                    >
                       {assignLoading ? '...' : t('projects.form.assign')}
                     </PrimaryBtn>
 
@@ -394,8 +471,16 @@ const AddProjectForm = ({ onAdd, users, onCancel }) => {
                 className="h-[240px] w-full rounded-2xl border border-black/10 bg-white px-3 py-2 text-sm text-[#111827] focus:border-[#0078d4] focus:outline-none focus:ring-2 focus:ring-[#0078d4]/30"
               >
                 {employees.map(u => (
-                  <option key={u._id} value={u._id} className="py-2 px-3">
+                  <option 
+                    key={u._id} 
+                    value={u._id} 
+                    className={cn(
+                      'py-2 px-3',
+                      (u.status === 'deactivated' || u.is_active === false) && 'text-red-500 bg-red-50'
+                    )}
+                  >
                     {u.first_name} {u.last_name}
+                    {(u.status === 'deactivated' || u.is_active === false) && ` (${t('users.status.deactivated')})`}
                   </option>
                 ))}
               </select>
@@ -461,8 +546,11 @@ const Projects = () => {
 
   const ajouterProjet = async (donnees) => {
     try {
-      await projectAPI.createProject({ ...donnees, company_id: utilisateur.company_id });
-      await toutCharger();
+      const response = await projectAPI.createProject({ ...donnees, company_id: utilisateur.company_id });
+      
+      // Update the state immediately by prepending the new project
+      setProjets(prev => [response.data.project, ...prev]);
+      
       setAfficherFormulaire(false);
       toast.success(t('projects.success.created'));
     } catch (err) {
@@ -474,7 +562,28 @@ const Projects = () => {
     try {
       const response = await projectAPI.assignUser(pid, uid);
       if (response.data.success) {
-        await toutCharger();
+        // Instead of reloading all projects, update the specific project in the state
+        // First, find the user details
+        const userToAssign = utilisateurs.find(u => u._id === uid);
+        
+        if (userToAssign) {
+          setProjets(prev => {
+            return prev.map(project => {
+              if (project._id === pid) {
+                // Check if user is already assigned
+                const isAlreadyAssigned = project.assigned_users.some(u => u._id === uid);
+                if (!isAlreadyAssigned) {
+                  return {
+                    ...project,
+                    assigned_users: [...project.assigned_users, userToAssign]
+                  };
+                }
+              }
+              return project;
+            });
+          });
+        }
+        
         toast.success(t('projects.success.userAssigned'));
       }
     } catch (err) {

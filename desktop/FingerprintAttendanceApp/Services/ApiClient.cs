@@ -363,6 +363,100 @@ public class ApiClient
         }
     }
 
+    public async Task<bool> UpdateFingerprintStatusAsync(string employeeId, string deviceUserId)
+    {
+        try
+        {
+            if (!await EnsureAuthenticatedAsync())
+            {
+                _logger.LogError("Cannot authenticate to update fingerprint status");
+                return false;
+            }
+            
+            _logger.LogInformation($"Updating fingerprint status for {employeeId}");
+            
+            var data = new { 
+                employee_id = employeeId, 
+                device_user_id = deviceUserId 
+            };
+            var jsonContent = JsonConvert.SerializeObject(data);
+            var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+            
+            string fullUrl = $"{_baseUrl}/fingerprint/update-status/{employeeId}";
+            var response = await _httpClient.PostAsync(fullUrl, content);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                _logger.LogInformation($"✅ Fingerprint status updated for {employeeId}");
+                return true;
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                _logger.LogError($"Failed to update fingerprint status. Status: {response.StatusCode}, Response: {errorContent}");
+                return false;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error updating fingerprint status: {ex.Message}");
+            return false;
+        }
+    }
+
+    public async Task<User?> GetUserFingerprintStatusAsync(string employeeId)
+    {
+        try
+        {
+            if (!await EnsureAuthenticatedAsync())
+            {
+                _logger.LogError("Cannot authenticate to get fingerprint status");
+                return null;
+            }
+            
+            _logger.LogInformation($"Checking fingerprint status for {employeeId}");
+            string fullUrl = $"{_baseUrl}/fingerprint/check/{employeeId}";
+            var response = await _httpClient.GetAsync(fullUrl);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                _logger.LogDebug($"Fingerprint status response: {responseContent}");
+                
+                try
+                {
+                    var result = JsonConvert.DeserializeObject<FingerprintStatusResponse>(responseContent);
+                    
+                    if (result?.Success == true && result.Data != null)
+                    {
+                        return result.Data;
+                    }
+                    else
+                    {
+                        _logger.LogWarning($"Fingerprint check failed: {result?.Error}");
+                        return null;
+                    }
+                }
+                catch (Exception parseEx)
+                {
+                    _logger.LogError($"Error parsing fingerprint status: {parseEx.Message}");
+                    return null;
+                }
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                _logger.LogError($"Failed to get fingerprint status. Status: {response.StatusCode}, Response: {errorContent}");
+                return null;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error getting fingerprint status: {ex.Message}");
+            return null;
+        }
+    }
+
     public async Task<bool> HealthCheckAsync()
     {
         try
@@ -430,4 +524,16 @@ public class UserResponse
 {
     [JsonProperty("user")]
     public User? User { get; set; }
+}
+
+public class FingerprintStatusResponse
+{
+    [JsonProperty("success")]
+    public bool Success { get; set; }
+    
+    [JsonProperty("data")]
+    public User? Data { get; set; }
+    
+    [JsonProperty("error")]
+    public string? Error { get; set; }
 }

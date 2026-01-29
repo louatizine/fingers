@@ -26,7 +26,8 @@ def get_project_by_id(project_id):
 
 def get_all_projects(filters=None):
     db = get_db()
-    projects = list(db.projects.find(filters or {}))
+    # Sort by created_at in descending order (newest first)
+    projects = list(db.projects.find(filters or {}).sort("created_at", -1))
     for p in projects:
         p['_id'] = str(p['_id'])
     return projects

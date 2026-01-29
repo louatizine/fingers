@@ -133,14 +133,21 @@ namespace FingerprintAttendanceApp.Services
                 Console.Write("   Connecting via COM interface... ");
                 
                 // Try to connect to device
+                bool isConnected = false;
                 if (_zkem != null)
                 {
-                    _isConnected = _zkem.Connect_Net(_ipAddress, _port);
+                    try
+                    {
+                        isConnected = _zkem.Connect_Net(_ipAddress, _port);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"❌ COM connection error: {ex.Message}");
+                        isConnected = false;
+                    }
                 }
-                else
-                {
-                    _isConnected = false;
-                }
+                
+                _isConnected = isConnected;
                 
                 if (_isConnected)
                 {
@@ -199,8 +206,12 @@ namespace FingerprintAttendanceApp.Services
         {
             if (_isConnected && _zkem != null) 
             {
-                _zkem.Disconnect();
-                Console.WriteLine("📴 Device disconnected");
+                try
+                {
+                    _zkem.Disconnect();
+                    Console.WriteLine("📴 Device disconnected");
+                }
+                catch { }
             }
             _isConnected = false;
         }
@@ -332,14 +343,22 @@ namespace FingerprintAttendanceApp.Services
                 bool userCreated = false;
                 if (_zkem != null)
                 {
-                    userCreated = _zkem.SSR_SetUserInfo(
-                        _deviceId, 
-                        deviceId.ToString(), 
-                        fullName, 
-                        "",  // password
-                        0,   // privilege (0=normal user)
-                        true // enabled
-                    );
+                    try
+                    {
+                        userCreated = _zkem.SSR_SetUserInfo(
+                            _deviceId, 
+                            deviceId.ToString(), 
+                            fullName, 
+                            "",  // password
+                            0,   // privilege (0=normal user)
+                            true // enabled
+                        );
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger?.LogError($"SSR_SetUserInfo failed: {ex.Message}");
+                        userCreated = false;
+                    }
                 }
                 
                 if (!userCreated)
@@ -357,11 +376,18 @@ namespace FingerprintAttendanceApp.Services
                 // Start enrollment
                 if (_zkem != null)
                 {
-                    _zkem.CancelOperation();
-                    bool startEnroll = _zkem.StartEnrollEx(deviceId, 0, 1);
-                    
-                    if (!startEnroll)
-                        return new EnrollmentResult { Success = false, Message = "❌ Failed to start enrollment" };
+                    try
+                    {
+                        _zkem.CancelOperation();
+                        bool startEnroll = _zkem.StartEnrollEx(deviceId, 0, 1);
+                        
+                        if (!startEnroll)
+                            return new EnrollmentResult { Success = false, Message = "❌ Failed to start enrollment" };
+                    }
+                    catch (Exception ex)
+                    {
+                        return new EnrollmentResult { Success = false, Message = $"❌ Enrollment error: {ex.Message}" };
+                    }
                 }
                 else
                 {
@@ -399,7 +425,11 @@ namespace FingerprintAttendanceApp.Services
                 // Stop enrollment
                 if (_zkem != null)
                 {
-                    _zkem.CancelOperation();
+                    try
+                    {
+                        _zkem.CancelOperation();
+                    }
+                    catch { }
                 }
                 
                 // Verify template was saved

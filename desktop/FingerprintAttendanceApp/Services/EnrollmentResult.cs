@@ -1,9 +1,10 @@
-namespace FingerprintAttendanceApp.Services;
-
-public class EnrollmentResult
+namespace FingerprintAttendanceApp.Services
 {
-    public bool Success { get; set; }
-    public string Message { get; set; } = string.Empty;
-    public string DeviceUserId { get; set; } = string.Empty;
-    public string Instructions { get; set; } = string.Empty;
+    public class EnrollmentResult
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; } = string.Empty;
+        public string? DeviceUserId { get; set; }
+        public string? Instructions { get; set; }
+    }
 }

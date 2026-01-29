@@ -600,11 +600,13 @@ class Program
         foreach (var user in users)
         {
             Console.WriteLine($"📌 Employee ID: {user.EmployeeId ?? "N/A"}");
-            Console.WriteLine($"   👤 Name: {user.FullName ?? $"{user.FirstName} {user.LastName}".Trim()}");
+            Console.WriteLine($"   👤 Name: {user.DisplayName}");
             if (!string.IsNullOrEmpty(user.Department))
                 Console.WriteLine($"   🏢 Department: {user.Department}");
             if (!string.IsNullOrEmpty(user.Position))
                 Console.WriteLine($"   💼 Position: {user.Position}");
+            if (user.HasFingerprint)
+                Console.WriteLine($"   👆 Fingerprint: Enrolled (Device ID: {user.FingerprintDeviceId})");
             Console.WriteLine("   ---");
         }
     }
@@ -635,7 +637,20 @@ class Program
                 return;
             }
 
-            Console.WriteLine($"✅ Found user: {user.FullName ?? $"{user.FirstName} {user.LastName}".Trim()}");
+            // Check if already has fingerprint
+            var fingerprintStatus = await _apiClient?.GetUserFingerprintStatusAsync(employeeId)!;
+            if (fingerprintStatus?.HasFingerprint == true)
+            {
+                Console.WriteLine($"⚠️ User already has fingerprint enrolled on device ID: {fingerprintStatus.FingerprintDeviceId}");
+                Console.Write("   Do you want to re-enroll? (y/n): ");
+                var response = Console.ReadLine()?.ToLower();
+                if (response != "y")
+                {
+                    return;
+                }
+            }
+
+            Console.WriteLine($"✅ Found user: {user.DisplayName}");
             Console.WriteLine($"   Employee ID: {user.EmployeeId}");
             
             if (!string.IsNullOrEmpty(user.Department))
@@ -656,7 +671,16 @@ class Program
 
             Console.WriteLine("\n🎯 === Starting Fingerprint Enrollment ===");
             
-            var result = await _fingerprintService?.EnrollUserAsync(user.EmployeeId, user.FullName ?? $"{user.FirstName} {user.LastName}".Trim())!;
+            // Ensure we have non-null values for required parameters
+            string safeEmployeeId = user.EmployeeId ?? employeeId;
+            string safeFullName = user.DisplayName ?? $"{user.FirstName} {user.LastName}".Trim();
+            
+            if (string.IsNullOrEmpty(safeFullName))
+            {
+                safeFullName = safeEmployeeId;
+            }
+            
+            var result = await _fingerprintService?.EnrollUserAsync(safeEmployeeId, safeFullName)!;
             Console.WriteLine($"\n{result.Message}");
             
             if (result.Success)
@@ -666,17 +690,33 @@ class Program
                 Console.ReadLine();
                 
                 // Complete enrollment
-                var completeResult = await _fingerprintService?.CompleteEnrollmentAsync(user.EmployeeId)!;
+                var completeResult = await _fingerprintService?.CompleteEnrollmentAsync(safeEmployeeId)!;
                 Console.WriteLine($"\n{completeResult.Message}");
                 
                 if (completeResult.Success)
                 {
-                    Console.WriteLine("\n🎉 Enrollment completed successfully!");
-                    Console.WriteLine($"   Employee: {user.FullName ?? $"{user.FirstName} {user.LastName}".Trim()}");
-                    Console.WriteLine($"   Device User ID: {result.DeviceUserId}");
+                    Console.WriteLine("\n🎉 Enrollment completed successfully on device!");
+                    Console.WriteLine($"   Employee: {safeFullName}");
+                    Console.WriteLine($"   Device User ID: {completeResult.DeviceUserId}");
                     Console.WriteLine($"   Timestamp: {DateTime.Now}");
                     
-                    Console.WriteLine($"\n💡 Note: User enrolled on device. Update fingerprint status in web app.");
+                    // Update fingerprint status in backend
+                    Console.WriteLine("\n💾 Updating fingerprint status in database...");
+                    bool updated = await _apiClient?.UpdateFingerprintStatusAsync(employeeId, completeResult.DeviceUserId ?? "0")!;
+                    
+                    if (updated)
+                    {
+                        Console.WriteLine("✅ Fingerprint status updated in database!");
+                    }
+                    else
+                    {
+                        Console.WriteLine("⚠️ Device enrollment succeeded but failed to update database status.");
+                        Console.WriteLine("   Please update fingerprint status manually in web app.");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"❌ Enrollment failed: {completeResult.Message}");
                 }
             }
             else
