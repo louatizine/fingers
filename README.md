@@ -1,6 +1,6 @@
 # HR Management System - Complete ERP Solution
 
-A comprehensive web-based HR Management System built with React, Flask, and MongoDB. Features include employee management, leave tracking, salary advances, and project management with role-based access control.
+A comprehensive web-based HR Management System built with React, Flask, and MongoDB. Features include employee management, biometric attendance, leave tracking, salary advances, and project management with role-based access control and multi-language support.
 
 ## 🚀 Features
 
@@ -9,12 +9,23 @@ A comprehensive web-based HR Management System built with React, Flask, and Mong
 - Role-based access control (Admin, Supervisor, Employee)
 - Secure password hashing
 - Session management
+- User profile management
 
 ### Employee Management
 - Create, update, and deactivate employees
 - Assign employees to projects
 - Company-based organization
 - Leave balance tracking
+- Fingerprint enrollment and management
+- Employee search and filtering
+
+### Biometric Attendance System
+- ZKTeco fingerprint device integration
+- Real-time attendance tracking
+- Fingerprint enrollment and verification
+- Attendance history and reports
+- Device status monitoring
+- Desktop fingerprint management UI (WPF)
 
 ### Leave Management
 - Multiple leave types (annual, sick, unpaid)
@@ -23,29 +34,46 @@ A comprehensive web-based HR Management System built with React, Flask, and Mong
 - Approval/rejection workflow
 - Email notifications
 - Real-time balance updates
+- Leave trends analytics
 
 ### Salary Advance Requests
 - Employee request submission
 - Admin/Supervisor approval workflow
 - Request history tracking
 - Email notifications
+- Approval status tracking
 
 ### Dashboard & Analytics
-- Role-specific dashboards
+- Role-specific dashboards (Admin, Supervisor, Employee)
 - Interactive charts (Recharts)
 - Real-time statistics
 - Pending approvals overview
+- Recent activity tracking
+- System health monitoring
+- Attendance summaries
+- Leave balance visualization
 
 ### Notification System
+- In-app real-time notifications
 - Configurable SMTP settings
 - Email templates
 - Automatic notifications for approvals/rejections
+- Mark as read/unread functionality
+- Notification history
+
+### Multi-Language Support (i18n)
+- English, French, and Arabic
+- RTL support for Arabic
+- Real-time language switching
+- Comprehensive translation coverage
+- Localized date and number formats
 
 ### Responsive Design
 - Mobile-first approach
 - Tablet and desktop optimized
-- Clean blue & white theme
+- Modern blue & white theme
 - Professional UI with Tailwind CSS
+- Accessible components with Headless UI
 
 ## 📋 Tech Stack
 
@@ -56,6 +84,8 @@ A comprehensive web-based HR Management System built with React, Flask, and Mong
 - **Recharts** - Data visualization
 - **Axios** - HTTP client
 - **Headless UI** - Accessible components
+- **i18next** - Internationalization framework
+- **react-i18next** - React bindings for i18n
 - **Vite** - Build tool
 
 ### Backend
@@ -64,6 +94,13 @@ A comprehensive web-based HR Management System built with React, Flask, and Mong
 - **PyMongo** - MongoDB driver
 - **Flask-CORS** - Cross-origin resource sharing
 - **Python 3.8+**
+- **Flask-Mail** - Email notifications
+
+### Desktop Applications
+- **WPF (Windows Presentation Foundation)** - Fingerprint Admin UI
+- **.NET 6.0** - Console Application for attendance
+- **C#** - Desktop development
+- **ZKTeco SDK** - Fingerprint device integration
 
 ### Database
 - **MongoDB** - NoSQL database
@@ -77,12 +114,17 @@ Employees_Managements/
 │   ├── config.py              # Configuration settings
 │   ├── database.py            # MongoDB connection
 │   ├── requirements.txt       # Python dependencies
+│   ├── create_admin.py        # Admin user creation script
 │   ├── models/
 │   │   ├── user_model.py
 │   │   ├── leave_model.py
 │   │   ├── salary_advance_model.py
 │   │   ├── project_model.py
-│   │   └── company_model.py
+│   │   ├── company_model.py
+│   │   ├── fingerprint_model.py
+│   │   ├── attendance_model.py
+│   │   ├── notif_model.py
+│   │   └── settings_model.py
 │   ├── routes/
 │   │   ├── auth_routes.py
 │   │   ├── user_routes.py
@@ -91,38 +133,77 @@ Employees_Managements/
 │   │   ├── project_routes.py
 │   │   ├── company_routes.py
 │   │   ├── dashboard_routes.py
-│   │   └── notification_routes.py
+│   │   ├── notification_routes.py
+│   │   ├── notif_routes.py
+│   │   ├── fingerprint_routes.py
+│   │   ├── attendance_routes.py
+│   │   └── settings_route.py
 │   ├── services/
-│   │   └── email_service.py
+│   │   ├── email_service.py
+│   │   └── attendance_service.py
 │   └── utils/
 │       └── auth_utils.py
-└── frontend/
-    ├── index.html
-    ├── package.json
-    ├── vite.config.js
-    ├── tailwind.config.js
-    └── src/
-        ├── App.jsx
-        ├── main.jsx
-        ├── index.css
-        ├── components/
-        │   ├── Layout.jsx
-        │   ├── Navbar.jsx
-        │   └── Sidebar.jsx
-        ├── context/
-        │   └── AuthContext.jsx
-        ├── pages/
-        │   ├── Login.jsx
-        │   ├── Dashboard.jsx
-        │   ├── Employees.jsx
-        │   ├── Leaves.jsx
-        │   ├── SalaryAdvances.jsx
-        │   ├── Projects.jsx
-        │   ├── Profile.jsx
-        │   ├── Settings.jsx
-        │   └── NotFound.jsx
-        └── services/
-            └── api.js
+├── frontend/
+│   ├── index.html
+│   ├── package.json
+│   ├── vite.config.js
+│   ├── tailwind.config.js
+│   └── src/
+│       ├── App.jsx
+│       ├── main.jsx
+│       ├── index.css
+│       ├── components/
+│       │   ├── Layout.jsx
+│       │   ├── Navbar.jsx
+│       │   ├── Sidebar.jsx
+│       │   ├── Toast.jsx
+│       │   ├── ConfirmDialog.jsx
+│       │   ├── AttendanceSummary.jsx
+│       │   ├── DailySummary.jsx
+│       │   ├── LeaveBalanceChart.jsx
+│       │   ├── LeaveTrendsChart.jsx
+│       │   ├── RecentActivityCard.jsx
+│       │   ├── RequestsOverviewChart.jsx
+│       │   ├── SystemHealthCard.jsx
+│       │   └── employees/
+│       │       └── AddEmployeeModal.jsx
+│       ├── context/
+│       │   └── AuthContext.jsx
+│       ├── i18n/
+│       │   ├── config.js
+│       │   └── locales/
+│       │       ├── en/
+│       │       ├── fr/
+│       │       └── ar/
+│       ├── pages/
+│       │   ├── Login.jsx
+│       │   ├── Dashboard.jsx
+│       │   ├── AdminDashboard.jsx
+│       │   ├── SupervisorDashboard.jsx
+│       │   ├── EmployeeDashboard.jsx
+│       │   ├── Employees.jsx
+│       │   ├── Leaves.jsx
+│       │   ├── SalaryAdvances.jsx
+│       │   ├── Projects.jsx
+│       │   ├── Attendance.jsx
+│       │   ├── FingerprintManagement.jsx
+│       │   ├── Profile.jsx
+│       │   ├── Settings.jsx
+│       │   └── NotFound.jsx
+│       └── services/
+│           └── api.js
+└── desktop/
+    ├── Fingerprint.AdminUI/     # WPF Admin Application
+    │   ├── App.xaml
+    │   ├── MainWindow.xaml
+    │   ├── ViewModels/
+    │   ├── Views/
+    │   ├── Services/
+    │   └── Models/
+    └── FingerprintAttendanceApp/ # Console Attendance App
+        ├── Program.cs
+        ├── Services/
+        └── Models/
 ```
 
 ## 🛠️ Installation & Setup
@@ -131,6 +212,27 @@ Employees_Managements/
 - Node.js 16+ and npm
 - Python 3.8+
 - MongoDB 4.4+
+- .NET 6.0+ (for desktop applications)
+- ZKTeco fingerprint device (optional, for attendance)
+
+### Quick Start
+
+**Windows Users:** Use the provided batch files for easy setup!
+
+#### Backend
+```bash
+cd backend
+start-backend.bat
+```
+
+#### Frontend
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+### Detailed Setup
 
 ### Backend Setup
 
@@ -172,9 +274,15 @@ copy .env.example .env
 # Or update MONGO_URI in .env
 ```
 
-6. **Run the backend:**
+6. **Create admin user (first time only):**
+```bash
+python create_admin.py
+```
+
+7. **Run the backend:**
 ```bash
 python app.py
+# Or use: start-backend.bat
 ```
 
 Backend will run on `http://localhost:5000`
@@ -191,12 +299,49 @@ cd frontend
 npm install
 ```
 
-3. **Start development server:**
+3. **Configure environment (optional):**
+```bash
+# Create .env file if you need to change API URL
+VITE_API_URL=http://localhost:5000
+```
+
+4. **Start development server:**
 ```bash
 npm run dev
 ```
 
-Frontend will run on `http://localhost:3000`
+Frontend will run on `http://localhost:5173`
+
+### Desktop Applications Setup (Optional)
+
+#### Fingerprint Admin UI (WPF)
+
+1. **Navigate to desktop directory:**
+```bash
+cd desktop/Fingerprint.AdminUI
+```
+
+2. **Build and run:**
+```bash
+dotnet build
+dotnet run
+# Or use: run.bat
+```
+
+#### Fingerprint Attendance Console App
+
+1. **Navigate to attendance app:**
+```bash
+cd desktop/FingerprintAttendanceApp
+```
+
+2. **Configure settings:**
+Edit `appsettings.json` with your backend API URL and device settings.
+
+3. **Run the application:**
+```bash
+dotnet run
+```
 
 ## 🔑 Default Credentials
 
@@ -316,22 +461,31 @@ See [API_DOCUMENTATION.md](./API_DOCUMENTATION.md) for complete API reference.
 - Company management
 - Project management
 - Leave & salary advance approvals
+- Fingerprint enrollment and management
+- Attendance tracking and reports
+- In-app notification management
 - SMTP configuration
-- System-wide dashboard
+- System-wide dashboard with comprehensive analytics
+- User role management
 
 ### Supervisor
 - View employees in their company
 - Approve/reject leave requests
 - Approve/reject salary advances
-- Project management
+- Project management within company
+- View attendance records
 - Company-specific dashboard
+- Team analytics
 
 ### Employee
 - View personal dashboard
 - Submit leave requests
 - Submit salary advance requests
 - View personal leave balance
+- View attendance history
 - Update profile
+- Receive real-time notifications
+- Track request status
 
 ## 📧 Email Notifications
 
@@ -340,6 +494,28 @@ Configure SMTP settings in admin panel:
 - Salary advance approval/rejection notifications
 - Customizable email templates
 - Test email functionality
+- Automated notification delivery
+
+## 🌐 Multi-Language Support
+
+The application supports three languages:
+- **English (en)** - Default
+- **French (fr)**
+- **Arabic (ar)** - with RTL support
+
+**Switching Languages:**
+- Click the language selector in the navbar
+- Changes apply immediately across the entire application
+- User preference is saved in localStorage
+
+**Translation Coverage:**
+- All UI components
+- Form labels and validation messages
+- Dashboard analytics
+- Notification messages
+- Date and time formats
+
+For more details, see [I18N_TRANSLATION_SUMMARY.md](./I18N_TRANSLATION_SUMMARY.md)
 
 ## 🚀 Production Deployment
 
@@ -410,22 +586,40 @@ This project is licensed under the MIT License.
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
+## � Additional Documentation
+
+- [API Documentation](./API_DOCUMENTATION.md) - Complete REST API reference
+- [Project Structure](./PROJECT_STRUCTURE.md) - Detailed project architecture
+- [Quick Start Guide](./QUICK_START.md) - Get started quickly
+- [Running Guide](./RUNNING_GUIDE.md) - Detailed running instructions
+- [Troubleshooting](./TROUBLESHOOTING.md) - Common issues and solutions
+- [i18n Translation Summary](./I18N_TRANSLATION_SUMMARY.md) - Internationalization details
+
 ## 📞 Support
 
 For issues and questions:
 - Create an issue in the repository
+- Check the troubleshooting guide
 - Contact: support@hrmanagement.com
 
 ## 🎯 Roadmap
 
-- [ ] Performance reporting
-- [ ] Attendance tracking
-- [ ] Payroll management
-- [ ] Document management
+- [x] Multi-language support (English, French, Arabic)
+- [x] Attendance tracking with fingerprint devices
+- [x] Role-based dashboards
+- [x] In-app notification system
+- [x] Desktop fingerprint management UI
+- [ ] Advanced performance reporting
+- [ ] Payroll management integration
+- [ ] Document management system
 - [ ] Mobile app (React Native)
-- [ ] Multi-language support
-- [ ] Advanced analytics
+- [ ] Advanced analytics and BI dashboards
+- [ ] Shift scheduling
+- [ ] Time-off calendars
+- [ ] Employee self-service portal enhancements
 
 ---
 
-**Built with ❤️ using React, Flask, and MongoDB**
+**Built with ❤️ using React, Flask, MongoDB, and .NET**
+
+**Key Technologies:** React 18 • Flask 3.0 • MongoDB • WPF • i18next • Tailwind CSS • ZKTeco SDK
