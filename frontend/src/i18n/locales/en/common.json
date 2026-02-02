@@ -189,6 +189,13 @@
     "adjustFilters": "Try adjusting your filters",
     "getStarted": "Get started by adding your first employee",
     "confirmDeactivate": "Are you sure you want to deactivate this employee?",
+    "workforceManagement": "Workforce Management",
+    "firstNamePlaceholder": "John",
+    "lastNamePlaceholder": "Doe",
+    "months": "Months",
+    "defaultPosition": "Employee",
+    "noPhone": "No phone",
+    "notAvailable": "N/A",
     "table": {
       "employee": "Employee",
       "department": "Department",
@@ -206,11 +213,19 @@
       "active": "Active",
       "inactive": "Inactive"
     },
+    "tabs": {
+      "directory": "Directory",
+      "leave": "Leave"
+    },
     "stats": {
       "total": "Total Employees",
       "active": "Active",
       "departments": "Departments",
       "avgExperience": "Average Experience"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
     },
     "departments": {
       "engineering": "Engineering",
@@ -673,30 +688,6 @@
       "showing": "Showing page {{page}} of {{total}} ({{records}} records)"
     }
   },
-  "employees": {
-    "workforceManagement": "Workforce Management",
-    "firstNamePlaceholder": "John",
-    "lastNamePlaceholder": "Doe",
-    "months": "Months",
-    "tabs": {
-      "directory": "Directory",
-      "leave": "Leave"
-    },
-    "status": {
-      "active": "Active",
-      "inactive": "Inactive"
-    },
-    "defaultPosition": "Employee",
-    "noPhone": "No phone",
-    "notAvailable": "N/A"
-  },
-  "settings": {
-    "employeeBalances": {
-      "monthsService": "Months of Service",
-      "earned": "Earned",
-      "balance": "Balance"
-    }
-  },
   "users": {
     "status": {
       "active": "Active",
@@ -708,8 +699,17 @@
     "salaryAdvanceRequests": "Salary Advance Requests",
     "advanceRequestOverview": "Advance Request Overview"
   },
-  "notifications": {
-    "policyUpdate": "Leave Policy Update",
+  "notifications": {    "title": "Notifications",
+    "allRead": "All caught up",
+    "unreadCount": "{{count}} unread",
+    "markAllAsRead": "Mark all as read",
+    "loading": "Loading notifications...",
+    "emptyTitle": "No notifications",
+    "empty": "You're all caught up!",
+    "viewAll": "View all notifications",
+    "minutesAgo": "{{count}} minutes ago",
+    "hoursAgo": "{{count}} hours ago",
+    "recently": "Recently",    "policyUpdate": "Leave Policy Update",
     "maternityPolicyUpdate": "New maternity leave policy effective from July 1st.",
     "referenceId": "Reference ID"
   }

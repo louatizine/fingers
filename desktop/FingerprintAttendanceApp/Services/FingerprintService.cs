@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 using FingerprintAttendanceApp.Models;
 using Microsoft.Extensions.Logging;
@@ -17,6 +18,10 @@ namespace FingerprintAttendanceApp.Services
         private dynamic? _zkem;
         private bool _isConnected = false;
         private Dictionary<string, int> _idMappings = new();
+        private readonly SemaphoreSlim _deviceLock = new SemaphoreSlim(1, 1);
+        private bool _isDeviceBusy = false;
+
+        public bool IsDeviceBusy => _isDeviceBusy;
 
         public FingerprintService(ILogger<FingerprintService> logger, string ipAddress, int port, int deviceId = 1)
         {
@@ -25,6 +30,39 @@ namespace FingerprintAttendanceApp.Services
             _port = port;
             _deviceId = deviceId;
             InitializeComObject();
+        }
+
+        public async Task<IDisposable> AcquireDeviceLockAsync()
+        {
+            await _deviceLock.WaitAsync();
+            _isDeviceBusy = true;
+            return new DeviceLockReleaser(this);
+        }
+
+        private void ReleaseDeviceLock()
+        {
+            _isDeviceBusy = false;
+            _deviceLock.Release();
+        }
+
+        private class DeviceLockReleaser : IDisposable
+        {
+            private readonly FingerprintService _service;
+            private bool _disposed = false;
+
+            public DeviceLockReleaser(FingerprintService service)
+            {
+                _service = service;
+            }
+
+            public void Dispose()
+            {
+                if (!_disposed)
+                {
+                    _service.ReleaseDeviceLock();
+                    _disposed = true;
+                }
+            }
         }
 
         private void InitializeComObject()
@@ -625,6 +663,8 @@ namespace FingerprintAttendanceApp.Services
                 catch { }
                 _zkem = null;
             }
+            
+            _deviceLock?.Dispose();
             
             GC.SuppressFinalize(this);
         }

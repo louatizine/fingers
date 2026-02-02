@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import './index.css'
 import { AuthProvider } from './context/AuthContext'
-import './i18n' // Initialize i18n
+import './i18n/index.js' // Initialize i18n
 
 // Set initial document direction and language
 const initLanguage = localStorage.getItem('i18nextLng') || 'fr'

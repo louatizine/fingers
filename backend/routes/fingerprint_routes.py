@@ -324,9 +324,9 @@ def get_pending_enrollments():
 @fingerprint_bp.route('/confirm', methods=['POST'])
 def confirm_enrollment():
     """
-    Confirm successful fingerprint enrollment
+    Confirm successful fingerprint enrollment with optional template backup
     Called by desktop app after successfully enrolling fingerprint on device
-    Payload: { "biometric_id": number }
+    Payload: { "biometric_id": number, "template_data": "base64_string" (optional) }
     """
     try:
         data = request.get_json()
@@ -338,6 +338,7 @@ def confirm_enrollment():
             }), 400
         
         biometric_id = data['biometric_id']
+        template_data = data.get('template_data')  # Optional Base64 template
         
         db = get_db()
         
@@ -350,6 +351,8 @@ def confirm_enrollment():
                 'error': f'User with biometric_id {biometric_id} not found'
             }), 404
         
+        employee_id = user.get('employee_id')
+        
         # Update user's fingerprint status
         update_data = {
             'has_fingerprint': True,
@@ -359,20 +362,49 @@ def confirm_enrollment():
             'updated_at': datetime.utcnow()
         }
         
+        # Update or create fingerprint record with template data
+        fingerprint_data = {
+            'employee_id': employee_id,
+            'biometric_id': biometric_id,
+            'device_id': str(biometric_id),
+            'enrolled_at': datetime.utcnow(),
+            'updated_at': datetime.utcnow(),
+            'is_active': True
+        }
+        
+        # Store template data if provided (for backup/migration)
+        if template_data:
+            fingerprint_data['template_data'] = template_data
+            fingerprint_data['template_format'] = 'ZKTeco_Base64'
+            fingerprint_data['has_backup'] = True
+            logger.info(f"Storing fingerprint template backup for {employee_id} ({len(template_data)} chars)")
+        else:
+            fingerprint_data['has_backup'] = False
+            logger.warning(f"No template data provided for {employee_id}")
+        
+        # Upsert fingerprint record
+        db.fingerprints.update_one(
+            {'employee_id': employee_id},
+            {'$set': fingerprint_data},
+            upsert=True
+        )
+        
+        # Update user record
         result = db.users.update_one(
             {'biometric_id': biometric_id},
             {'$set': update_data}
         )
         
-        if result.modified_count > 0:
-            logger.info(f"Fingerprint enrollment confirmed for biometric_id {biometric_id} (employee: {user.get('employee_id')})")
+        if result.modified_count > 0 or result.matched_count > 0:
+            logger.info(f"Fingerprint enrollment confirmed for biometric_id {biometric_id} (employee: {employee_id})")
             return jsonify({
                 'success': True,
-                'message': 'Enrollment confirmed successfully',
+                'message': 'Enrollment confirmed successfully' + (' with template backup' if template_data else ''),
                 'data': {
-                    'employee_id': user.get('employee_id'),
+                    'employee_id': employee_id,
                     'biometric_id': biometric_id,
-                    'full_name': user.get('full_name') or f"{user.get('first_name', '')} {user.get('last_name', '')}".strip()
+                    'full_name': user.get('full_name') or f"{user.get('first_name', '')} {user.get('last_name', '')}".strip(),
+                    'has_template_backup': bool(template_data)
                 }
             }), 200
         else:

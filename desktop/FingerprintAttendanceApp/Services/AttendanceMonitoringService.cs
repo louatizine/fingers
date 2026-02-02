@@ -82,6 +82,13 @@ namespace FingerprintAttendanceApp.Services
                     return;
                 }
 
+                // Check if device is busy (e.g., during enrollment)
+                if (_fingerprintService.IsDeviceBusy)
+                {
+                    _logger.LogDebug("Device is busy, skipping attendance check");
+                    return;
+                }
+
                 // Get attendance logs from device since last check
                 var logs = await GetAttendanceLogsFromDeviceAsync();
 

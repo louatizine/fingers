@@ -98,21 +98,24 @@ def create_user(user_data):
         
         # Auto-generate employee_id if not provided
         if not user_data.get('employee_id'):
-            # Find the highest employee number
+            # Find the highest biometric_id to avoid duplicates
+            # Use numeric sorting on biometric_id field
             last_user = db.users.find_one(
-                {'employee_id': {'$regex': '^EMP'}},
-                sort=[('employee_id', -1)]
+                {'biometric_id': {'$exists': True}},
+                sort=[('biometric_id', -1)]
             )
             
-            if last_user and last_user.get('employee_id'):
+            if last_user and last_user.get('biometric_id'):
                 try:
-                    # Extract number from EMP#### format
-                    last_num = int(last_user['employee_id'].replace('EMP', ''))
-                    next_num = last_num + 1
+                    next_num = int(last_user['biometric_id']) + 1
                 except:
                     next_num = 1
             else:
                 next_num = 1
+            
+            # Ensure the employee_id doesn't already exist (double check)
+            while db.users.find_one({'employee_id': f"EMP{next_num:04d}"}):
+                next_num += 1
             
             # Generate employee_id in format EMP0001, EMP0002, etc.
             user_data['employee_id'] = f"EMP{next_num:04d}"

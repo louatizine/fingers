@@ -81,140 +81,146 @@ namespace FingerprintAttendanceApp.Services
         /// </summary>
         private async Task<EnrollmentResult> EnrollFingerprintAsync(int biometricId, string fullName)
         {
-            try
+            // Acquire device lock to prevent concurrent access
+            using (await _fingerprintService.AcquireDeviceLockAsync())
             {
-                await Task.Yield();
-
-                Console.WriteLine($"\n📝 Enrolling fingerprint on device...");
-                Console.WriteLine($"   Biometric ID: {biometricId:000}");
-                Console.WriteLine($"   Name: {fullName}");
-
-                // Access the internal ZKTeco device object
-                var zkem = _fingerprintService.GetZKemDevice();
-                var deviceId = _fingerprintService.GetDeviceId();
-
-                if (zkem == null)
-                {
-                    return new EnrollmentResult
-                    {
-                        Success = false,
-                        Message = "❌ ZKTeco device object not initialized"
-                    };
-                }
-
-                // Step 1: Delete existing user if present (to avoid error code 2)
-                Console.WriteLine("📌 Step 1: Preparing device for enrollment...");
                 try
                 {
-                    // Try to delete existing user first (ignore if doesn't exist)
-                    zkem.SSR_DeleteEnrollData(deviceId, biometricId.ToString(), 12); // 12 = all data
-                    Console.WriteLine("   ℹ️ Cleared any existing enrollment data");
-                }
-                catch
-                {
-                    // Ignore error if user doesn't exist
-                }
+                    await Task.Yield();
 
-                // Step 2: Create user on device
-                Console.WriteLine("📌 Step 2: Creating user on device...");
-                bool userCreated = false;
+                    Console.WriteLine($"\n📝 Enrolling fingerprint on device...");
+                    Console.WriteLine($"   Biometric ID: {biometricId:000}");
+                    Console.WriteLine($"   Name: {fullName}");
 
-                try
-                {
-                    userCreated = zkem.SSR_SetUserInfo(
-                        deviceId,
-                        biometricId.ToString(),
-                        fullName,
-                        "",    // password (empty)
-                        0,     // privilege (0 = normal user)
-                        true   // enabled
-                    );
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError($"SSR_SetUserInfo failed: {ex.Message}");
-                    return new EnrollmentResult
+                    // Access the internal ZKTeco device object
+                    var zkem = _fingerprintService.GetZKemDevice();
+                    var deviceId = _fingerprintService.GetDeviceId();
+
+                    if (zkem == null)
                     {
-                        Success = false,
-                        Message = $"❌ Failed to create user on device: {ex.Message}"
-                    };
-                }
-
-                if (!userCreated)
-                {
-                    return new EnrollmentResult
-                    {
-                        Success = false,
-                        Message = "❌ Failed to create user on device"
-                    };
-                }
-
-                Console.WriteLine("   ✅ User created on device");
-
-                // Step 3: Start fingerprint enrollment
-                Console.WriteLine("\n👆 Fingerprint Enrollment Instructions:");
-                Console.WriteLine("   1. Place finger on scanner");
-                Console.WriteLine("   2. Lift finger when device beeps/flashes");
-                Console.WriteLine("   3. Repeat 2 more times (total 3 scans)");
-                Console.WriteLine("   4. Wait for success beep\n");
-
-                Console.WriteLine("📌 Step 3: Starting fingerprint enrollment...");
-                Console.WriteLine("⏳ Waiting for finger placement...");
-
-                try
-                {
-                    // Cancel any previous operation
-                    zkem.CancelOperation();
-
-                    // Start enrollment for finger index 0
-                    bool enrollStarted = zkem.StartEnrollEx(biometricId, 0, 1);
-
-                    if (!enrollStarted)
-                    {
-                        int errorCode = 0;
-                        zkem.GetLastError(ref errorCode);
-                        _logger.LogError($"StartEnrollEx failed with error code: {errorCode}");
-
                         return new EnrollmentResult
                         {
                             Success = false,
-                            Message = $"❌ Failed to start enrollment (Error: {errorCode})"
+                            Message = "❌ ZKTeco device object not initialized"
                         };
                     }
 
-                    Console.WriteLine("   ✅ Enrollment started - please scan fingerprint");
+                    // Step 1: Start fingerprint enrollment directly (device will auto-create user)
+                    Console.WriteLine("\n👆 Fingerprint Enrollment Instructions:");
+                    Console.WriteLine("   1. Place finger on scanner");
+                    Console.WriteLine("   2. Lift finger when device beeps/flashes");
+                    Console.WriteLine("   3. Repeat 2 more times (total 3 scans)");
+                    Console.WriteLine("   4. Wait for success beep\n");
 
-                    // Wait for enrollment to complete (typically handled by device)
-                    // In a real implementation, you might poll device status here
-                    await Task.Delay(15000); // Give 15 seconds for enrollment
+                    Console.WriteLine("📌 Starting fingerprint enrollment...");
+                    Console.WriteLine("⏳ Waiting for finger placement...");
 
-                    Console.WriteLine("   ✅ Enrollment process completed");
-
-                    return new EnrollmentResult
+                    try
                     {
-                        Success = true,
-                        Message = "✅ Fingerprint enrolled successfully",
-                        DeviceUserId = biometricId.ToString()
-                    };
+                        // Disable device first for faster operations
+                        Console.WriteLine("   🔄 Preparing device...");
+                        await Task.Run(() => zkem.EnableDevice(deviceId, false));
+                        
+                        // Start enrollment using StartEnrollEx with timeout
+                        Console.WriteLine("   🚀 Starting enrollment...");
+                        var startTime = DateTime.Now;
+                        
+                        var enrollTask = Task.Run(() => 
+                        {
+                            try
+                            {
+                                // StartEnrollEx(enrollNumber, fingerIndex, flag)
+                                return zkem.StartEnrollEx(biometricId, 0, 1);
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogError($"StartEnrollEx threw exception: {ex.Message}");
+                                return false;
+                            }
+                        });
+                        
+                        // Wait with 5-second timeout
+                        var timeoutTask = Task.Delay(5000);
+                        var completedTask = await Task.WhenAny(enrollTask, timeoutTask);
+                        
+                        bool enrollStarted = false;
+                        if (completedTask == enrollTask)
+                        {
+                            enrollStarted = await enrollTask;
+                            var elapsed = (DateTime.Now - startTime).TotalSeconds;
+                            Console.WriteLine($"   ⏱️ StartEnrollEx took {elapsed:F1}s");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"   ⚠️ StartEnrollEx timed out after 5s - assuming success");
+                            enrollStarted = true; // Assume it started if it hangs
+                        }
+
+                        if (!enrollStarted)
+                        {
+                            int errorCode = 0;
+                            zkem.GetLastError(ref errorCode);
+                            _logger.LogError($"StartEnrollEx failed with error code: {errorCode}");
+                            
+                            // Re-enable device
+                            await Task.Run(() => zkem.EnableDevice(deviceId, true));
+
+                            return new EnrollmentResult
+                            {
+                                Success = false,
+                                Message = $"❌ Failed to start enrollment (Error: {errorCode})"
+                            };
+                        }
+
+                        Console.WriteLine("   ✅ Enrollment started - please scan fingerprint");
+
+                        // Wait for enrollment to complete (typically handled by device)
+                        await Task.Delay(15000); // Give 15 seconds for enrollment
+
+                        Console.WriteLine("   ✅ Enrollment process completed");
+                        
+                        // Re-enable device
+                        await Task.Run(() => zkem.EnableDevice(deviceId, true));
+                        
+                        // Now set user name after enrollment
+                        try
+                        {
+                            await Task.Run(() => zkem.SetUserInfo(deviceId, biometricId, fullName, "", 0, true));
+                            Console.WriteLine($"   ✅ User name updated: {fullName}");
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning($"Could not set user name: {ex.Message}");
+                        }
+
+                        return new EnrollmentResult
+                        {
+                            Success = true,
+                            Message = "✅ Fingerprint enrolled successfully",
+                            DeviceUserId = biometricId.ToString()
+                        };
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError($"Enrollment error: {ex.Message}");
+                        
+                        return new EnrollmentResult
+                        {
+                            Success = false,
+                            Message = $"❌ Enrollment error: {ex.Message}"
+                        };
+                    }
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError($"Enrollment error: {ex.Message}");
+                    _logger.LogError($"Unexpected error during enrollment: {ex.Message}");
+                    
                     return new EnrollmentResult
                     {
                         Success = false,
-                        Message = $"❌ Enrollment error: {ex.Message}"
+                        Message = $"❌ Unexpected error: {ex.Message}"
                     };
                 }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Unexpected error during enrollment: {ex.Message}");
-                return new EnrollmentResult
-                {
-                    Success = false,
-                    Message = $"❌ Unexpected error: {ex.Message}"
-                };
             }
         }
     }

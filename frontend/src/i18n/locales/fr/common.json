@@ -173,6 +173,13 @@
     "adjustFilters": "Essayez d'ajuster vos filtres",
     "getStarted": "Commencez par ajouter votre premier employé",
     "confirmDeactivate": "Êtes-vous sûr de vouloir désactiver cet employé ?",
+    "workforceManagement": "Gestion de la Main-d'Œuvre",
+    "firstNamePlaceholder": "Jean",
+    "lastNamePlaceholder": "Dupont",
+    "months": "Mois",
+    "defaultPosition": "Employé",
+    "noPhone": "Pas de téléphone",
+    "notAvailable": "N/D",
     "table": {
       "employee": "Employé",
       "department": "Département",
@@ -190,11 +197,19 @@
       "active": "Actif",
       "inactive": "Inactif"
     },
+    "tabs": {
+      "directory": "Annuaire",
+      "leave": "Congés"
+    },
     "stats": {
       "total": "Total Employés",
       "active": "Actifs",
       "departments": "Départements",
       "avgExperience": "Expérience Moyenne"
+    },
+    "status": {
+      "active": "Actif",
+      "inactive": "Inactif"
     },
     "departments": {
       "engineering": "Ingénierie",
@@ -655,44 +670,31 @@
       "showing": "Affichage de la page {{page}} sur {{total}} ({{records}} enregistrements)"
     }
   },
-  "employees": {
-    "workforceManagement": "Gestion de la Main-d'Œuvre",
-    "firstNamePlaceholder": "Jean",
-    "lastNamePlaceholder": "Dupont",
-    "months": "Mois",
-    "tabs": {
-      "directory": "Annuaire",
-      "leave": "Congés"
-    },
-    "status": {
-      "active": "Actif",
-      "inactive": "Inactif"
-    },
-    "defaultPosition": "Employé",
-    "noPhone": "Pas de téléphone",
-    "notAvailable": "N/D"
-  },
-  "settings": {
-    "employeeBalances": {
-      "monthsService": "Mois de Service",
-      "earned": "Gagné",
-      "balance": "Solde"
-    }
-  },
   "users": {
     "status": {
       "active": "Actif",
       "deactivated": "Désactivé"
     }
   },
-  "dashboard": {
-    "companyLeaveStatus": "Aperçu du Statut des Congés de l'Entreprise",
-    "salaryAdvanceRequests": "Demandes d'Avance sur Salaire",
-    "advanceRequestOverview": "Aperçu des Demandes d'Avance"
-  },
   "notifications": {
+    "title": "Notifications",
+    "allRead": "Tout est lu",
+    "unreadCount": "{{count}} non lues",
+    "markAllAsRead": "Tout marquer comme lu",
+    "loading": "Chargement des notifications...",
+    "emptyTitle": "Aucune notification",
+    "empty": "Vous êtes à jour!",
+    "viewAll": "Voir toutes les notifications",
+    "minutesAgo": "Il y a {{count}} minutes",
+    "hoursAgo": "Il y a {{count}} heures",
+    "recently": "Récemment",
     "policyUpdate": "Mise à jour de la politique des congés",
     "maternityPolicyUpdate": "Nouvelle politique de congé maternité applicable à partir du 1er juillet.",
     "referenceId": "ID de référence"
+  },
+  "time": {
+    "days": "jours",
+    "months": "mois",
+    "years": "ans"
   }
 }

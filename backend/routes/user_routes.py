@@ -124,11 +124,17 @@ def create_new_user():
                 return jsonify({'error': f'{field} is required'}), 400
         
         # Create user
-        user_id = create_user(data)
+        result = create_user(data)
+        
+        # Check if creation was successful
+        if not result.get('success'):
+            return jsonify({'error': result.get('error', 'Failed to create user')}), 400
         
         return jsonify({
             'message': 'User created successfully',
-            'user_id': user_id
+            'user_id': result.get('user_id'),
+            'employee_id': result.get('user', {}).get('employee_id'),
+            'biometric_id': result.get('user', {}).get('biometric_id')
         }), 201
         
     except Exception as e:

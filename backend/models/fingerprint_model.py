@@ -30,7 +30,7 @@ class FingerprintModel:
         return True, None
     
     @staticmethod
-    def enroll_user(employee_id: str, template_id: str, device_id: str) -> Dict[str, Any]:
+    def enroll_user(employee_id: str, template_id: str, device_id: str, template_data: str = None) -> Dict[str, Any]:
         """Enroll fingerprint for a user - updates both fingerprints and users collections"""
         db = get_db()
         
@@ -48,6 +48,15 @@ class FingerprintModel:
             'updated_at': datetime.utcnow(),
             'is_active': True
         }
+        
+        # Add template data if provided (Base64 encoded)
+        if template_data:
+            fingerprint_data['template_data'] = template_data
+            fingerprint_data['template_format'] = 'ZKTeco_Base64'
+            fingerprint_data['has_backup'] = True
+            logger.info(f"Storing fingerprint template backup for {employee_id}")
+        else:
+            fingerprint_data['has_backup'] = False
         
         # Update fingerprints collection
         result = db.fingerprints.update_one(
@@ -70,13 +79,15 @@ class FingerprintModel:
             {'$set': user_update}
         )
         
-        logger.info(f"Fingerprint enrolled for user {employee_id}")
+        logger.info(f"Fingerprint enrolled for user {employee_id}" + 
+                   (" with template backup" if template_data else ""))
         
         return {
             'success': True,
             'employee_id': employee_id,
             'template_id': template_id,
-            'device_id': device_id
+            'device_id': device_id,
+            'has_backup': bool(template_data)
         }
     
     @staticmethod

@@ -176,6 +176,13 @@
     "adjustFilters": "جرب تعديل الفلاتر الخاصة بك",
     "getStarted": "ابدأ بإضافة موظفك الأول",
     "confirmDeactivate": "هل أنت متأكد من أنك تريد إلغاء تفعيل هذا الموظف؟",
+    "workforceManagement": "إدارة القوى العاملة",
+    "firstNamePlaceholder": "أحمد",
+    "lastNamePlaceholder": "محمد",
+    "months": "أشهر",
+    "defaultPosition": "موظف",
+    "noPhone": "لا يوجد هاتف",
+    "notAvailable": "غير متوفر",
     "table": {
       "employee": "الموظف",
       "department": "القسم",
@@ -193,11 +200,19 @@
       "active": "نشط",
       "inactive": "غير نشط"
     },
+    "tabs": {
+      "directory": "الدليل",
+      "leave": "الإجازات"
+    },
     "stats": {
       "total": "إجمالي الموظفين",
       "active": "نشط",
       "departments": "الأقسام",
       "avgExperience": "متوسط الخبرة"
+    },
+    "status": {
+      "active": "نشط",
+      "inactive": "غير نشط"
     },
     "departments": {
       "engineering": "الهندسة",
@@ -659,30 +674,6 @@
       "showing": "عرض الصفحة {{page}} من {{total}} ({{records}} سجل)"
     }
   },
-  "employees": {
-    "workforceManagement": "إدارة القوى العاملة",
-    "firstNamePlaceholder": "أحمد",
-    "lastNamePlaceholder": "محمد",
-    "months": "أشهر",
-    "tabs": {
-      "directory": "الدليل",
-      "leave": "الإجازات"
-    },
-    "status": {
-      "active": "نشط",
-      "inactive": "غير نشط"
-    },
-    "defaultPosition": "موظف",
-    "noPhone": "لا يوجد هاتف",
-    "notAvailable": "غير متوفر"
-  },
-  "settings": {
-    "employeeBalances": {
-      "monthsService": "أشهر الخدمة",
-      "earned": "المكتسب",
-      "balance": "الرصيد"
-    }
-  },
   "users": {
     "status": {
       "active": "نشط",
@@ -694,8 +685,17 @@
     "salaryAdvanceRequests": "طلبات السلف المالية",
     "advanceRequestOverview": "نظرة عامة على طلبات السلف"
   },
-  "notifications": {
-    "policyUpdate": "تحديث سياسة الإجازات",
+  "notifications": {    "title": "الإشعارات",
+    "allRead": "تم قراءة الكل",
+    "unreadCount": "{{count}} غير مقروءة",
+    "markAllAsRead": "تحديد الكل كمقروء",
+    "loading": "تحميل الإشعارات...",
+    "emptyTitle": "لا توجد إشعارات",
+    "empty": "أنت على اطلاع بكل شيء!",
+    "viewAll": "عرض جميع الإشعارات",
+    "minutesAgo": "منذ {{count}} دقائق",
+    "hoursAgo": "منذ {{count}} ساعات",
+    "recently": "مؤخراً",    "policyUpdate": "تحديث سياسة الإجازات",
     "maternityPolicyUpdate": "سياسة إجازة الأمومة الجديدة سارية اعتبارًا من 1 يوليو.",
     "referenceId": "معرف المرجع"
   }
