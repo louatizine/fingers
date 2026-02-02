@@ -248,3 +248,139 @@ def remove_fingerprint(employee_id):
     except Exception as e:
         logger.error(f"Error removing fingerprint: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
+
+@fingerprint_bp.route('/pending', methods=['GET'])
+def get_pending_enrollments():
+    """
+    Get list of users pending fingerprint enrollment
+    Returns users where has_fingerprint = False or fingerprint_status = 'PENDING'
+    Desktop app polls this endpoint to detect new users
+    """
+    try:
+        db = get_db()
+        
+        # Find users without fingerprints or with pending status
+        pending_users = list(db.users.find(
+            {
+                '$or': [
+                    {'has_fingerprint': False},
+                    {'has_fingerprint': {'$exists': False}},
+                    {'fingerprint_status': 'PENDING'}
+                ],
+                'is_active': True
+            },
+            {
+                'employee_id': 1,
+                'biometric_id': 1,
+                'first_name': 1,
+                'last_name': 1,
+                'full_name': 1,
+                'department': 1,
+                'position': 1,
+                'fingerprint_status': 1,
+                'created_at': 1,
+                '_id': 0
+            }
+        ).sort('created_at', -1))
+        
+        # Add full_name if not present and ensure biometric_id exists
+        for user in pending_users:
+            if 'full_name' not in user or not user['full_name']:
+                user['full_name'] = f"{user.get('first_name', '')} {user.get('last_name', '')}".strip()
+            
+            # Set default fingerprint_status if not present
+            if 'fingerprint_status' not in user:
+                user['fingerprint_status'] = 'PENDING'
+            
+            # Ensure biometric_id exists - if not, generate one
+            if 'biometric_id' not in user or not user['biometric_id']:
+                # Generate biometric_id from employee_id (e.g., EMP9401 -> 9401)
+                employee_id = user.get('employee_id', '')
+                if employee_id.startswith('EMP'):
+                    try:
+                        biometric_id = int(employee_id[3:])
+                    except:
+                        biometric_id = hash(employee_id) % 100000
+                else:
+                    biometric_id = hash(employee_id) % 100000
+                
+                # Update the user with biometric_id
+                db.users.update_one(
+                    {'employee_id': user['employee_id']},
+                    {'$set': {'biometric_id': biometric_id}}
+                )
+                user['biometric_id'] = biometric_id
+        
+        return jsonify({
+            'success': True,
+            'data': pending_users,
+            'count': len(pending_users)
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error fetching pending enrollments: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@fingerprint_bp.route('/confirm', methods=['POST'])
+def confirm_enrollment():
+    """
+    Confirm successful fingerprint enrollment
+    Called by desktop app after successfully enrolling fingerprint on device
+    Payload: { "biometric_id": number }
+    """
+    try:
+        data = request.get_json()
+        
+        if not data or 'biometric_id' not in data:
+            return jsonify({
+                'success': False,
+                'error': 'biometric_id is required'
+            }), 400
+        
+        biometric_id = data['biometric_id']
+        
+        db = get_db()
+        
+        # Find user by biometric_id
+        user = db.users.find_one({'biometric_id': biometric_id})
+        
+        if not user:
+            return jsonify({
+                'success': False,
+                'error': f'User with biometric_id {biometric_id} not found'
+            }), 404
+        
+        # Update user's fingerprint status
+        update_data = {
+            'has_fingerprint': True,
+            'fingerprint_status': 'ENROLLED',
+            'fingerprint_device_id': str(biometric_id),
+            'fingerprint_enrolled_at': datetime.utcnow(),
+            'updated_at': datetime.utcnow()
+        }
+        
+        result = db.users.update_one(
+            {'biometric_id': biometric_id},
+            {'$set': update_data}
+        )
+        
+        if result.modified_count > 0:
+            logger.info(f"Fingerprint enrollment confirmed for biometric_id {biometric_id} (employee: {user.get('employee_id')})")
+            return jsonify({
+                'success': True,
+                'message': 'Enrollment confirmed successfully',
+                'data': {
+                    'employee_id': user.get('employee_id'),
+                    'biometric_id': biometric_id,
+                    'full_name': user.get('full_name') or f"{user.get('first_name', '')} {user.get('last_name', '')}".strip()
+                }
+            }), 200
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Failed to update enrollment status'
+            }), 500
+            
+    except Exception as e:
+        logger.error(f"Error confirming enrollment: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500

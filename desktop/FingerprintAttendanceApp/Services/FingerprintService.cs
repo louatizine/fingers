@@ -591,6 +591,27 @@ namespace FingerprintAttendanceApp.Services
             return Math.Abs((employeeId ?? "").GetHashCode()) % 10000;
         }
 
+        /// <summary>
+        /// Get the ZKTeco device object for advanced operations
+        /// </summary>
+        public dynamic? GetZKemDevice()
+        {
+            return _zkem;
+        }
+
+        /// <summary>
+        /// Get the device ID
+        /// </summary>
+        public int GetDeviceId()
+        {
+            return _deviceId;
+        }
+
+        /// <summary>
+        /// Check if device is connected
+        /// </summary>
+        public bool IsConnected => _isConnected;
+
         public void Dispose()
         {
             Disconnect();

@@ -224,3 +224,36 @@ def get_user_public(employee_id):
     except Exception as e:
         logger.error(f"Get public user error: {e}")
         return jsonify({'error': 'An error occurred'}), 500
+
+
+@user_bp.route('/biometric/<int:biometric_id>', methods=['GET'])
+def get_user_by_biometric_id(biometric_id):
+    """Get user by biometric ID - For attendance tracking"""
+    try:
+        from database import get_db
+        db = get_db()
+        user = db.users.find_one({'biometric_id': biometric_id})
+        
+        if not user:
+            logger.warning(f"No user found with biometric_id: {biometric_id}")
+            return jsonify({'user': None}), 404
+        
+        # Convert ObjectId to string
+        user['_id'] = str(user['_id'])
+        
+        # Return user data for attendance
+        return jsonify({
+            'user': {
+                '_id': user['_id'],
+                'employee_id': user.get('employee_id'),
+                'biometric_id': user.get('biometric_id'),
+                'first_name': user.get('first_name'),
+                'last_name': user.get('last_name'),
+                'department': user.get('department'),
+                'position': user.get('position')
+            }
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Get user by biometric ID error: {e}")
+        return jsonify({'error': 'An error occurred'}), 500

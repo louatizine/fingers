@@ -496,6 +496,191 @@ public class ApiClient
     {
         return _baseUrl;
     }
+
+    /// <summary>
+    /// Get list of users pending fingerprint enrollment
+    /// </summary>
+    public async Task<PendingUsersResponse?> GetPendingEnrollmentsAsync()
+    {
+        try
+        {
+            if (!await EnsureAuthenticatedAsync())
+            {
+                _logger.LogError("Cannot authenticate to get pending enrollments");
+                return null;
+            }
+            
+            string fullUrl = $"{_baseUrl}/fingerprint/pending";
+            var response = await _httpClient.GetAsync(fullUrl);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                
+                try
+                {
+                    var result = JsonConvert.DeserializeObject<PendingUsersResponse>(responseContent);
+                    return result;
+                }
+                catch (Exception parseEx)
+                {
+                    _logger.LogError($"Error parsing pending enrollments: {parseEx.Message}");
+                    return null;
+                }
+            }
+            else
+            {
+                _logger.LogError($"Failed to get pending enrollments. Status: {response.StatusCode}");
+                return null;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error getting pending enrollments: {ex.Message}");
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Confirm successful fingerprint enrollment
+    /// </summary>
+    public async Task<bool> ConfirmEnrollmentAsync(int biometricId)
+    {
+        try
+        {
+            if (!await EnsureAuthenticatedAsync())
+            {
+                _logger.LogError("Cannot authenticate to confirm enrollment");
+                return false;
+            }
+            
+            _logger.LogInformation($"Confirming enrollment for biometric ID: {biometricId}");
+            
+            var data = new { biometric_id = biometricId };
+            var jsonContent = JsonConvert.SerializeObject(data);
+            var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+            
+            string fullUrl = $"{_baseUrl}/fingerprint/confirm";
+            var response = await _httpClient.PostAsync(fullUrl, content);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var result = JsonConvert.DeserializeObject<EnrollmentConfirmResponse>(responseContent);
+                
+                if (result?.Success == true)
+                {
+                    _logger.LogInformation($"✅ Enrollment confirmed for biometric ID {biometricId}");
+                    return true;
+                }
+                else
+                {
+                    _logger.LogError($"Enrollment confirmation failed: {result?.Error}");
+                    return false;
+                }
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                _logger.LogError($"Failed to confirm enrollment. Status: {response.StatusCode}, Response: {errorContent}");
+                return false;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error confirming enrollment: {ex.Message}");
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Get user by biometric_id for attendance tracking
+    /// </summary>
+    public async Task<User?> GetUserByBiometricIdAsync(int biometricId)
+    {
+        try
+        {
+            if (!await EnsureAuthenticatedAsync())
+            {
+                _logger.LogError("Cannot authenticate to get user by biometric ID");
+                return null;
+            }
+            
+            string fullUrl = $"{_baseUrl}/users/biometric/{biometricId}";
+            var response = await _httpClient.GetAsync(fullUrl);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var result = JsonConvert.DeserializeObject<UserResponse>(responseContent);
+                return result?.User;
+            }
+            
+            return null;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error getting user by biometric ID: {ex.Message}");
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Record attendance event to backend
+    /// </summary>
+    public async Task<bool> RecordAttendanceAsync(AttendanceLog log)
+    {
+        try
+        {
+            if (!await EnsureAuthenticatedAsync())
+            {
+                _logger.LogError("Cannot authenticate to record attendance");
+                return false;
+            }
+            
+            var attendanceData = new
+            {
+                employee_id = log.EmployeeId,
+                event_type = log.EventType,
+                device_id = log.DeviceId,
+                match_score = log.MatchScore,
+                notes = log.Notes,
+                timestamp = log.Timestamp.ToString("o") // ISO 8601 format
+            };
+            
+            var jsonContent = JsonConvert.SerializeObject(attendanceData);
+            var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+            
+            string fullUrl = $"{_baseUrl}/attendance/manual";
+            _logger.LogInformation($"Recording attendance for {log.EmployeeId} - {log.EventType}");
+            
+            var response = await _httpClient.PostAsync(fullUrl, content);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var result = JsonConvert.DeserializeObject<AttendanceResponse>(responseContent);
+                
+                if (result?.Success == true)
+                {
+                    _logger.LogInformation($"✅ Attendance recorded: {log.EmployeeId}");
+                    return true;
+                }
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                _logger.LogError($"Failed to record attendance. Status: {response.StatusCode}, Response: {errorContent}");
+            }
+            
+            return false;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error confirming enrollment: {ex.Message}");
+            return false;
+        }
+    }
 }
 
 // Response wrapper classes for Flask API structure
@@ -536,4 +721,40 @@ public class FingerprintStatusResponse
     
     [JsonProperty("error")]
     public string? Error { get; set; }
+}
+
+public class PendingUsersResponse
+{
+    [JsonProperty("success")]
+    public bool Success { get; set; }
+    
+    [JsonProperty("data")]
+    public List<PendingUser>? Data { get; set; }
+    
+    [JsonProperty("count")]
+    public int Count { get; set; }
+}
+
+public class EnrollmentConfirmResponse
+{
+    [JsonProperty("success")]
+    public bool Success { get; set; }
+    
+    [JsonProperty("message")]
+    public string? Message { get; set; }
+    
+    [JsonProperty("error")]
+    public string? Error { get; set; }
+}
+
+public class AttendanceResponse
+{
+    [JsonProperty("success")]
+    public bool Success { get; set; }
+    
+    [JsonProperty("message")]
+    public string? Message { get; set; }
+    
+    [JsonProperty("data")]
+    public object? Data { get; set; }
 }

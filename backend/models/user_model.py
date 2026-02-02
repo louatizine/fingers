@@ -87,6 +87,7 @@ def find_user_by_employee_id(employee_id):
 def create_user(user_data):
     """
     Create a new user in the database
+    Auto-generates employee_id (EMP####) and biometric_id (####) if not provided
     """
     try:
         db = get_db()
@@ -95,9 +96,47 @@ def create_user(user_data):
         if db.users.find_one({'email': user_data.get('email')}):
             return {'success': False, 'error': 'Email already exists'}
         
-        # Check if employee_id already exists
-        if user_data.get('employee_id') and db.users.find_one({'employee_id': user_data.get('employee_id')}):
-            return {'success': False, 'error': 'Employee ID already exists'}
+        # Auto-generate employee_id if not provided
+        if not user_data.get('employee_id'):
+            # Find the highest employee number
+            last_user = db.users.find_one(
+                {'employee_id': {'$regex': '^EMP'}},
+                sort=[('employee_id', -1)]
+            )
+            
+            if last_user and last_user.get('employee_id'):
+                try:
+                    # Extract number from EMP#### format
+                    last_num = int(last_user['employee_id'].replace('EMP', ''))
+                    next_num = last_num + 1
+                except:
+                    next_num = 1
+            else:
+                next_num = 1
+            
+            # Generate employee_id in format EMP0001, EMP0002, etc.
+            user_data['employee_id'] = f"EMP{next_num:04d}"
+            
+            # Generate biometric_id as just the number
+            user_data['biometric_id'] = next_num
+            
+            logger.info(f"Auto-generated employee_id: {user_data['employee_id']}, biometric_id: {user_data['biometric_id']}")
+        else:
+            # If employee_id is provided, check if it already exists
+            if db.users.find_one({'employee_id': user_data.get('employee_id')}):
+                return {'success': False, 'error': 'Employee ID already exists'}
+            
+            # Generate biometric_id from employee_id if it follows EMP#### format
+            if user_data['employee_id'].startswith('EMP'):
+                try:
+                    user_data['biometric_id'] = int(user_data['employee_id'].replace('EMP', ''))
+                except:
+                    # Fallback: use hash if cannot extract number
+                    user_data['biometric_id'] = hash(user_data['employee_id']) % 100000
+        
+        # Set fingerprint status to PENDING for new users
+        user_data.setdefault('has_fingerprint', False)
+        user_data.setdefault('fingerprint_status', 'PENDING')
         
         # Hash password if provided
         if 'password' in user_data:
@@ -112,6 +151,8 @@ def create_user(user_data):
         
         result = db.users.insert_one(user_data)
         user_data['_id'] = str(result.inserted_id)
+        
+        logger.info(f"User created successfully: {user_data['employee_id']} with biometric_id: {user_data['biometric_id']}")
         
         return {'success': True, 'user': user_data, 'user_id': str(result.inserted_id)}
     except Exception as e:

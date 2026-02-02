@@ -18,7 +18,11 @@ class Program
     private static ApiClient? _apiClient;
     private static ILoggerFactory? _loggerFactory;
     private static IConfiguration? _configuration;
+    private static BackendPollingService? _pollingService;
+    private static FingerprintEnrollmentService? _enrollmentService;
+    private static AttendanceMonitoringService? _attendanceMonitoring;
     private static bool _isRunning = true;
+    private static readonly Queue<PendingUser> _pendingEnrollments = new Queue<PendingUser>();
 
     static async Task Main(string[] args)
     {
@@ -33,11 +37,28 @@ class Program
         _configuration = serviceProvider.GetRequiredService<IConfiguration>();
         _apiClient = serviceProvider.GetRequiredService<ApiClient>();
         _fingerprintService = serviceProvider.GetRequiredService<FingerprintService>();
+        _enrollmentService = serviceProvider.GetRequiredService<FingerprintEnrollmentService>();
+        _pollingService = serviceProvider.GetRequiredService<BackendPollingService>();
+        _attendanceMonitoring = serviceProvider.GetRequiredService<AttendanceMonitoringService>();
 
         if (await InitializeSystemAsync())
         {
+            // Start background polling for new user enrollments
+            StartEnrollmentPolling();
+            
+            // Start attendance monitoring
+            StartAttendanceMonitoring();
+            
             while (_isRunning)
             {
+                // Check for pending enrollments first
+                if (_pendingEnrollments.Count > 0)
+                {
+                    var user = _pendingEnrollments.Dequeue();
+                    await HandlePendingEnrollment(user);
+                    continue;
+                }
+                
                 DisplayMenu();
                 var choice = Console.ReadLine();
                 
@@ -72,6 +93,9 @@ class Program
                         // Debug option
                         await DebugApiResponse();
                         break;
+                    case "10":
+                        await ListUsersFromDevice();
+                        break;
                     default:
                         Console.WriteLine("❌ Invalid choice. Please try again.");
                         break;
@@ -79,6 +103,11 @@ class Program
             }
         }
         
+        // Cleanup
+        _pollingService?.Stop();
+        _pollingService?.Dispose();
+        _attendanceMonitoring?.Stop();
+        _attendanceMonitoring?.Dispose();
         _fingerprintService?.Dispose();
         Console.WriteLine("\n✅ Application closed.");
     }
@@ -95,7 +124,8 @@ class Program
         Console.WriteLine("7. 🔢 Try Common IPs");
         Console.WriteLine("8. 🚪 Exit");
         Console.WriteLine("9. 🔧 Debug API (Hidden)");
-        Console.Write("👉 Enter your choice (1-9): ");
+        Console.WriteLine("10. 👥 List Users from Device");
+        Console.Write("👉 Enter your choice (1-10): ");
     }
 
     private static IServiceCollection ConfigureServices()
@@ -139,6 +169,12 @@ class Program
             });
 
             services.AddSingleton<ApiClient>();
+            
+            // Register enrollment services
+            services.AddSingleton<FingerprintEnrollmentService>();
+            services.AddSingleton<BackendPollingService>();
+            services.AddSingleton<AttendanceMonitoringService>();
+            
             services.AddSingleton<ILogger<Program>>(sp => 
                 sp.GetRequiredService<ILoggerFactory>().CreateLogger<Program>());
             
@@ -611,6 +647,128 @@ class Program
         }
     }
 
+    private static async Task ListUsersFromDevice()
+    {
+        Console.WriteLine("\n👥 Fetching enrolled users from fingerprint device...");
+        
+        if (_fingerprintService == null)
+        {
+            Console.WriteLine("❌ Fingerprint service not available");
+            return;
+        }
+
+        if (!_fingerprintService.IsConnected)
+        {
+            Console.WriteLine("❌ Device is not connected. Please run option 2 first.");
+            return;
+        }
+
+        try
+        {
+            await Task.Yield();
+
+            var zkem = _fingerprintService.GetZKemDevice();
+            var deviceId = _fingerprintService.GetDeviceId();
+
+            if (zkem == null)
+            {
+                Console.WriteLine("❌ Device object not initialized");
+                return;
+            }
+
+            Console.WriteLine("🔄 Reading users from device...\n");
+
+            // Disable device for reading
+            zkem.EnableDevice(deviceId, false);
+
+            try
+            {
+                // Read all user IDs first
+                if (zkem.ReadAllUserID(deviceId))
+                {
+                    var deviceUsers = new List<(string enrollNumber, string name, string password, int privilege, bool enabled)>();
+                    
+                    string enrollNumber = "";
+                    string name = "";
+                    string password = "";
+                    int privilege = 0;
+                    bool enabled = false;
+
+                    // Get all user info
+                    while (zkem.SSR_GetAllUserInfo(deviceId, out enrollNumber, out name, out password, out privilege, out enabled))
+                    {
+                        deviceUsers.Add((enrollNumber, name, password, privilege, enabled));
+                    }
+
+                    if (deviceUsers.Count == 0)
+                    {
+                        Console.WriteLine("📭 No users found on device.");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"✅ Found {deviceUsers.Count} enrolled users:\n");
+                        Console.WriteLine(new string('=', 80));
+                        Console.WriteLine($"{"Biometric ID",-15} {"Name",-30} {"Privilege",-15} {"Status",-10}");
+                        Console.WriteLine(new string('=', 80));
+
+                        foreach (var (id, userName, pwd, priv, isEnabled) in deviceUsers.OrderBy(u => int.TryParse(u.enrollNumber, out int n) ? n : 0))
+                        {
+                            string privilegeStr = priv switch
+                            {
+                                0 => "User",
+                                1 => "Enroller",
+                                2 => "Manager",
+                                3 => "Admin",
+                                _ => $"Level {priv}"
+                            };
+
+                            string statusStr = isEnabled ? "✅ Enabled" : "❌ Disabled";
+                            string biometricId = int.TryParse(id, out int bioId) ? $"{bioId:000}" : id;
+
+                            Console.WriteLine($"{biometricId,-15} {userName,-30} {privilegeStr,-15} {statusStr,-10}");
+
+                            // Try to match with backend user
+                            if (int.TryParse(id, out int biometricIdNum))
+                            {
+                                var backendUser = await _apiClient?.GetUserByBiometricIdAsync(biometricIdNum)!;
+                                if (backendUser != null)
+                                {
+                                    Console.WriteLine($"{"",15} → Employee: {backendUser.EmployeeId} ({backendUser.Department})");
+                                }
+                            }
+                        }
+                        Console.WriteLine(new string('=', 80));
+
+                        // Summary
+                        Console.WriteLine($"\n📊 Summary:");
+                        Console.WriteLine($"   Total Users: {deviceUsers.Count}");
+                        Console.WriteLine($"   Enabled: {deviceUsers.Count(u => u.enabled)}");
+                        Console.WriteLine($"   Disabled: {deviceUsers.Count(u => !u.enabled)}");
+                        Console.WriteLine($"   Admins: {deviceUsers.Count(u => u.privilege == 3)}");
+                        Console.WriteLine($"   Managers: {deviceUsers.Count(u => u.privilege == 2)}");
+                        Console.WriteLine($"   Regular Users: {deviceUsers.Count(u => u.privilege == 0)}");
+                    }
+                }
+                else
+                {
+                    int errorCode = 0;
+                    zkem.GetLastError(ref errorCode);
+                    Console.WriteLine($"❌ Failed to read users from device. Error code: {errorCode}");
+                }
+            }
+            finally
+            {
+                // Re-enable device
+                zkem.EnableDevice(deviceId, true);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ Error reading users from device: {ex.Message}");
+            _logger?.LogError($"Error listing device users: {ex.Message}");
+        }
+    }
+
     private static async Task EnrollUser()
     {
         Console.Write("\n👤 Enter Employee ID (e.g., EMP0004): ");
@@ -727,6 +885,189 @@ class Program
         catch (Exception ex)
         {
             Console.WriteLine($"❌ Error during enrollment: {ex.Message}");
+        }
+    }
+
+    private static void StartEnrollmentPolling()
+    {
+        try
+        {
+            if (_pollingService == null || _configuration == null)
+            {
+                Console.WriteLine("⚠️ Polling service not available");
+                return;
+            }
+
+            // Check if polling is enabled in configuration
+            var pollingConfig = _configuration.GetSection("EnrollmentPolling");
+            bool enabled = bool.Parse(pollingConfig["Enabled"] ?? "true");
+
+            if (!enabled)
+            {
+                Console.WriteLine("ℹ️ Enrollment polling is disabled in configuration");
+                return;
+            }
+
+            // Subscribe to new user detection events
+            _pollingService.NewUserDetected += OnNewUserDetected;
+
+            // Start the polling service
+            _pollingService.Start();
+
+            Console.WriteLine("✅ Enrollment polling started - listening for new users...\n");
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError($"Error starting enrollment polling: {ex.Message}");
+            Console.WriteLine($"⚠️ Could not start enrollment polling: {ex.Message}");
+        }
+    }
+
+    private static void StartAttendanceMonitoring()
+    {
+        try
+        {
+            if (_attendanceMonitoring == null || _configuration == null)
+            {
+                Console.WriteLine("⚠️ Attendance monitoring service not available");
+                return;
+            }
+
+            // Check if attendance monitoring is enabled in configuration
+            var attendanceConfig = _configuration.GetSection("AttendanceMonitoring");
+            bool enabled = bool.Parse(attendanceConfig["Enabled"] ?? "true");
+
+            if (!enabled)
+            {
+                Console.WriteLine("ℹ️ Attendance monitoring is disabled in configuration");
+                return;
+            }
+
+            // Start the attendance monitoring service
+            _attendanceMonitoring.Start();
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError($"Error starting attendance monitoring: {ex.Message}");
+            Console.WriteLine($"⚠️ Could not start attendance monitoring: {ex.Message}");
+        }
+    }
+
+    private static async void OnNewUserDetected(object? sender, PendingUser user)
+    {
+        try
+        {
+            // Queue the enrollment instead of blocking
+            _pendingEnrollments.Enqueue(user);
+            
+            // Show brief notification
+            Console.WriteLine("\n");
+            Console.WriteLine("🔔 NEW EMPLOYEE DETECTED!");
+            Console.WriteLine($"   {user.DisplayName} (ID: {user.EmployeeId})");
+            Console.WriteLine("   Enrollment prompt will appear next...");
+            Console.WriteLine();
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError($"Error handling new user detection: {ex.Message}");
+            Console.WriteLine($"❌ Error: {ex.Message}");
+        }
+    }
+
+    private static async Task HandlePendingEnrollment(PendingUser user)
+    {
+        try
+        {
+            Console.WriteLine("\n");
+            Console.WriteLine("═══════════════════════════════════════════════════════════");
+            Console.WriteLine("🔔 NEW EMPLOYEE DETECTED!");
+            Console.WriteLine("═══════════════════════════════════════════════════════════");
+            Console.WriteLine($"   Name: {user.DisplayName}");
+            Console.WriteLine($"   Employee ID: {user.EmployeeId}");
+            Console.WriteLine($"   Department: {user.Department ?? "N/A"}");
+            Console.WriteLine($"   Position: {user.Position ?? "N/A"}");
+            Console.WriteLine($"   Biometric ID: {user.BiometricId:000}");
+            Console.WriteLine("═══════════════════════════════════════════════════════════");
+            Console.WriteLine();
+
+            // Prompt for enrollment
+            Console.Write("📌 Do you want to enroll fingerprint now? (Y/N): ");
+            var response = Console.ReadLine()?.Trim().ToUpper();
+
+            if (response == "Y" || response == "YES")
+            {
+                await EnrollNewUser(user);
+            }
+            else
+            {
+                Console.WriteLine("⏭️ Enrollment skipped. You can enroll this user later.");
+                // Reset the processed status so it appears again on next poll
+                _pollingService?.ResetProcessedUser(user.BiometricId);
+            }
+
+            Console.WriteLine();
+            Console.Write("👉 Press any key to continue...");
+            Console.ReadKey();
+            Console.WriteLine("\n");
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError($"Error handling pending enrollment: {ex.Message}");
+            Console.WriteLine($"❌ Error: {ex.Message}");
+        }
+    }
+
+    private static async Task EnrollNewUser(PendingUser user)
+    {
+        try
+        {
+            if (_enrollmentService == null)
+            {
+                Console.WriteLine("❌ Enrollment service not available");
+                return;
+            }
+
+            if (_fingerprintService == null || !_fingerprintService.IsConnected)
+            {
+                Console.WriteLine("❌ Fingerprint device is not connected");
+                Console.WriteLine("   Please connect the device first (Option 2: Test Device Connection)");
+                return;
+            }
+
+            Console.WriteLine($"\n🚀 Starting enrollment for {user.DisplayName}...");
+            Console.WriteLine($"   Using biometric ID: {user.BiometricId:000}");
+            Console.WriteLine();
+
+            var result = await _enrollmentService.EnrollUserAsync(user);
+
+            if (result.Success)
+            {
+                Console.WriteLine("\n" + new string('=', 60));
+                Console.WriteLine("🎉 ENROLLMENT SUCCESSFUL!");
+                Console.WriteLine(new string('=', 60));
+                Console.WriteLine($"   Employee: {user.DisplayName}");
+                Console.WriteLine($"   Employee ID: {user.EmployeeId}");
+                Console.WriteLine($"   Biometric ID: {user.BiometricId:000}");
+                Console.WriteLine($"   Status: Enrolled and confirmed");
+                Console.WriteLine($"   Timestamp: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+                Console.WriteLine(new string('=', 60));
+            }
+            else
+            {
+                Console.WriteLine($"\n❌ Enrollment failed: {result.Message}");
+                Console.WriteLine("   You can try again later from the main menu.");
+                
+                // Reset processed status so user appears in next poll
+                _pollingService?.ResetProcessedUser(user.BiometricId);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError($"Error enrolling new user: {ex.Message}");
+            Console.WriteLine($"❌ Error during enrollment: {ex.Message}");
+            
+            // Reset processed status on error
+            _pollingService?.ResetProcessedUser(user.BiometricId);
         }
     }
 }
