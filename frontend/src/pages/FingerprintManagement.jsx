@@ -138,7 +138,7 @@ function FingerprintManagement() {
               </h1>
             </div>
             <p className={`text-slate-500 font-medium ${isRTL ? 'mr-1' : 'ml-1'}`}>
-              {t('fingerprint:subtitle') || 'Biometric identity management and enrollment logs'}
+              {t('fingerprint:subtitle')}
             </p>
           </div>
 
@@ -149,7 +149,7 @@ function FingerprintManagement() {
                 <FingerPrintIcon className="h-6 w-6 text-green-600" />
               </div>
               <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Enrolled</p>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t('fingerprint:stats.enrolled')}</p>
                 <p className="text-xl font-black text-slate-800">{enrolledUsers.filter(u => u.fingerprint_template_id).length}</p>
               </div>
             </div>
@@ -158,7 +158,7 @@ function FingerprintManagement() {
                 <UserIcon className="h-6 w-6 text-amber-600" />
               </div>
               <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Pending</p>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t('fingerprint:stats.pending')}</p>
                 <p className="text-xl font-black text-slate-800">{enrolledUsers.filter(u => !u.fingerprint_template_id).length}</p>
               </div>
             </div>
@@ -171,7 +171,7 @@ function FingerprintManagement() {
             <MagnifyingGlassIcon className={`absolute ${isRTL ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400`} />
             <input
               type="text"
-              placeholder="Search by name, ID, or department..."
+              placeholder={t('fingerprint:filters.searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className={`w-full ${isRTL ? 'pr-12 pl-4' : 'pl-12 pr-4'} py-3 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400 font-medium`}
@@ -181,7 +181,7 @@ function FingerprintManagement() {
           <div className={`flex items-center gap-3 w-full lg:w-auto ${isRTL ? 'mr-auto' : 'ml-auto'}`}>
             <div className="flex items-center gap-2 text-sm font-semibold text-slate-500 bg-slate-50 px-4 py-3 rounded-xl">
               <FunnelIcon className="h-4 w-4" />
-              <span>Show:</span>
+              <span>{t('fingerprint:show')}</span>
               <select
                 value={itemsPerPage}
                 onChange={(e) => { setItemsPerPage(Number(e.target.value)); setCurrentPage(1); }}
@@ -215,7 +215,7 @@ function FingerprintManagement() {
                           <div className="absolute animate-ping h-8 w-8 rounded-full bg-indigo-400 opacity-20"></div>
                           <div className="h-10 w-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
                         </div>
-                        <p className="mt-4 text-slate-500 font-medium animate-pulse">Syncing biometric data...</p>
+                        <p className="mt-4 text-slate-500 font-medium animate-pulse">{t('fingerprint:loading')}</p>
                       </div>
                     </td>
                   </tr>
@@ -227,12 +227,12 @@ function FingerprintManagement() {
                           <FingerPrintIcon className="h-8 w-8 text-slate-400" />
                         </div>
                         <h3 className="text-lg font-bold text-slate-700 mb-2">
-                          {searchTerm ? 'No users found' : 'No enrolled fingerprints'}
+                          {searchTerm ? t('fingerprint:empty.noUsersFound') : t('fingerprint:empty.noEnrolled')}
                         </h3>
                         <p className="text-slate-500 font-medium">
                           {searchTerm 
-                            ? `No users match "${searchTerm}". Try a different search term.`
-                            : 'No users have enrolled their fingerprints yet. Use the desktop app to enroll users.'}
+                            ? t('fingerprint:empty.noMatch', { term: searchTerm })
+                            : t('fingerprint:empty.noEnrolledDesc')}
                         </p>
                       </div>
                     </td>
@@ -258,14 +258,14 @@ function FingerprintManagement() {
                           )}
                         </div>
                         <div>
-                          <p className="text-sm font-bold text-slate-800">{fullName || 'Unknown'}</p>
-                          <p className="text-xs font-medium text-slate-500">ID: {user.employee_id}</p>
+                          <p className="text-sm font-bold text-slate-800">{fullName || t('common.unknown')}</p>
+                          <p className="text-xs font-medium text-slate-500">{t('fingerprint:table.id', { id: user.employee_id })}</p>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200">
-                        {user.department || 'General'}
+                        {user.department || t('common.general')}
                       </span>
                     </td>
                     <td className="px-6 py-4">
@@ -273,7 +273,7 @@ function FingerprintManagement() {
                         <div className="flex flex-col gap-1">
                           <div className="flex items-center gap-2 text-sm text-slate-600 font-medium">
                             <DevicePhoneMobileIcon className="h-4 w-4 text-slate-400" />
-                            {user.device_id || 'N/A'}
+                            {user.device_id || t('common.na')}
                           </div>
                           <div className="flex items-center gap-2 text-xs text-slate-400">
                             <IdentificationIcon className="h-3 w-3" />
@@ -285,7 +285,7 @@ function FingerprintManagement() {
                       ) : (
                         <div className="flex items-center gap-2 text-sm text-amber-600 font-medium">
                           <ExclamationTriangleIcon className="h-4 w-4" />
-                          <span>Pending Enrollment</span>
+                          <span>{t('fingerprint:pendingEnrollment')}</span>
                         </div>
                       )}
                     </td>
@@ -298,7 +298,7 @@ function FingerprintManagement() {
                           </div>
                         </>
                       ) : (
-                        <div className="text-sm text-slate-400 italic">Not enrolled yet</div>
+                        <div className="text-sm text-slate-400 italic">{t('fingerprint:notEnrolledYet')}</div>
                       )}
                     </td>
                     <td className={`px-6 py-4 ${isRTL ? 'text-left' : 'text-right'}`}>
@@ -306,12 +306,12 @@ function FingerprintManagement() {
                         <button
                           onClick={() => { setSelectedUser(user); setShowRemoveModal(true); }}
                           className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all active:scale-90"
-                          title="Remove fingerprint"
+                          title={t('fingerprint:removeFingerprint')}
                         >
                           <TrashIcon className="h-5 w-5" />
                         </button>
                       ) : (
-                        <span className="text-xs text-slate-400 italic">No action</span>
+                        <span className="text-xs text-slate-400 italic">{t('fingerprint:noAction')}</span>
                       )}
                     </td>
                   </tr>
@@ -324,7 +324,7 @@ function FingerprintManagement() {
           {/* --- PAGINATION FOOTER --- */}
           <footer className="bg-slate-50/80 border-t border-slate-100 p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-sm font-bold text-slate-500">
-              Showing <span className="text-slate-900">{indexOfFirstItem + 1} - {Math.min(indexOfLastItem, filteredUsers.length)}</span> of {filteredUsers.length}
+              {t('fingerprint:showing', { from: indexOfFirstItem + 1, to: Math.min(indexOfLastItem, filteredUsers.length), total: filteredUsers.length })}
             </p>
             <div className="flex items-center gap-2">
               <button 
@@ -369,9 +369,9 @@ function FingerprintManagement() {
               <div className="mx-auto w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center mb-6">
                 <ExclamationTriangleIcon className="h-8 w-8 text-red-500" />
               </div>
-              <h3 className="text-xl font-black text-slate-900 mb-2">Revoke Enrollment?</h3>
+              <h3 className="text-xl font-black text-slate-900 mb-2">{t('fingerprint:revokeTitle')}</h3>
               <p className="text-slate-500 font-medium mb-6">
-                This will permanently delete the fingerprint data for <span className="text-slate-900 font-bold">{selectedUser.full_name}</span>. This action cannot be undone.
+                {t('fingerprint:revokeDesc', { name: selectedUser.full_name })}
               </p>
               
               <div className="flex gap-3">
@@ -379,14 +379,14 @@ function FingerprintManagement() {
                   onClick={() => setShowRemoveModal(false)}
                   className="flex-1 py-3 text-sm font-bold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition-all"
                 >
-                  Keep it
+                  {t('fingerprint:keepIt')}
                 </button>
                 <button
                   onClick={handleRemoveFingerprint}
                   className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white text-sm font-semibold rounded-lg shadow-sm hover:bg-red-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 active:scale-95 transition-all"
                   aria-label={t('common.remove')}
                 >
-                  Yes, Remove
+                  {t('fingerprint:yesRemove')}
                 </button>
               </div>
             </div>

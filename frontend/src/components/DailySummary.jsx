@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -8,6 +9,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
  * Shows check-in, check-out, and total hours for a specific employee and date
  */
 function DailySummary() {
+  const { t } = useTranslation();
   const [employeeId, setEmployeeId] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [summary, setSummary] = useState(null);
@@ -65,7 +67,7 @@ function DailySummary() {
             type="text"
             value={employeeId}
             onChange={(e) => setEmployeeId(e.target.value)}
-            placeholder="Enter employee ID"
+            placeholder={t('attendance.enterEmployeeId')}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
           />
         </div>
@@ -104,21 +106,21 @@ function DailySummary() {
       {summary && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-blue-50 rounded-lg p-4">
-            <div className="text-sm text-blue-600 font-medium mb-1">Check In</div>
+            <div className="text-sm text-blue-600 font-medium mb-1">{t('attendance.checkIn')}</div>
             <div className="text-2xl font-bold text-blue-900">
               {formatTime(summary.check_in)}
             </div>
           </div>
 
           <div className="bg-green-50 rounded-lg p-4">
-            <div className="text-sm text-green-600 font-medium mb-1">Check Out</div>
+            <div className="text-sm text-green-600 font-medium mb-1">{t('attendance.checkOut')}</div>
             <div className="text-2xl font-bold text-green-900">
               {formatTime(summary.check_out)}
             </div>
           </div>
 
           <div className="bg-purple-50 rounded-lg p-4">
-            <div className="text-sm text-purple-600 font-medium mb-1">Total Hours</div>
+            <div className="text-sm text-purple-600 font-medium mb-1">{t('attendance.totalHours')}</div>
             <div className="text-2xl font-bold text-purple-900">
               {summary.total_hours ? `${summary.total_hours}h` : 'N/A'}
             </div>

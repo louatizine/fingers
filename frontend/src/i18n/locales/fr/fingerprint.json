@@ -2,6 +2,16 @@
   "title": "Gestion des empreintes digitales",
   "subtitle": "Gestion de l'identité biométrique et journaux d'inscription",
   "enrolledUsers": "Utilisateurs inscrits",
+  "stats": {
+    "enrolled": "Inscrits",
+    "pending": "En attente",
+    "checkIns": "Enregistrements",
+    "total": "Total Utilisateurs"
+  },
+  "filters": {
+    "searchPlaceholder": "Rechercher par nom, ID ou département..."
+  },
+  "show": "Afficher",
   "note": {
     "title": "Remarque :",
     "description": "L'inscription des empreintes digitales s'effectue à l'aide de l'application de bureau Windows. Cette page affiche uniquement les utilisateurs inscrits. Pour inscrire de nouveaux utilisateurs, utilisez le terminal biométrique de bureau."

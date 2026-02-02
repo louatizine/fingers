@@ -12,7 +12,7 @@ export default function LeaveTrendsChart() {
 
   return (
     <div className="bg-white shadow-sm border border-[#d2d0ce] rounded-sm p-6">
-      <h3 className="text-lg font-semibold text-[#323130] mb-4">Leave Trends</h3>
+      <h3 className="text-lg font-semibold text-[#323130] mb-4">{t('attendance.leaveTrends')}</h3>
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={leaveTrendData}>

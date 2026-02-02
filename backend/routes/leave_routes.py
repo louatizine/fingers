@@ -11,6 +11,8 @@ from models.user_model import find_user_by_id, update_leave_balance, get_vacatio
 from utils.auth_utils import admin_or_supervisor_required
 from services.email_service import send_leave_notification
 from datetime import datetime
+from models.notif_model import create_notification
+from database import get_db
 import logging
 
 logger = logging.getLogger(__name__)
@@ -108,7 +110,7 @@ def create_leave():
             'user_name': f"{current_user['first_name']} {current_user['last_name']}",
             'user_email': current_user['email'],
             'company_id': current_user['company_id'],
-            'leave_type': leave_type_normalized,  # Use normalized type for consistency
+            'leave_type': leave_type_normalized,
             'start_date': data['start_date'],
             'end_date': data['end_date'],
             'days': days,
@@ -118,6 +120,36 @@ def create_leave():
         }
         
         leave_id = create_leave_request(leave_data)
+        
+        # Create notification for supervisors/admins
+        notification_data = {
+            'user_id': current_user_id,
+            'title': 'New Leave Request',
+            'message': f'{current_user["first_name"]} {current_user["last_name"]} has requested {days} days of {leave_type} leave',
+            'type': 'leave_request',
+            'related_id': leave_id,
+            'priority': 'medium'
+        }
+        create_notification(notification_data)
+        
+        # Also notify supervisors in the company
+        db = get_db()
+        supervisors = db.users.find({
+            'company_id': current_user['company_id'],
+            'role': 'supervisor',
+            'is_active': True
+        })
+        
+        for supervisor in supervisors:
+            supervisor_notification = {
+                'user_id': str(supervisor['_id']),
+                'title': 'New Leave Request Needs Review',
+                'message': f'{current_user["first_name"]} {current_user["last_name"]} has requested {days} days of {leave_type} leave',
+                'type': 'leave_request',
+                'related_id': leave_id,
+                'priority': 'high'
+            }
+            create_notification(supervisor_notification)
         
         return jsonify({
             'message': 'Leave request created successfully',
@@ -160,6 +192,17 @@ def approve_leave(leave_id):
         )
         
         if success:
+            # Create notification for the employee
+            notification_data = {
+                'user_id': leave['user_id'],
+                'title': 'Leave Request Approved',
+                'message': f'Your {leave["days"]}-day {leave["leave_type"]} leave request has been approved',
+                'type': 'leave_status',
+                'related_id': leave_id,
+                'priority': 'low'
+            }
+            create_notification(notification_data)
+            
             # Deduct from appropriate balance based on leave type
             leave_type_normalized = leave['leave_type'].lower()
             
@@ -197,6 +240,7 @@ def reject_leave(leave_id):
     """Reject leave request"""
     try:
         current_user_id = get_jwt_identity()
+        current_user = find_user_by_id(current_user_id)
         
         leave = get_leave_by_id(leave_id)
         
@@ -218,6 +262,17 @@ def reject_leave(leave_id):
         )
         
         if success:
+            # Create notification for the employee
+            notification_data = {
+                'user_id': leave['user_id'],
+                'title': 'Leave Request Rejected',
+                'message': f'Your {leave["days"]}-day {leave["leave_type"]} leave request has been rejected',
+                'type': 'leave_status',
+                'related_id': leave_id,
+                'priority': 'low'
+            }
+            create_notification(notification_data)
+            
             # Send email notification
             try:
                 send_leave_notification(

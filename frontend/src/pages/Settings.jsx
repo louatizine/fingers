@@ -105,9 +105,9 @@ export default function Settings() {
     setLoading(true)
     try {
       await settingsAPI.updateAttendanceSettings(attendanceSettings)
-      toast.success('Attendance settings updated successfully')
+      toast.success(t('settings.messages.attendanceSaveSuccess'))
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Failed to update attendance settings')
+      toast.error(error.response?.data?.error || t('settings.messages.attendanceSaveFailed'))
     } finally {
       setLoading(false)
     }
@@ -286,21 +286,21 @@ export default function Settings() {
           <div className="flex flex-wrap gap-4">
             <StatCard 
               icon={BuildingOfficeIcon} 
-              label="Companies" 
+              label={t('settings.stats.companies')} 
               value={companies.length} 
               color="indigo" 
             />
             <StatCard 
               icon={UserGroupIcon} 
-              label="Employees Tracked" 
+              label={t('settings.stats.employeesTracked')} 
               value={employeeVacations.length} 
               color="emerald" 
             />
             <StatCard 
               icon={CalculatorIcon} 
-              label="Monthly Vacation" 
+              label={t('settings.stats.monthlyVacation')} 
               value={settings.monthlyVacationDays} 
-              unit="days"
+              unit={t('time.days')}
               color="blue" 
             />
           </div>
@@ -437,7 +437,7 @@ export default function Settings() {
                 <div className="flex items-center justify-between pt-4 border-t border-slate-100">
                   <div className="flex items-center gap-2 text-sm text-slate-500">
                     <InformationCircleIcon className="h-4 w-4" />
-                    <span>Changes affect all employees</span>
+                    <span>{t('settings.holiday.changesAffectAll')}</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <button
@@ -468,99 +468,6 @@ export default function Settings() {
                 </div>
               </form>
             </SettingCard>
-
-            {/* Employee Vacation Balances Table */}
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-              <div className="px-6 py-5 border-b border-slate-100">
-                <div className="flex items-center">
-                  <div className="h-10 w-10 rounded-xl bg-emerald-50 flex items-center justify-center mr-4">
-                    <UsersIcon className="h-5 w-5 text-emerald-600" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-slate-900">
-                      {t('settings.employeeBalances.title')}
-                    </h3>
-                    <p className="text-sm text-slate-500 mt-0.5">
-                      {t('settings.employeeBalances.subtitle')}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="overflow-x-auto">
-                <table className={`w-full border-collapse ${isRTL ? 'text-right' : 'text-left'}`}>
-                  <thead>
-                    <tr className="bg-slate-50/50 border-b border-slate-100">
-                      <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('settings.employeeBalances.name')}</th>
-                      <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('settings.employeeBalances.hireDate')}</th>
-                      <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('settings.employeeBalances.monthsService')}</th>
-                      <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('settings.employeeBalances.earned')}</th>
-                      <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('settings.employeeBalances.used')}</th>
-                      <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('settings.employeeBalances.balance')}</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {employeeVacations.length === 0 ? (
-                      <tr>
-                        <td colSpan="6" className="py-16 text-center">
-                          <div className="flex flex-col items-center text-slate-400">
-                            <UsersIcon className="h-16 w-16 mb-4 opacity-50" />
-                            <p className="font-medium">{t('settings.employeeBalances.noRecords')}</p>
-                          </div>
-                        </td>
-                      </tr>
-                    ) : (
-                      employeeVacations.map((employee, index) => {
-                        const balance = calculateVacationBalance(employee)
-                        const fullName = `${employee.first_name || ''} ${employee.last_name || ''}`.trim() || 'Unknown Employee'
-                        const initials = (employee.first_name?.charAt(0) || '') + (employee.last_name?.charAt(0) || '') || 'E'
-                        return (
-                          <tr key={index} className="group hover:bg-indigo-50/30 transition-colors">
-                            <td className="px-6 py-4">
-                              <div className="flex items-center gap-3">
-                                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-indigo-600 font-bold shadow-sm group-hover:from-indigo-100 group-hover:to-indigo-200 transition-all">
-                                  {initials}
-                                </div>
-                                <div>
-                                  <p className="text-sm font-bold text-slate-800">{fullName}</p>
-                                  <p className="text-xs font-medium text-slate-500">{employee.email || 'N/A'}</p>
-                                </div>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="text-sm font-semibold text-slate-700">
-                                {employee.hire_date ? new Date(employee.hire_date).toLocaleDateString('en-US', { 
-                                  month: 'short', 
-                                  day: '2-digit', 
-                                  year: 'numeric' 
-                                }) : 'N/A'}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="text-sm font-bold text-slate-700">{balance.monthsService}</div>
-                              <div className="text-xs text-slate-500 font-medium">
-                                after probation: {balance.monthsAfterProbation}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="text-sm font-bold text-emerald-600">{balance.earned} days</div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="text-sm font-bold text-amber-600">{balance.used} days</div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className={`text-sm font-bold ${balance.balance >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
-                                {balance.balance} days
-                              </div>
-                            </td>
-                          </tr>
-                        )
-                      })
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
           </div>
         ) : (
           /* Attendance Settings Tab */
@@ -652,12 +559,12 @@ export default function Settings() {
                             : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                         }`}
                       >
-                        {day}
+                        {t(`settings.attendance.days.${day}`)}
                       </button>
                     ))}
                   </div>
                   <p className="text-xs text-slate-400 mt-3 font-medium">
-                    Selected days: {attendanceSettings.workingDays.join(', ')}
+                    {t('settings.attendance.selectedDays', { days: attendanceSettings.workingDays.map(day => t(`settings.attendance.days.${day}`)).join(', ') })}
                   </p>
                 </div>
 

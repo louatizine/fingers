@@ -140,7 +140,7 @@ export default function Profile() {
                 <ProfileDetail icon={BriefcaseIcon} label={t('profile.fields.position')} value={user?.position} isRTL={isRTL} />
                 
                 <div>
-                  <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Account Status</p>
+                  <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">{t('profile.accountStatus')}</p>
                   <span className={`inline-flex items-center px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider ${
                     user?.is_active ? 'bg-gradient-to-r from-emerald-50 to-emerald-100 text-status-success ring-1 ring-status-success/20' : 'bg-gradient-to-r from-red-50 to-red-100 text-status-error ring-1 ring-status-error/20'
                   }`}>
@@ -160,18 +160,21 @@ export default function Profile() {
             value={vacationBalance.toFixed(2)} 
             color="from-azure to-azure-dark" 
             label={t('profile.leaveBalance.basedOnTenure')}
+            t={t}
           />
           <BalanceCard 
             title={t('profile.leaveBalance.sick')} 
             value={user?.leave_balance?.sick || 0} 
             color="from-status-success to-emerald-600" 
             label={t('profile.leaveBalance.companyPolicy')}
+            t={t}
           />
           <BalanceCard 
             title={t('profile.leaveBalance.unpaid')} 
             value={user?.leave_balance?.unpaid || 0} 
             color="from-status-warning to-amber-600" 
             label={t('profile.leaveBalance.companyPolicy')}
+            t={t}
           />
         </div>
       </div>
@@ -193,13 +196,13 @@ function ProfileDetail({ icon: Icon, label, value, isRTL }) {
   )
 }
 
-function BalanceCard({ title, value, color, label }) {
+function BalanceCard({ title, value, color, label, t }) {
   return (
     <div className="bg-white/80 backdrop-blur-xl shadow-premium border border-white/60 rounded-2xl p-7 group hover:shadow-glow transition-all duration-300">
       <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2">{title}</p>
       <div className="flex items-baseline gap-2 mb-4">
         <span className="text-4xl font-extrabold text-slate-900 tracking-tight">{value}</span>
-        <span className="text-sm text-slate-400 font-semibold">days</span>
+        <span className="text-sm text-slate-400 font-semibold">{t('time.days')}</span>
       </div>
       {/* Premium Gradient Indicator */}
       <div className={`h-2 w-full bg-slate-100 rounded-full overflow-hidden shadow-inner`}>

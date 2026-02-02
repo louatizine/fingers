@@ -32,7 +32,13 @@
     "seeLess": "عرض أقل",
     "notAvailable": "غير متوفر",
     "viewAll": "عرض الكل",
-    "thisMonth": "هذا الشهر"
+    "thisMonth": "هذا الشهر",
+    "welcome": "مرحبًا",
+    "currency": "د.ت",
+    "days": "أيام",
+    "filters": "فلاتر",
+    "thisYear": "هذا العام",
+    "previousYear": "العام السابق"
   },  "currency": {
     "dinar": "د.ت"
   },  "nav": {
@@ -58,9 +64,17 @@
     "welcome": "مرحبًا بعودتك، {{name}}!",
     "subtitle_employee": "نظرة عامة على نشاطك.",
     "subtitle_admin": "راقب أنشطة ومقاييس الشركة",
-    "subtitle_supervisor": "تتبع أداء وطلبات فريقك",
+    "subtitle_supervisor": "عمليات الشركة وإدارة الفريق",
     "request_leave": "طلب إجازة",
     "view_calendar": "عرض التقويم",
+    "vacation_balance": "رصيد الإجازات",
+    "days_available": "أيام متاحة",
+    "vacation_earned": "مكتسب",
+    "vacation_used": "مستخدم",
+    "my_leave_requests": "طلبات الإجازة الخاصة بي",
+    "my_salary_advances": "السلف المالية الخاصة بي",
+    "total_requests": "إجمالي الطلبات",
+    "recentActivity": "النشاط الأخير",
     "stats": {
       "annual_leave": "الإجازة السنوية",
       "sick_leave": "الإجازة المرضية",
@@ -93,7 +107,11 @@
       "leave_requests_subtitle": "آخر الطلبات المقدمة",
       "salary_advances": "السلف المالية الأخيرة",
       "salary_advances_subtitle": "الطلبات المالية"
-    }
+    },
+    "companyLeaveStatus": "نظرة عامة على حالة الإجازات في الشركة",
+    "salaryAdvanceRequests": "طلبات السلف المالية",
+    "advanceRequestOverview": "نظرة عامة على طلبات السلف",
+    "companyWideLeaveDistribution": "توزيع الإجازات على مستوى الشركة"
   },
   "leaves": {
     "title": "طلبات الإجازة",
@@ -106,7 +124,19 @@
     "calculated_from_settings": "محسوب من الإعدادات",
     "company_policy": "سياسة الشركة",
     "insufficient_balance": "رصيد غير كافٍ",
+    "balanceTitle": "رصيد الإجازات",
+    "balanceDescription": "أيام الإجازة المتاحة حسب الفئة",
+    "balance": "الرصيد",
+    "submittedOn": "تم الإرسال في {{date}}",
+    "types": {
+      "annual": "إجازة سنوية",
+      "sick": "إجازة مرضية",
+      "unpaid": "إجازة بدون أجر",
+      "maternity": "إجازة أمومة"
+    },
     "table": {
+      "title": "طلبات الإجازة",
+      "subtitle": "إدارة وتتبع جميع طلبات الإجازة",
       "employee": "الموظف",
       "type": "النوع",
       "balance": "الرصيد",
@@ -277,6 +307,11 @@
     "probationPeriodMonths": "فترة التجربة (أشهر)",
     "maxConsecutiveDays": "الحد الأقصى للأيام المتتالية",
     "includeWeekends": "تضمين عطلات نهاية الأسبوع في حساب الإجازة",
+    "stats": {
+      "companies": "الشركات",
+      "employeesTracked": "الموظفون المتابعون",
+      "monthlyVacation": "أيام الإجازة الشهرية"
+    },
     "tabs": {
       "holiday": "إعدادات الإجازات",
       "language": "اللغة",
@@ -335,7 +370,9 @@
       "loadFailed": "فشل تحميل الإعدادات",
       "saveSuccess": "تم حفظ الإعدادات بنجاح",
       "saveFailed": "فشل حفظ الإعدادات",
-      "recalculateSuccess": "تمت إعادة حساب جميع الأرصدة بنجاح"
+      "recalculateSuccess": "تم إعادة حساب جميع الأرصدة بنجاح",
+      "attendanceSaveSuccess": "تم حفظ إعدادات الحضور بنجاح",
+      "attendanceSaveFailed": "فشل حفظ إعدادات الحضور"
     },
     "attendance": {
       "title": "إعدادات الحضور",
@@ -351,6 +388,16 @@
       "lunchBreakEnd": "نهاية استراحة الغداء",
       "lunchBreakEndHelp": "تنتهي استراحة الغداء في هذا الوقت",
       "workingDays": "أيام العمل",
+      "selectedDays": "المحدد: {{days}}",
+      "days": {
+        "Mon": "الإثنين",
+        "Tue": "الثلاثاء",
+        "Wed": "الأربعاء",
+        "Thu": "الخميس",
+        "Fri": "الجمعة",
+        "Sat": "السبت",
+        "Sun": "الأحد"
+      },
       "howItWorksTitle": "كيف يعمل:",
       "howItWorks1": "أول بصمة في اليوم = تسجيل الدخول",
       "howItWorks2": "آخر بصمة في اليوم = تسجيل الخروج",
@@ -478,7 +525,12 @@
     "subtitle": "إدارة طلبات السلف المالية",
     "newRequest": "طلب جديد",
     "total_requests": "إجمالي الطلبات",
+    "totalRequests": "إجمالي الطلبات",
     "pending_requests": "الطلبات المعلقة",
+    "loading": "جاري تحميل الطلبات...",
+    "itemsPerPage": "عناصر لكل صفحة",
+    "pagination": "صفحة {{current}} من {{total}}",
+    "actionRequired": "إجراء مطلوب",
     "table": {
       "employee": "الموظف",
       "amount": "المبلغ",
@@ -499,7 +551,8 @@
       "subtitle": "يرجى تقديم سبب الرفض",
       "reasonLabel": "سبب الرفض",
       "reasonPlaceholder": "اشرح سبب رفض هذا الطلب...",
-      "confirmButton": "رفض الطلب"
+      "confirmButton": "رفض الطلب",
+      "itemToReject": "عنصر للرفض"
     },
     "messages": {
       "createSuccess": "تم تقديم طلب السلفة بنجاح",
@@ -516,15 +569,28 @@
     "subtitle": "نظام تخطيط موارد المؤسسة",
     "welcomeBack": "مرحبًا بعودتك",
     "signInMessage": "تسجيل الدخول للوصول إلى حسابك",
+    "pleaseSignIn": "يرجى تسجيل الدخول للمتابعة",
+    "securePortal": "بوابة آمنة",
+    "userId": "معرف المستخدم",
+    "userIdPlaceholder": "أدخل معرف المستخدم أو البريد الإلكتروني",
     "emailLabel": "عنوان البريد الإلكتروني",
     "emailPlaceholder": "أدخل بريدك الإلكتروني",
     "passwordLabel": "كلمة المرور",
     "passwordPlaceholder": "أدخل كلمة المرور",
+    "demoLogin": "تسجيل دخول تجريبي",
+    "signIn": "تسجيل الدخول",
     "signInButton": "تسجيل الدخول إلى لوحة التحكم",
     "signingIn": "جاري تسجيل الدخول...",
+    "authenticating": "جاري المصادقة...",
     "demoCredentials": "بيانات الاعتماد التجريبية",
     "footer": "© 2026 نظام إدارة الموارد البشرية. جميع الحقوق محفوظة.",
-    "loginError": "فشل تسجيل الدخول"
+    "loginError": "فشل تسجيل الدخول",
+    "validation": {
+      "requiredFields": "يرجى ملء جميع الحقول"
+    },
+    "errors": {
+      "invalidCredentials": "بيانات اعتماد غير صالحة"
+    }
   },
   "status": {
     "pending": "قيد الانتظار",
@@ -573,5 +639,64 @@
     "this_week": "هذا الأسبوع",
     "this_month": "هذا الشهر",
     "this_year": "هذا العام"
+  },
+  "attendance": {
+    "searchCriteria": "معايير البحث",
+    "enterEmployeeId": "أدخل معرف الموظف",
+    "totalWorkedHours": "إجمالي ساعات العمل",
+    "completeDays": "الأيام الكاملة",
+    "totalDays": "إجمالي الأيام",
+    "dailyBreakdown": "التفصيل اليومي",
+    "checkIn": "تسجيل الدخول",
+    "checkOut": "تسجيل الخروج",
+    "totalHours": "إجمالي الساعات",
+    "employee": "الموظف",
+    "leaveTrends": "اتجاهات الإجازات",
+    "systemHealth": "صحة النظام",
+    "total": "الإجمالي",
+    "loading": "جاري تحميل سجلات الحضور...",
+    "pagination": {
+      "showing": "عرض الصفحة {{page}} من {{total}} ({{records}} سجل)"
+    }
+  },
+  "employees": {
+    "workforceManagement": "إدارة القوى العاملة",
+    "firstNamePlaceholder": "أحمد",
+    "lastNamePlaceholder": "محمد",
+    "months": "أشهر",
+    "tabs": {
+      "directory": "الدليل",
+      "leave": "الإجازات"
+    },
+    "status": {
+      "active": "نشط",
+      "inactive": "غير نشط"
+    },
+    "defaultPosition": "موظف",
+    "noPhone": "لا يوجد هاتف",
+    "notAvailable": "غير متوفر"
+  },
+  "settings": {
+    "employeeBalances": {
+      "monthsService": "أشهر الخدمة",
+      "earned": "المكتسب",
+      "balance": "الرصيد"
+    }
+  },
+  "users": {
+    "status": {
+      "active": "نشط",
+      "deactivated": "معطل"
+    }
+  },
+  "dashboard": {
+    "companyLeaveStatus": "نظرة عامة على حالة الإجازات في الشركة",
+    "salaryAdvanceRequests": "طلبات السلف المالية",
+    "advanceRequestOverview": "نظرة عامة على طلبات السلف"
+  },
+  "notifications": {
+    "policyUpdate": "تحديث سياسة الإجازات",
+    "maternityPolicyUpdate": "سياسة إجازة الأمومة الجديدة سارية اعتبارًا من 1 يوليو.",
+    "referenceId": "معرف المرجع"
   }
 }

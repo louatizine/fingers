@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { salaryAdvanceAPI } from '../services/api'
+import { useContext } from 'react'
+import { NavbarContext } from '../components/Navbar'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../components/Toast'
 import { useConfirm } from '../components/ConfirmDialog'
@@ -70,6 +72,9 @@ export default function SalaryAdvances() {
     return pageNumbers
   }
 
+  // Get fetchNotifications from Navbar context if available
+  const navbarContext = useContext(NavbarContext)
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
@@ -78,6 +83,9 @@ export default function SalaryAdvances() {
       setShowModal(false)
       setFormData({ amount: '', reason: '' })
       loadAdvances()
+      if (navbarContext && navbarContext.fetchNotifications) {
+        navbarContext.fetchNotifications()
+      }
     } catch {
       toast.error(t('salaryAdvances.messages.createFailed'))
     }
@@ -199,7 +207,7 @@ export default function SalaryAdvances() {
     return (
       <div className="flex flex-col justify-center items-center h-96">
         <ArrowPathIcon className="h-10 w-10 text-blue-500 animate-spin opacity-20" />
-        <p className="mt-4 text-sm font-medium text-slate-400 tracking-wide">Refining your view...</p>
+        <p className="mt-4 text-sm font-medium text-slate-400 tracking-wide">{t('salaryAdvances.loading')}</p>
       </div>
     )
   }
@@ -234,12 +242,12 @@ export default function SalaryAdvances() {
       {/* Control Bar */}
       <div className="flex flex-wrap items-center justify-between gap-4 p-5 bg-white/70 backdrop-blur-md rounded-2xl border border-white shadow-sm ring-1 ring-slate-200">
         <div className="flex items-center gap-2 px-3 py-1 bg-slate-100 rounded-full">
-          <span className="text-xs font-bold text-slate-500 uppercase tracking-tighter">Total Requests:</span>
+          <span className="text-xs font-bold text-slate-500 uppercase tracking-tighter">{t('salaryAdvances.totalRequests')}</span>
           <span className="text-xs font-black text-slate-900">{advances.length}</span>
         </div>
 
         <div className="flex items-center gap-4">
-          <label className="text-xs font-bold text-slate-400 uppercase">Items / Page</label>
+          <label className="text-xs font-bold text-slate-400 uppercase">{t('salaryAdvances.itemsPerPage')}</label>
           <div className="flex bg-slate-100 p-1 rounded-xl">
             {[10, 20, 50].map(val => (
               <button
@@ -374,7 +382,7 @@ export default function SalaryAdvances() {
           </div>
 
           <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-4 sm:mt-0">
-            Page {currentPage} of {totalPages}
+            {t('salaryAdvances.pagination', { current: currentPage, total: totalPages })}
           </p>
         </div>
       )}
@@ -394,7 +402,7 @@ export default function SalaryAdvances() {
                   {showModal ? t('salaryAdvances.modal.title') : t('salaryAdvances.rejectModal.title')}
                 </h3>
                 <p className="text-slate-400 font-bold text-xs uppercase tracking-widest mt-1">
-                  Action Required
+                  {t('salaryAdvances.actionRequired')}
                 </p>
               </div>
 
@@ -414,7 +422,7 @@ export default function SalaryAdvances() {
                   <div className="space-y-6">
                     <div className="p-4 bg-rose-50 rounded-2xl border border-rose-100">
                       <p className="text-xs font-black text-rose-400 uppercase tracking-widest mb-2">
-                        Item to Reject
+                        {t('salaryAdvances.rejectModal.itemToReject')}
                       </p>
                       <p className="font-bold text-rose-900">
                         {selectedAdvance?.user_name} - {selectedAdvance?.amount} {t('currency.dinar')}

@@ -1,4 +1,7 @@
+import { useTranslation } from 'react-i18next'
+
 export default function SystemHealthCard() {
+  const { t } = useTranslation()
   const metrics = [
     { label: 'API Response', value: '98.7%', status: 'healthy', color: 'green' },
     { label: 'Database', value: '99.9%', status: 'healthy', color: 'green' },
@@ -8,7 +11,7 @@ export default function SystemHealthCard() {
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-6">System Health</h3>
+      <h3 className="text-lg font-semibold text-gray-900 mb-6">{t('attendance.systemHealth')}</h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {metrics.map((metric, idx) => (
           <div key={idx} className="p-4 rounded-lg border border-gray-200 hover:border-gray-300 transition">

@@ -90,9 +90,9 @@ const Avatar = ({ initials, className, isActive = true }) => (
   </div>
 );
 
-// User status badge component
+// User status badge component - REMOVED DUPLICATE useTranslation
 const UserStatusBadge = ({ isActive }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation(); // ✅ Only one declaration
   
   if (isActive) {
     return (
@@ -116,7 +116,7 @@ const UserStatusBadge = ({ isActive }) => {
 // ============================================
 
 const ProjectCard = ({ project, userRole, users, onRemoveUser, onAssignSubmit }) => {
-  const { t, i18n } = useTranslation();
+  const { t, i18n } = useTranslation(); // ✅ Only one declaration
   const isRTL = i18n.language === 'ar';
 
   const [expanded, setExpanded] = useState(false);
@@ -378,7 +378,7 @@ const ProjectCard = ({ project, userRole, users, onRemoveUser, onAssignSubmit })
 // ============================================
 
 const AddProjectForm = ({ onAdd, users, onCancel }) => {
-  const { t, i18n } = useTranslation();
+  const { t, i18n } = useTranslation(); // ✅ Only one declaration
   const toast = useToast();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -511,7 +511,7 @@ const AddProjectForm = ({ onAdd, users, onCancel }) => {
 // ============================================
 
 const Projects = () => {
-  const { t, i18n } = useTranslation();
+  const { t, i18n } = useTranslation(); // ✅ Only one declaration
   const { user: utilisateur } = useAuth();
   const toast = useToast();
   const { confirm } = useConfirm();
@@ -620,7 +620,7 @@ const Projects = () => {
       <div className="min-h-screen bg-gradient-to-b from-white to-[#f3f4f6]">
         <div className="mx-auto flex min-h-screen max-w-6xl flex-col items-center justify-center px-6">
           <div className="h-12 w-12 animate-spin rounded-full border-4 border-[#0078d4] border-t-transparent" />
-          <p className="mt-4 text-sm font-medium text-[#6b7280]">Loading...</p>
+          <p className="mt-4 text-sm font-medium text-[#6b7280]">{t('common.loading')}</p>
         </div>
       </div>
     );

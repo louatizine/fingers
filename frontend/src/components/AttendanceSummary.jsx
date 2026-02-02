@@ -72,17 +72,17 @@ export default function AttendanceSummary() {
 
       {/* Filters */}
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-4">Search Criteria</h2>
+        <h2 className="text-xl font-semibold mb-4">{t('attendance.searchCriteria')}</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Employee ID
+              {t('profile.fields.employeeId')}
             </label>
             <input
               type="text"
               value={employeeId}
               onChange={(e) => setEmployeeId(e.target.value)}
-              placeholder="Enter employee ID"
+              placeholder={t('attendance.enterEmployeeId')}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
             />
           </div>
@@ -137,7 +137,7 @@ export default function AttendanceSummary() {
             <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg p-6 text-white">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-blue-100 text-sm">Total Worked Hours</p>
+                  <p className="text-blue-100 text-sm">{t('attendance.totalWorkedHours')}</p>
                   <p className="text-3xl font-bold mt-1">
                     {summary.totals.worked_hours.toFixed(2)}h
                   </p>
@@ -149,7 +149,7 @@ export default function AttendanceSummary() {
             <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-lg p-6 text-white">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-green-100 text-sm">Complete Days</p>
+                  <p className="text-green-100 text-sm">{t('attendance.completeDays')}</p>
                   <p className="text-3xl font-bold mt-1">
                     {summary.totals.complete_days}
                   </p>
@@ -161,7 +161,7 @@ export default function AttendanceSummary() {
             <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-lg p-6 text-white">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-purple-100 text-sm">Total Days</p>
+                  <p className="text-purple-100 text-sm">{t('attendance.totalDays')}</p>
                   <p className="text-3xl font-bold mt-1">
                     {summary.totals.total_days}
                   </p>
@@ -174,7 +174,7 @@ export default function AttendanceSummary() {
           {/* Daily Summary Table */}
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
             <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-800">Daily Breakdown</h2>
+              <h2 className="text-xl font-semibold text-gray-800">{t('attendance.dailyBreakdown')}</h2>
             </div>
 
             <div className="overflow-x-auto">

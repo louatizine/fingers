@@ -1,15 +1,18 @@
 import { ClockIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
+import { useTranslation } from 'react-i18next';
 import StatusBadge from './StatusBadge';
 
 export default function RecentActivityCard({ recentLeaves }) {
+  const { t } = useTranslation()
+  
   return (
     <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
       
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold text-gray-900">Activité Récente</h3>
+        <h3 className="text-lg font-semibold text-gray-900">{t('dashboard.recentActivity')}</h3>
         <button className="text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors">
-          Voir tout
+          {t('common.viewAll')}
         </button>
       </div>
 
@@ -34,9 +37,9 @@ export default function RecentActivityCard({ recentLeaves }) {
 
             <div className="flex items-center text-xs text-gray-500 mt-1">
               <ClockIcon className="h-4 w-4 mr-1 text-gray-400 flex-shrink-0" />
-              <span>{leave.days} jours</span>
+              <span>{leave.days} {t('common.days')}</span>
               <span className="mx-2 text-gray-300">•</span>
-              <span>Soumis le {leave.submitted_date || leave.start_date}</span>
+              <span>{t('leaves.submittedOn', { date: leave.submitted_date || leave.start_date })}</span>
             </div>
           </div>
         ))}
@@ -48,10 +51,10 @@ export default function RecentActivityCard({ recentLeaves }) {
           <InformationCircleIcon className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
           <div className="text-sm">
             <p className="font-medium text-yellow-900">
-              Mise à jour de la politique des congés
+              {t('notifications.policyUpdate')}
             </p>
             <p className="text-yellow-700 mt-1">
-              Nouvelle politique de congé maternité applicable à partir du 1er juillet.
+              {t('notifications.maternityPolicyUpdate')}
             </p>
           </div>
         </div>

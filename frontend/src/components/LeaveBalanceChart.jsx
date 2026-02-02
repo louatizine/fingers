@@ -1,4 +1,5 @@
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import { useTranslation } from 'react-i18next'
 
 const COLOR_PALETTE = {
   dataViz: [
@@ -14,25 +15,27 @@ const COLOR_PALETTE = {
 }
 
 export default function LeaveBalanceChart({ leaveBalance }) {
+  const { t } = useTranslation()
+  
   const leaveBalanceData = leaveBalance
     ? [
         {
-          name: 'Congé Annuel',
+          name: t('leaves.types.annual'),
           value: leaveBalance.annual || 0,
           color: COLOR_PALETTE.dataViz[0]
         },
         {
-          name: 'Congé Maladie',
+          name: t('leaves.types.sick'),
           value: leaveBalance.sick || 0,
           color: COLOR_PALETTE.dataViz[1]
         },
         {
-          name: 'Congé Sans Solde',
+          name: t('leaves.types.unpaid'),
           value: leaveBalance.unpaid || 0,
           color: COLOR_PALETTE.dataViz[2]
         },
         {
-          name: 'Congé Maternité',
+          name: t('leaves.types.maternity'),
           value: leaveBalance.maternity || 0,
           color: COLOR_PALETTE.dataViz[3]
         }
@@ -44,16 +47,16 @@ export default function LeaveBalanceChart({ leaveBalance }) {
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="text-lg font-semibold text-[#323130]">
-            Solde des Congés
+            {t('leaves.balanceTitle')}
           </h3>
           <p className="text-sm text-[#605e5c]">
-            Jours de congé disponibles par catégorie
+            {t('leaves.balanceDescription')}
           </p>
         </div>
 
         <select className="text-sm border border-[#8a8886] rounded-sm px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-[#0078d4] focus:border-[#0078d4] text-[#323130]">
-          <option>Cette année</option>
-          <option>Année précédente</option>
+          <option>{t('common.thisYear')}</option>
+          <option>{t('common.previousYear')}</option>
         </select>
       </div>
 
@@ -81,7 +84,7 @@ export default function LeaveBalanceChart({ leaveBalance }) {
             </Pie>
 
             <Tooltip
-              formatter={(value) => [`${value} jours`, 'Solde']}
+              formatter={(value) => [`${value} ${t('common.days')}`, t('leaves.balance')]}
             />
 
             <Legend />

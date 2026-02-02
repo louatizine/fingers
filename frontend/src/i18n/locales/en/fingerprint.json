@@ -2,6 +2,16 @@
   "title": "Fingerprint Management",
   "subtitle": "Biometric identity management and enrollment logs",
   "enrolledUsers": "Enrolled Users",
+  "stats": {
+    "enrolled": "Enrolled",
+    "pending": "Pending",
+    "checkIns": "Check-ins",
+    "total": "Total Users"
+  },
+  "filters": {
+    "searchPlaceholder": "Search by name, ID, or department..."
+  },
+  "show": "Show",
   "note": {
     "title": "Note:",
     "description": "Fingerprint enrollment is performed using the Windows Desktop Application. This page only displays enrolled users. To enroll new users, use the desktop biometric terminal."

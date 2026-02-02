@@ -70,8 +70,20 @@ export default function Leaves() {
   // Create New Leave Request
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // Calculate days between start_date and end_date (inclusive)
+    const { start_date, end_date, ...rest } = formData;
+    let days = 0;
+    if (start_date && end_date) {
+      const start = new Date(start_date);
+      const end = new Date(end_date);
+      days = Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
+    }
+    if (!days || days < 1) {
+      toast.error(t('leaves.messages.invalid_days'));
+      return;
+    }
     try {
-      const response = await leaveAPI.createLeave(formData);
+      const response = await leaveAPI.createLeave({ ...rest, start_date, end_date, days });
       if (response.data.insufficient_balance) {
         toast.warning(t('leaves.messages.insufficient_warning', {
           available: Number(response.data.current_balance || 0).toFixed(2),
@@ -191,7 +203,7 @@ export default function Leaves() {
     return (
       <div className="flex flex-col items-center justify-center h-96">
         <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-        <p className="mt-4 text-slate-400 font-bold text-xs uppercase tracking-widest">Loading Records...</p>
+        <p className="mt-4 text-slate-400 font-bold text-xs uppercase tracking-widest">{t('leaves.loading')}</p>
       </div>
     );
   }
@@ -267,8 +279,8 @@ export default function Leaves() {
       <div className="w-full mx-auto bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
         {/* Table Header */}
         <div className="px-8 py-4 border-b border-slate-200 bg-gradient-to-r from-slate-50/50 to-white">
-          <h2 className="text-lg font-bold text-slate-800">Leave Requests</h2>
-          <p className="text-sm text-slate-500 mt-1">Manage your leave requests and check your balances</p>
+          <h2 className="text-lg font-bold text-slate-800">{t('leaves.table.title')}</h2>
+          <p className="text-sm text-slate-500 mt-1">{t('leaves.table.subtitle')}</p>
         </div>
 
         <div className="overflow-x-auto">
@@ -340,8 +352,7 @@ export default function Leaves() {
         {leaves.length > 0 ? (
           <div className="px-6 py-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-50/30">
             <div className="text-sm font-medium text-slate-500">
-              Showing <span className="font-bold text-slate-700">{indexOfFirstItem + 1} - {Math.min(indexOfLastItem, leaves.length)}</span> of{' '}
-              <span className="font-bold text-slate-700">{leaves.length}</span> records
+              {t('leaves.table.showing', { from: indexOfFirstItem + 1, to: Math.min(indexOfLastItem, leaves.length), total: leaves.length })}
             </div>
 
             <div className="flex items-center gap-1">
@@ -381,8 +392,8 @@ export default function Leaves() {
             <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 mb-4">
               <CalendarDaysIcon className="h-8 w-8 text-slate-400" />
             </div>
-            <h3 className="text-lg font-bold text-slate-700 mb-2">No leave requests found</h3>
-            <p className="text-slate-500">Start by creating your first leave request</p>
+            <h3 className="text-lg font-bold text-slate-700 mb-2">{t('leaves.table.noRequests')}</h3>
+            <p className="text-slate-500">{t('leaves.table.noRequestsDesc')}</p>
           </div>
         )}
       </div>
@@ -455,7 +466,7 @@ export default function Leaves() {
                         className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
                         value={formData.reason}
                         onChange={e => setFormData({ ...formData, reason: e.target.value })}
-                        placeholder="Enter reason for leave..."
+                        placeholder={t('leaves.modal.reasonPlaceholder')}
                       />
                     </div>
                   </>
@@ -468,7 +479,7 @@ export default function Leaves() {
                       className="w-full bg-rose-50/50 border border-rose-300 rounded-xl p-3 text-sm font-medium focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none"
                       value={rejectReason}
                       onChange={e => setRejectReason(e.target.value)}
-                      placeholder="Enter reason for rejection..."
+                      placeholder={t('leaves.modal.rejectionReasonPlaceholder')}
                     />
                   </div>
                 )}

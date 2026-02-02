@@ -32,7 +32,13 @@
     "seeLess": "See Less",
     "notAvailable": "N/A",
     "viewAll": "View All",
-    "thisMonth": "This Month"
+    "thisMonth": "This Month",
+    "welcome": "Welcome",
+    "currency": "DT",
+    "days": "days",
+    "filters": "Filters",
+    "thisYear": "This Year",
+    "previousYear": "Previous Year"
   },
   "currency": {
     "dinar": "DT"
@@ -57,12 +63,21 @@
     "title_employee": "My Dashboard",
     "title_admin": "Admin Dashboard",
     "title_supervisor": "Supervisor Dashboard",
-    "welcome": "Welcome back, {{name}}!",
+    "welcome": "Welcome back",
     "subtitle_employee": "Here's an overview of your activity.",
     "subtitle_admin": "Monitor company activities and metrics",
-    "subtitle_supervisor": "Track your team's performance and requests",
+    "subtitle_supervisor": "Company Operations & Team Management",
     "request_leave": "Request Leave",
     "view_calendar": "View Calendar",
+    "vacation_balance": "Vacation Balance",
+    "days_available": "Days Available",
+    "vacation_earned": "Earned",
+    "vacation_used": "Used",
+    "my_leave_requests": "My Leave Requests",
+    "my_salary_advances": "My Salary Advances",
+    "total_requests": "Total Requests",
+    "recentActivity": "Recent Activity",
+    "days": "days",
     "stats": {
       "annual_leave": "Annual Leave",
       "sick_leave": "Sick Leave",
@@ -95,7 +110,11 @@
       "leave_requests_subtitle": "Latest submissions",
       "salary_advances": "Recent Salary Advances",
       "salary_advances_subtitle": "Financial requests"
-    }
+    },
+    "companyLeaveStatus": "Company Leave Status Overview",
+    "salaryAdvanceRequests": "Salary Advance Requests",
+    "advanceRequestOverview": "Advance Request Overview",
+    "companyWideLeaveDistribution": "Company-wide Leave Distribution"
   },
   "leaves": {
     "title": "Leave Requests",
@@ -108,6 +127,28 @@
     "calculated_from_settings": "Calculated from settings",
     "company_policy": "Company policy",
     "insufficient_balance": "Insufficient balance",
+    "balanceTitle": "Leave Balance",
+    "balanceDescription": "Available leave days by category",
+    "balance": "Balance",
+    "submittedOn": "Submitted on {{date}}",
+    "types": {
+      "annual": "Annual Leave",
+      "sick": "Sick Leave",
+      "unpaid": "Unpaid Leave",
+      "maternity": "Maternity Leave"
+    },
+    "table": {
+      "title": "Leave Requests",
+      "subtitle": "Manage and track all leave requests",
+      "employee": "Employee",
+      "type": "Type",
+      "balance": "Balance",
+      "dates": "Dates",
+      "days": "Days",
+      "reason": "Reason",
+      "status": "Status",
+      "actions": "Actions"
+    },
     "table": {
       "employee": "Employee",
       "type": "Type",
@@ -238,6 +279,7 @@
     "title": "My Profile",
     "personalInfo": "Personal Information",
     "accountDetails": "Your account details and information",
+    "accountStatus": "Account Status",
     "editButton": "Edit Profile",
     "saveButton": "Save Changes",
     "notProvided": "Not provided",
@@ -279,6 +321,11 @@
     "probationPeriodMonths": "Probation Period (Months)",
     "maxConsecutiveDays": "Max Consecutive Days",
     "includeWeekends": "Include weekends in vacation calculation",
+    "stats": {
+      "companies": "Companies",
+      "employeesTracked": "Employees Tracked",
+      "monthlyVacation": "Monthly Vacation Days"
+    },
     "tabs": {
       "holiday": "Vacation Settings",
       "language": "Language",
@@ -337,7 +384,10 @@
       "loadFailed": "Failed to load settings",
       "saveSuccess": "Settings saved successfully",
       "saveFailed": "Failed to save settings",
-      "recalculateSuccess": "All balances have been recalculated successfully"    },
+      "recalculateSuccess": "All balances have been recalculated successfully",
+      "attendanceSaveSuccess": "Attendance settings saved successfully",
+      "attendanceSaveFailed": "Failed to save attendance settings"
+    },
     "attendance": {
       "title": "Attendance Settings",
       "configTitle": "Work Schedule Configuration",
@@ -352,6 +402,16 @@
       "lunchBreakEnd": "Lunch Break End",
       "lunchBreakEndHelp": "Lunch break ends at this time",
       "workingDays": "Working Days",
+      "selectedDays": "Selected: {{days}}",
+      "days": {
+        "Mon": "Monday",
+        "Tue": "Tuesday",
+        "Wed": "Wednesday",
+        "Thu": "Thursday",
+        "Fri": "Friday",
+        "Sat": "Saturday",
+        "Sun": "Sunday"
+      },
       "howItWorksTitle": "How it works:",
       "howItWorks1": "First fingerprint of the day = check-in",
       "howItWorks2": "Last fingerprint of the day = check-out",
@@ -479,7 +539,12 @@
     "subtitle": "Manage salary advance requests",
     "newRequest": "New Request",
     "total_requests": "Total Requests",
+    "totalRequests": "Total Requests",
     "pending_requests": "Pending Requests",
+    "loading": "Loading requests...",
+    "itemsPerPage": "Items per page",
+    "pagination": "Page {{current}} of {{total}}",
+    "actionRequired": "Action Required",
     "table": {
       "employee": "Employee",
       "amount": "Amount",
@@ -500,7 +565,8 @@
       "subtitle": "Please provide a reason for rejection",
       "reasonLabel": "Rejection Reason",
       "reasonPlaceholder": "Explain why this request is being rejected...",
-      "confirmButton": "Reject Request"
+      "confirmButton": "Reject Request",
+      "itemToReject": "Item to reject"
     },
     "messages": {
       "createSuccess": "Advance request submitted successfully",
@@ -517,15 +583,28 @@
     "subtitle": "Enterprise Resource Planning System",
     "welcomeBack": "Welcome Back",
     "signInMessage": "Sign in to access your account",
+    "pleaseSignIn": "Please sign in to continue",
+    "securePortal": "Secure Portal",
+    "userId": "User ID",
+    "userIdPlaceholder": "Enter your User ID or Email",
     "emailLabel": "Email Address",
     "emailPlaceholder": "Enter your email",
     "passwordLabel": "Password",
     "passwordPlaceholder": "Enter your password",
+    "demoLogin": "Demo Login",
+    "signIn": "Sign In",
     "signInButton": "Sign In to Dashboard",
     "signingIn": "Signing in...",
+    "authenticating": "Authenticating...",
     "demoCredentials": "Demo Credentials",
     "footer": "© 2026 HR Management System. All rights reserved.",
-    "loginError": "Login failed"
+    "loginError": "Login failed",
+    "validation": {
+      "requiredFields": "Please fill in all fields"
+    },
+    "errors": {
+      "invalidCredentials": "Invalid credentials"
+    }
   },
   "status": {
     "pending": "Pending",
@@ -574,5 +653,64 @@
     "this_week": "This Week",
     "this_month": "This Month",
     "this_year": "This Year"
+  },
+  "attendance": {
+    "searchCriteria": "Search Criteria",
+    "enterEmployeeId": "Enter employee ID",
+    "totalWorkedHours": "Total Worked Hours",
+    "completeDays": "Complete Days",
+    "totalDays": "Total Days",
+    "dailyBreakdown": "Daily Breakdown",
+    "checkIn": "Check In",
+    "checkOut": "Check Out",
+    "totalHours": "Total Hours",
+    "employee": "Employee",
+    "leaveTrends": "Leave Trends",
+    "systemHealth": "System Health",
+    "total": "Total",
+    "loading": "Loading attendance logs...",
+    "pagination": {
+      "showing": "Showing page {{page}} of {{total}} ({{records}} records)"
+    }
+  },
+  "employees": {
+    "workforceManagement": "Workforce Management",
+    "firstNamePlaceholder": "John",
+    "lastNamePlaceholder": "Doe",
+    "months": "Months",
+    "tabs": {
+      "directory": "Directory",
+      "leave": "Leave"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "defaultPosition": "Employee",
+    "noPhone": "No phone",
+    "notAvailable": "N/A"
+  },
+  "settings": {
+    "employeeBalances": {
+      "monthsService": "Months of Service",
+      "earned": "Earned",
+      "balance": "Balance"
+    }
+  },
+  "users": {
+    "status": {
+      "active": "Active",
+      "deactivated": "Deactivated"
+    }
+  },
+  "dashboard": {
+    "companyLeaveStatus": "Company Leave Status Overview",
+    "salaryAdvanceRequests": "Salary Advance Requests",
+    "advanceRequestOverview": "Advance Request Overview"
+  },
+  "notifications": {
+    "policyUpdate": "Leave Policy Update",
+    "maternityPolicyUpdate": "New maternity leave policy effective from July 1st.",
+    "referenceId": "Reference ID"
   }
 }

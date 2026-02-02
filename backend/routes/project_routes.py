@@ -8,8 +8,10 @@ from models.project_model import (
     update_project, delete_project, assign_employee_to_project,
     remove_employee_from_project
 )
-from models.user_model import find_user_by_id, get_active_users_only
+from models.user_model import find_user_by_id
 from utils.auth_utils import admin_or_supervisor_required
+from models.notif_model import create_notification
+from bson.objectid import ObjectId
 import logging
 
 logger = logging.getLogger(__name__)
@@ -19,28 +21,22 @@ project_bp = Blueprint('projects', __name__)
 @project_bp.route('', methods=['GET'])
 @jwt_required()
 def get_projects():
+    """Get projects based on user role - employees only see their assigned projects"""
     try:
-        from bson.objectid import ObjectId
-        
         current_user_id = get_jwt_identity()
         current_user = find_user_by_id(current_user_id)
 
-        filters = {}
-        if current_user['role'] != 'admin':
-            filters['company_id'] = current_user['company_id']
-        
         # For employees, only return projects they're assigned to
         if current_user['role'] == 'employee':
-            user_object_id = ObjectId(current_user['_id'])
-            user_id_str = str(current_user['_id'])
-            filters['$or'] = [
-                {'assigned_users': user_object_id},
-                {'assigned_users': user_id_str},
-                {'assigned_employees': user_object_id},
-                {'assigned_employees': user_id_str}
-            ]
-
-        projects = get_all_projects(filters)
+            from models.project_model import get_user_projects
+            projects = get_user_projects(current_user_id)
+        else:
+            # For supervisor/admin, filter by company or show all
+            filters = {}
+            if current_user['role'] == 'supervisor':
+                filters['company_id'] = current_user['company_id']
+            
+            projects = get_all_projects(filters)
 
         # 🔥 FIX: always return FULL USER OBJECTS
         # Support both 'assigned_employees' and 'assigned_users' for backward compatibility
@@ -75,7 +71,6 @@ def get_projects():
     except Exception as e:
         logger.error(f"Get projects error: {e}")
         return jsonify({'success': False, 'error': 'Fetch failed'}), 500
-
 
 @project_bp.route('', methods=['POST'])
 @jwt_required()
@@ -140,7 +135,6 @@ def create_new_project():
         logger.error(f"Create project error: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
-
 @project_bp.route('/<project_id>/assign/<user_id>', methods=['POST'])
 @jwt_required()
 @admin_or_supervisor_required
@@ -148,7 +142,6 @@ def assign_user_to_project(project_id, user_id):
     """Assign a user to a project"""
     try:
         from services.email_service import send_project_assignment_notification
-        from bson.objectid import ObjectId
         
         current_user_id = get_jwt_identity()
         current_user = find_user_by_id(current_user_id)
@@ -187,6 +180,17 @@ def assign_user_to_project(project_id, user_id):
         if not success:
             return jsonify({'success': False, 'error': 'Failed to assign user'}), 500
 
+        # Create notification for the assigned user
+        notification_data = {
+            'user_id': user_id,
+            'title': 'Assigned to Project',
+            'message': f'You have been assigned to project: {project["name"]}',
+            'type': 'project_assignment',
+            'related_id': project_id,
+            'priority': 'medium'
+        }
+        create_notification(notification_data)
+        
         # Send email notification to the assigned user
         try:
             assigned_by_name = f"{current_user.get('first_name', '')} {current_user.get('last_name', '')}"
@@ -212,7 +216,6 @@ def assign_user_to_project(project_id, user_id):
     except Exception as e:
         logger.error(f"Assign user error: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
-
 
 @project_bp.route('/<project_id>/remove/<user_id>', methods=['POST'])
 @jwt_required()

@@ -91,7 +91,7 @@ const AddEmployeeModal = ({ isOpen, onClose, formData, setFormData, onSubmit, co
                     value={formData.first_name}
                     onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
                     className={inputClass(errors.first_name, isRTL)}
-                    placeholder="John"
+                    placeholder={t('employees.firstNamePlaceholder')}
                   />
                 </InputGroup>
                 
@@ -105,7 +105,7 @@ const AddEmployeeModal = ({ isOpen, onClose, formData, setFormData, onSubmit, co
                     value={formData.last_name}
                     onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
                     className={inputClass(errors.last_name, isRTL)}
-                    placeholder="Doe"
+                    placeholder={t('employees.lastNamePlaceholder')}
                   />
                 </InputGroup>
               </div>

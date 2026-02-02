@@ -80,6 +80,56 @@ class FingerprintModel:
         }
     
     @staticmethod
+    def update_fingerprint_template(employee_id: str, template_id: str, device_id: str) -> Dict[str, Any]:
+        """Update fingerprint template for a user"""
+        db = get_db()
+        
+        # Check if user exists
+        user = db.users.find_one({'employee_id': employee_id})
+        if not user:
+            raise ValueError(f"User {employee_id} not found")
+        
+        # Update fingerprint document
+        fingerprint_update = {
+            'template_id': template_id,
+            'device_id': device_id,
+            'updated_at': datetime.utcnow()
+        }
+        
+        result = db.fingerprints.update_one(
+            {'employee_id': employee_id},
+            {'$set': fingerprint_update}
+        )
+        
+        if result.modified_count > 0:
+            # Update user's fingerprint status
+            user_update = {
+                'fingerprint_template_id': template_id,
+                'fingerprint_device_id': device_id,
+                'updated_at': datetime.utcnow()
+            }
+            
+            db.users.update_one(
+                {'employee_id': employee_id},
+                {'$set': user_update}
+            )
+            
+            logger.info(f"Fingerprint template updated for user {employee_id}")
+            
+            return {
+                'success': True,
+                'employee_id': employee_id,
+                'template_id': template_id,
+                'device_id': device_id,
+                'message': 'Fingerprint template updated successfully'
+            }
+        else:
+            return {
+                'success': False,
+                'error': 'Fingerprint not found or no changes made'
+            }
+    
+    @staticmethod
     def remove_enrollment(employee_id: str) -> Dict[str, Any]:
         """Remove fingerprint enrollment for a user"""
         db = get_db()
@@ -133,3 +183,12 @@ class FingerprintModel:
                 'is_active': fingerprint.get('is_active', True)
             }
         return None
+
+# Module-level functions for backward compatibility
+def update_fingerprint_template(employee_id: str, template_id: str, device_id: str) -> Dict[str, Any]:
+    """Wrapper function for backward compatibility"""
+    return FingerprintModel.update_fingerprint_template(employee_id, template_id, device_id)
+
+def get_enrolled_templates() -> Dict[str, str]:
+    """Wrapper function for backward compatibility"""
+    return FingerprintModel.get_enrolled_templates()

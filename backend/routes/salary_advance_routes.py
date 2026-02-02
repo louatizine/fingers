@@ -11,6 +11,8 @@ from models.salary_advance_model import (
 from models.user_model import find_user_by_id
 from utils.auth_utils import admin_or_supervisor_required
 from services.email_service import send_salary_advance_notification
+from models.notif_model import create_notification
+from database import get_db
 import logging
 
 logger = logging.getLogger(__name__)
@@ -93,6 +95,36 @@ def create_salary_advance():
         
         advance_id = create_salary_advance_request(advance_data)
         
+        # Create notification for supervisors/admins
+        notification_data = {
+            'user_id': current_user_id,
+            'title': 'New Salary Advance Request',
+            'message': f'{current_user["first_name"]} {current_user["last_name"]} has requested a salary advance of ${data["amount"]}',
+            'type': 'salary_advance',
+            'related_id': advance_id,
+            'priority': 'medium'
+        }
+        create_notification(notification_data)
+        
+        # Notify supervisors
+        db = get_db()
+        supervisors = db.users.find({
+            'company_id': current_user['company_id'],
+            'role': 'supervisor',
+            'is_active': True
+        })
+        
+        for supervisor in supervisors:
+            supervisor_notification = {
+                'user_id': str(supervisor['_id']),
+                'title': 'New Salary Advance Request',
+                'message': f'{current_user["first_name"]} {current_user["last_name"]} has requested a salary advance of ${data["amount"]}',
+                'type': 'salary_advance',
+                'related_id': advance_id,
+                'priority': 'high'
+            }
+            create_notification(supervisor_notification)
+        
         return jsonify({
             'message': 'Salary advance request created successfully',
             'advance_id': advance_id
@@ -109,6 +141,7 @@ def approve_salary_advance(advance_id):
     """Approve salary advance request"""
     try:
         current_user_id = get_jwt_identity()
+        current_user = find_user_by_id(current_user_id)
         
         advance = get_salary_advance_by_id(advance_id)
         
@@ -130,6 +163,17 @@ def approve_salary_advance(advance_id):
         )
         
         if success:
+            # Create notification for the employee
+            notification_data = {
+                'user_id': advance['user_id'],
+                'title': 'Salary Advance Approved',
+                'message': f'Your salary advance request of ${advance["amount"]} has been approved',
+                'type': 'salary_advance_status',
+                'related_id': advance_id,
+                'priority': 'low'
+            }
+            create_notification(notification_data)
+            
             # Send email notification
             try:
                 send_salary_advance_notification(
@@ -157,6 +201,7 @@ def reject_salary_advance(advance_id):
     """Reject salary advance request"""
     try:
         current_user_id = get_jwt_identity()
+        current_user = find_user_by_id(current_user_id)
         
         advance = get_salary_advance_by_id(advance_id)
         
@@ -178,6 +223,17 @@ def reject_salary_advance(advance_id):
         )
         
         if success:
+            # Create notification for the employee
+            notification_data = {
+                'user_id': advance['user_id'],
+                'title': 'Salary Advance Rejected',
+                'message': f'Your salary advance request of ${advance["amount"]} has been rejected',
+                'type': 'salary_advance_status',
+                'related_id': advance_id,
+                'priority': 'low'
+            }
+            create_notification(notification_data)
+            
             # Send email notification
             try:
                 send_salary_advance_notification(

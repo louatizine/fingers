@@ -9,7 +9,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-notification_bp = Blueprint('notifications', __name__)
+notification_bp = Blueprint('email_notifications', __name__)
 
 @notification_bp.route('/smtp-settings', methods=['GET'])
 @jwt_required()

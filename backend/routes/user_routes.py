@@ -36,6 +36,54 @@ def get_users():
         logger.error(f"Get users error: {e}")
         return jsonify({'error': 'An error occurred'}), 500
 
+
+user_bp.route('', methods=['GET'])
+@jwt_required()
+@admin_or_supervisor_required
+def get_users():
+    """Get all users (Admin/Supervisor only)"""
+    try:
+        current_user_id = get_jwt_identity()
+        current_user = find_user_by_id(current_user_id)
+        
+        if not current_user:
+            return jsonify({'error': 'Unauthorized'}), 401
+        
+        # Security Logic: Supervisors only see users from their own company
+        filters = {}
+        if current_user.get('role') == 'supervisor':
+            filters['company_id'] = current_user.get('company_id')
+        
+        users = get_all_users(filters)
+        
+        return jsonify({
+            'success': True,
+            'users': users,
+            'count': len(users)
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@user_bp.route('/<user_id>/activate', methods=['POST'])
+@jwt_required()
+@admin_or_supervisor_required
+def activate_user_route(user_id):  # Changed from activate_user to activate_user_route
+    """Activate user (Admin or Supervisor)"""
+    try:
+        from models.user_model import activate_user
+        success = activate_user(user_id)
+        
+        if success:
+            return jsonify({'message': 'User activated successfully'}), 200
+        else:
+            return jsonify({'error': 'User not found'}), 404
+        
+    except Exception as e:
+        logger.error(f"Activate user error: {e}")
+        return jsonify({'error': 'An error occurred'}), 500
+
 @user_bp.route('/<user_id>', methods=['GET'])
 @jwt_required()
 def get_user(user_id):

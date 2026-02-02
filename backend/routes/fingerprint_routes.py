@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from database import get_db
 from models.fingerprint_model import FingerprintModel
 from datetime import datetime
+from models.fingerprint_model import update_fingerprint_template, get_enrolled_templates
 import logging
 
 fingerprint_bp = Blueprint('fingerprint', __name__)

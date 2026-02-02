@@ -32,7 +32,13 @@
     "seeLess": "Voir moins",
     "notAvailable": "N/D",
     "viewAll": "Voir Tout",
-    "thisMonth": "Ce Mois"
+    "thisMonth": "Ce Mois",
+    "welcome": "Bienvenue",
+    "currency": "DT",
+    "days": "jours",
+    "filters": "Filtres",
+    "thisYear": "Cette année",
+    "previousYear": "Année précédente"
   },
   "currency": {
     "dinar": "DT"
@@ -95,7 +101,11 @@
       "leave_requests_subtitle": "Dernières soumissions",
       "salary_advances": "Avances sur Salaire Récentes",
       "salary_advances_subtitle": "Demandes financières"
-    }
+    },
+    "companyLeaveStatus": "Aperçu du Statut des Congés de l'Entreprise",
+    "salaryAdvanceRequests": "Demandes d'Avance sur Salaire",
+    "advanceRequestOverview": "Aperçu des Demandes d'Avance",
+    "companyWideLeaveDistribution": "Répartition des Congés à l'Échelle de l'Entreprise"
   },
   "leaves": {
     "title": "Demandes de Congés",
@@ -108,7 +118,19 @@
     "calculated_from_settings": "Calculé selon les paramètres",
     "company_policy": "Politique de l'entreprise",
     "insufficient_balance": "Solde insuffisant",
+    "balanceTitle": "Solde des Congés",
+    "balanceDescription": "Jours de congé disponibles par catégorie",
+    "balance": "Solde",
+    "submittedOn": "Soumis le {{date}}",
+    "types": {
+      "annual": "Congé Annuel",
+      "sick": "Congé Maladie",
+      "unpaid": "Congé Sans Solde",
+      "maternity": "Congé Maternité"
+    },
     "table": {
+      "title": "Demandes de Congés",
+      "subtitle": "Gérer et suivre toutes les demandes de congés",
       "employee": "Employé",
       "type": "Type",
       "balance": "Solde",
@@ -116,6 +138,9 @@
       "days": "Jours",
       "reason": "Motif",
       "status": "Statut",
+      "actions": "Actions"
+    },
+    "modal": {
       "actions": "Actions"
     },
     "modal": {
@@ -275,8 +300,17 @@
     "title": "Paramètres",
     "subtitle": "Gérez les configurations de l'application",
     "save_recalculate": "Enregistrer et Recalculer Tous les Soldes",
+    "monthlyVacationDays": "Jours de Vacances Mensuels",
+    "probationPeriodMonths": "Période de Probation (Mois)",
+    "maxConsecutiveDays": "Jours Consécutifs Maximum",
+    "includeWeekends": "Inclure les week-ends dans le calcul des vacances",
+    "stats": {
+      "companies": "Entreprises",
+      "employeesTracked": "Employés Suivis",
+      "monthlyVacation": "Jours de Vacances Mensuels"
+    },
     "tabs": {
-      "holiday": "Jours Fériés Publics",
+      "holiday": "Paramètres de Vacances",
       "language": "Langue",
       "companies": "Entreprises"
     },
@@ -285,6 +319,7 @@
       "configSubtitle": "Définissez les paramètres de calcul automatique des congés annuels",
       "monthlyVacationDays": "Jours de Vacances Mensuels",
       "daysPerMonth": "jours/mois",
+      "daysPerMonthHint": "Jours accumulés par mois (ex: 2.5 jours/mois = 30 jours/an)",
       "monthlyVacationDaysHelp": "Nombre de jours de vacances accumulés par mois de service (ex: 2.5 jours/mois = 30 jours/an)",
       "probationPeriod": "Période de Probation",
       "probationPeriodHelp": "Nombre de mois avant que les employés commencent à accumuler des vacances",
@@ -300,6 +335,8 @@
       "formulaNote": "Cette formule sera appliquée à tous les employés lors du recalcul",
       "recalculating": "Recalcul en cours...",
       "saveButton": "Enregistrer les Paramètres",
+      "saveNote": "Important: L'enregistrement des paramètres affectera les calculs de vacances",
+      "recalculateNote": "Tous les soldes de vacances des employés seront automatiquement recalculés",
       "employeeBalances": "Soldes de Vacances des Employés",
       "employeeBalancesSubtitle": "Vue d'ensemble des soldes calculés pour chaque employé",
       "afterProbation": "après probation",
@@ -331,25 +368,47 @@
       "loadFailed": "Échec du chargement des paramètres",
       "saveSuccess": "Paramètres enregistrés avec succès",
       "saveFailed": "Échec de l'enregistrement des paramètres",
-      "recalculateSuccess": "Tous les soldes ont été recalculés avec succès"
+      "recalculateSuccess": "Tous les soldes ont été recalculés avec succès",
+      "attendanceSaveSuccess": "Paramètres de présence enregistrés avec succès",
+      "attendanceSaveFailed": "Échec de l'enregistrement des paramètres de présence"
     },
     "attendance": {
-      "title": "Paramètres de présence",
+      "title": "Paramètres de Présence",
+      "configTitle": "Configuration des Horaires de Travail",
+      "configSubtitle": "Configurer les heures de travail et les règles de présence",
       "subtitle": "Configurer les heures de travail et les horaires de pause déjeuner",
-      "checkInStart": "Heure de début d'entrée",
-      "checkInStartHelp": "Heure prévue pour l'arrivée des employés",
-      "checkOutEnd": "Heure de fin de sortie",
-      "checkOutEndHelp": "Heure prévue pour le départ des employés",
-      "lunchBreakStart": "Début de la pause déjeuner",
+      "checkInStart": "Heure de Début de Pointage",
+      "checkInStartHelp": "Heure prévue pour le pointage des employés",
+      "checkOutEnd": "Heure de Fin de Pointage",
+      "checkOutEndHelp": "Heure prévue pour la sortie des employés",
+      "lunchBreakStart": "Début de Pause Déjeuner",
       "lunchBreakStartHelp": "La pause déjeuner commence à cette heure",
-      "lunchBreakEnd": "Fin de la pause déjeuner",
+      "lunchBreakEnd": "Fin de Pause Déjeuner",
       "lunchBreakEndHelp": "La pause déjeuner se termine à cette heure",
-      "howItWorksTitle": "Comment ça marche:",
-      "howItWorks1": "Première empreinte de la journée = arrivée",
-      "howItWorks2": "Dernière empreinte de la journée = départ",
+      "workingDays": "Jours de Travail",
+      "selectedDays": "Sélectionnés: {{days}}",
+      "days": {
+        "Mon": "Lundi",
+        "Tue": "Mardi",
+        "Wed": "Mercredi",
+        "Thu": "Jeudi",
+        "Fri": "Vendredi",
+        "Sat": "Samedi",
+        "Sun": "Dimanche"
+      },
+      "howItWorksTitle": "Comment ça fonctionne:",
+      "howItWorks1": "Première empreinte de la journée = pointage d'entrée",
+      "howItWorks2": "Dernière empreinte de la journée = pointage de sortie",
       "howItWorks3": "Le temps de pause déjeuner est automatiquement soustrait des heures travaillées",
-      "howItWorks4": "Heures travaillées = (Sortie - Entrée) - Durée de la pause déjeuner",
-      "save": "Enregistrer les paramètres de présence"
+      "howItWorks4": "Heures Travaillées = (Sortie - Entrée) - Durée de Pause Déjeuner",
+      "save": "Enregistrer les Paramètres de Présence"
+    },
+    "actions": {
+      "reset": "Réinitialiser",
+      "saveRecalculate": "Enregistrer et Recalculer Tout",
+      "saveSettings": "Enregistrer les Paramètres",
+      "saving": "Enregistrement...",
+      "recalculating": "Recalcul en cours..."
     }
   },
   "projects": {
@@ -462,7 +521,12 @@
     "subtitle": "Gérez les demandes d'avances sur salaire",
     "newRequest": "Nouvelle Demande",
     "total_requests": "Total des Demandes",
+    "totalRequests": "Total des Demandes",
     "pending_requests": "Demandes en Attente",
+    "loading": "Chargement des demandes...",
+    "itemsPerPage": "Éléments par page",
+    "pagination": "Page {{current}} sur {{total}}",
+    "actionRequired": "Action Requise",
     "table": {
       "employee": "Employé",
       "amount": "Montant",
@@ -483,7 +547,8 @@
       "subtitle": "Veuillez fournir une raison pour le rejet",
       "reasonLabel": "Motif du Rejet",
       "reasonPlaceholder": "Expliquez pourquoi cette demande est rejetée...",
-      "confirmButton": "Rejeter la Demande"
+      "confirmButton": "Rejeter la Demande",
+      "itemToReject": "Élément à rejeter"
     },
     "messages": {
       "createSuccess": "Demande d'avance soumise avec succès",
@@ -497,18 +562,31 @@
   },
   "login": {
     "title": "Gestion RH",
-    "subtitle": "Système de Planification des Ressources d'Entreprise",
+    "subtitle": "Systeme de Planification des Ressources d'Entreprise",
     "welcomeBack": "Bon Retour",
     "signInMessage": "Connectez-vous pour accéder à votre compte",
+    "pleaseSignIn": "Veuillez vous connecter pour continuer",
+    "securePortal": "Portail Sécurisé",
+    "userId": "Identifiant Utilisateur",
+    "userIdPlaceholder": "Entrez votre identifiant ou email",
     "emailLabel": "Adresse Email",
     "emailPlaceholder": "Entrez votre email",
     "passwordLabel": "Mot de Passe",
     "passwordPlaceholder": "Entrez votre mot de passe",
+    "demoLogin": "Connexion Démo",
+    "signIn": "Se Connecter",
     "signInButton": "Se Connecter au Tableau de Bord",
     "signingIn": "Connexion en cours...",
+    "authenticating": "Authentification...",
     "demoCredentials": "Identifiants de Démonstration",
     "footer": "© 2026 Système de Gestion RH. Tous droits réservés.",
-    "loginError": "Échec de la connexion"
+    "loginError": "Échec de la connexion",
+    "validation": {
+      "requiredFields": "Veuillez remplir tous les champs"
+    },
+    "errors": {
+      "invalidCredentials": "Identifiants invalides"
+    }
   },
   "status": {
     "pending": "En Attente",
@@ -557,5 +635,64 @@
     "this_week": "Cette Semaine",
     "this_month": "Ce Mois",
     "this_year": "Cette Année"
+  },
+  "attendance": {
+    "searchCriteria": "Critères de Recherche",
+    "enterEmployeeId": "Entrez l'ID de l'employé",
+    "totalWorkedHours": "Total des Heures Travaillées",
+    "completeDays": "Jours Complets",
+    "totalDays": "Total de Jours",
+    "dailyBreakdown": "Détail Quotidien",
+    "checkIn": "Arrivée",
+    "checkOut": "Départ",
+    "totalHours": "Total Heures",
+    "employee": "Employé",
+    "leaveTrends": "Tendances des Congés",
+    "systemHealth": "Santé du Système",
+    "total": "Total",
+    "loading": "Chargement des journaux de présence...",
+    "pagination": {
+      "showing": "Affichage de la page {{page}} sur {{total}} ({{records}} enregistrements)"
+    }
+  },
+  "employees": {
+    "workforceManagement": "Gestion de la Main-d'Œuvre",
+    "firstNamePlaceholder": "Jean",
+    "lastNamePlaceholder": "Dupont",
+    "months": "Mois",
+    "tabs": {
+      "directory": "Annuaire",
+      "leave": "Congés"
+    },
+    "status": {
+      "active": "Actif",
+      "inactive": "Inactif"
+    },
+    "defaultPosition": "Employé",
+    "noPhone": "Pas de téléphone",
+    "notAvailable": "N/D"
+  },
+  "settings": {
+    "employeeBalances": {
+      "monthsService": "Mois de Service",
+      "earned": "Gagné",
+      "balance": "Solde"
+    }
+  },
+  "users": {
+    "status": {
+      "active": "Actif",
+      "deactivated": "Désactivé"
+    }
+  },
+  "dashboard": {
+    "companyLeaveStatus": "Aperçu du Statut des Congés de l'Entreprise",
+    "salaryAdvanceRequests": "Demandes d'Avance sur Salaire",
+    "advanceRequestOverview": "Aperçu des Demandes d'Avance"
+  },
+  "notifications": {
+    "policyUpdate": "Mise à jour de la politique des congés",
+    "maternityPolicyUpdate": "Nouvelle politique de congé maternité applicable à partir du 1er juillet.",
+    "referenceId": "ID de référence"
   }
 }

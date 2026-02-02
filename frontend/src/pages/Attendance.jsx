@@ -367,7 +367,7 @@ function Attendance() {
             <Icon className={`h-6 w-6 ${colors.text}`} />
           </div>
           <div>
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{label}</p>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t(label)}</p>
             <p className="text-xl font-black text-slate-800">{value}</p>
           </div>
         </div>
@@ -422,13 +422,13 @@ function Attendance() {
         
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div>
-            <p className="text-xs text-slate-500 font-medium">Check-in</p>
+            <p className="text-xs text-slate-500 font-medium">{t('attendance:table.checkIn')}</p>
             <p className="font-semibold text-slate-700">
               {formatTime(day.check_in) || 'N/A'}
             </p>
           </div>
           <div>
-            <p className="text-xs text-slate-500 font-medium">Check-out</p>
+            <p className="text-xs text-slate-500 font-medium">{t('attendance:table.checkOut')}</p>
             <p className="font-semibold text-slate-700">
               {formatTime(day.check_out) || 'N/A'}
             </p>
@@ -437,18 +437,18 @@ function Attendance() {
         
         <div className="mt-3 pt-3 border-t border-slate-200">
           <div className="flex items-center justify-between mb-1">
-            <span className="text-xs text-slate-500 font-medium">Status</span>
+            <span className="text-xs text-slate-500 font-medium">{t('attendance:table.status')}</span>
             <span className={`text-xs font-bold px-2 py-1 rounded ${classes.badge}`}>
-              {status ? status.toUpperCase() : 'NO DATA'}
+              {status ? t(`attendance:status.${status}`) : t('attendance:status.no_data')}
             </span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-xs text-slate-500 font-medium">Worked Hours</span>
+            <span className="text-xs text-slate-500 font-medium">{t('attendance:table.workedHours')}</span>
             <span className="text-sm font-bold text-slate-800">{day.worked_hours || 0} hrs</span>
           </div>
           {day.total_records > 2 && (
             <div className="flex items-center justify-between mt-1">
-              <span className="text-xs text-slate-500 font-medium">Total Records</span>
+              <span className="text-xs text-slate-500 font-medium">{t('attendance:table.records')}</span>
               <span className="text-xs font-bold text-slate-700">{day.total_records}</span>
             </div>
           )}
@@ -472,7 +472,7 @@ function Attendance() {
               </h1>
             </div>
             <p className={`text-slate-500 font-medium ${isRTL ? 'mr-1' : 'ml-1'}`}>
-              {t('attendance:subtitle') || 'Monitor and manage employee presence logs'}
+              {t('attendance:subtitle')}
             </p>
           </div>
 
@@ -480,19 +480,19 @@ function Attendance() {
           <div className="flex flex-wrap gap-4">
             <StatCard 
               icon={ClockIcon} 
-              label="Today's Logs" 
+              label="attendance:stats.today" 
               value={stats.today} 
               color="emerald" 
             />
             <StatCard 
               icon={UserGroupIcon} 
-              label="Check-ins" 
+              label="attendance:stats.checkIns" 
               value={stats.checkIns} 
               color="blue" 
             />
             <StatCard 
               icon={DocumentArrowDownIcon} 
-              label="Total Logs" 
+              label="attendance:stats.total" 
               value={stats.total} 
               color="indigo" 
             />
@@ -544,9 +544,9 @@ function Attendance() {
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
                 <div>
-                  <label className={`block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ${isRTL ? 'mr-1' : 'ml-1'}`}>
-                    {t('attendance:filters.employeeId')}
-                  </label>
+                    <label className={`block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ${isRTL ? 'mr-1' : 'ml-1'}`}>
+                      {t('attendance:filters.employeeId')}
+                    </label>
                   <div className="relative">
                     <UserGroupIcon className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400`} />
                     <input
@@ -561,9 +561,9 @@ function Attendance() {
                 </div>
 
                 <div>
-                  <label className={`block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ${isRTL ? 'mr-1' : 'ml-1'}`}>
-                    {t('attendance:filters.startDate')}
-                  </label>
+                    <label className={`block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ${isRTL ? 'mr-1' : 'ml-1'}`}>
+                      {t('attendance:filters.startDate')}
+                    </label>
                   <div className="relative">
                     <CalendarIcon className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400`} />
                     <input
@@ -577,9 +577,9 @@ function Attendance() {
                 </div>
 
                 <div>
-                  <label className={`block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ${isRTL ? 'mr-1' : 'ml-1'}`}>
-                    {t('attendance:filters.endDate')}
-                  </label>
+                    <label className={`block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ${isRTL ? 'mr-1' : 'ml-1'}`}>
+                      {t('attendance:filters.endDate')}
+                    </label>
                   <div className="relative">
                     <CalendarIcon className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400`} />
                     <input
@@ -593,9 +593,9 @@ function Attendance() {
                 </div>
 
                 <div>
-                  <label className={`block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ${isRTL ? 'mr-1' : 'ml-1'}`}>
-                    {t('attendance:filters.eventType')}
-                  </label>
+                    <label className={`block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ${isRTL ? 'mr-1' : 'ml-1'}`}>
+                      {t('attendance:filters.eventType')}
+                    </label>
                   <select
                     name="eventType"
                     value={filters.eventType}
@@ -632,7 +632,7 @@ function Attendance() {
                               <div className="absolute animate-ping h-8 w-8 rounded-full bg-indigo-400 opacity-20"></div>
                               <div className="h-10 w-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
                             </div>
-                            <p className="mt-4 text-slate-500 font-medium animate-pulse">Loading attendance logs...</p>
+                            <p className="mt-4 text-slate-500 font-medium animate-pulse">{t('attendance.loading')}</p>
                           </div>
                         </td>
                       </tr>
@@ -645,7 +645,7 @@ function Attendance() {
                             </div>
                             <p className="font-medium">{t('attendance:noRecords')}</p>
                             {Object.values(filters).some(v => v !== '') && (
-                              <p className="text-sm mt-1">Try adjusting your filters</p>
+                              <p className="text-sm mt-1">{t('attendance:tryAdjustFilters')}</p>
                             )}
                           </div>
                         </td>
@@ -662,7 +662,7 @@ function Attendance() {
                                 </div>
                                 <div>
                                   <p className="text-sm font-bold text-slate-800">{log.employee_id}</p>
-                                  <p className="text-xs font-medium text-slate-500">Employee</p>
+                                  <p className="text-xs font-medium text-slate-500">{t('attendance.employee')}</p>
                                 </div>
                               </div>
                             </td>
@@ -704,9 +704,11 @@ function Attendance() {
               {attendanceLogs.length > 0 && (
                 <footer className="bg-slate-50/80 border-t border-slate-100 p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
                   <p className="text-sm font-bold text-slate-500">
-                    Showing <span className="text-slate-900">page {pagination.page}</span> of{' '}
-                    <span className="text-slate-900">{pagination.pages}</span>
-                    <span className={`text-slate-400 ${isRTL ? 'mr-1' : 'ml-1'}`}>({pagination.total} records)</span>
+                    {t('attendance.pagination.showing', { 
+                      page: pagination.page, 
+                      total: pagination.pages, 
+                      records: pagination.total 
+                    })}
                   </p>
                   <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <button 
@@ -751,14 +753,14 @@ function Attendance() {
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-2">
                   <ChartBarIcon className="h-5 w-5 text-slate-400" />
-                  <h2 className="text-lg font-bold text-slate-800">Attendance Summary</h2>
+                  <h2 className="text-lg font-bold text-slate-800">{t('attendance:summary.title')}</h2>
                 </div>
                 <div className="flex items-center gap-3">
                   <button
                     onClick={resetSummaryFilters}
                     className="text-sm font-bold text-slate-500 hover:text-slate-700 transition-colors"
                   >
-                    Reset
+                    {t('attendance:reset')}
                   </button>
                   {attendanceSummary && (
                     <button
@@ -766,7 +768,7 @@ function Attendance() {
                       className="inline-flex items-center gap-2 px-6 py-2.5 bg-emerald-600 text-white text-sm font-bold rounded-xl hover:bg-emerald-700 shadow-lg shadow-emerald-200/50 hover:shadow-emerald-200/70 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
                     >
                       <ArrowDownTrayIcon className="h-4 w-4" />
-                      <span>Export Summary</span>
+                      <span>{t('attendance:summary.export')}</span>
                     </button>
                   )}
                 </div>
@@ -775,7 +777,7 @@ function Attendance() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                 <div>
                   <label className={`block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ${isRTL ? 'mr-1' : 'ml-1'}`}>
-                    Employee ID
+                    {t('attendance:filters.employeeId')}
                   </label>
                   <div className="relative">
                     <UsersIcon className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400`} />
@@ -784,7 +786,7 @@ function Attendance() {
                       name="employeeId"
                       value={summaryFilters.employeeId}
                       onChange={handleSummaryFilterChange}
-                      placeholder="Enter Employee ID (e.g., EMP001)"
+                      placeholder={t('attendance:filters.placeholder_employee')}
                       className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400 font-medium`}
                     />
                   </div>
@@ -792,7 +794,7 @@ function Attendance() {
 
                 <div>
                   <label className={`block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ${isRTL ? 'mr-1' : 'ml-1'}`}>
-                    Start Date
+                    {t('attendance:filters.startDate')}
                   </label>
                   <div className="relative">
                     <CalendarIcon className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400`} />
@@ -808,7 +810,7 @@ function Attendance() {
 
                 <div>
                   <label className={`block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ${isRTL ? 'mr-1' : 'ml-1'}`}>
-                    End Date
+                    {t('attendance:filters.endDate')}
                   </label>
                   <div className="relative">
                     <CalendarIcon className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400`} />
@@ -826,7 +828,7 @@ function Attendance() {
               <div className="mt-4 flex items-center justify-between">
                 <div className="text-sm text-slate-500">
                   <InformationCircleIcon className="h-4 w-4 inline mr-1" />
-                  Make sure Employee ID exists in the database
+                  {t('attendance:summary.employeeIdInfo')}
                 </div>
                 <button
                   onClick={fetchAttendanceSummary}
@@ -836,12 +838,12 @@ function Attendance() {
                   {summaryLoading ? (
                     <>
                       <ArrowPathIcon className="h-4 w-4 animate-spin" />
-                      Loading...
+                      {t('attendance:loading')}
                     </>
                   ) : (
                     <>
                       <MagnifyingGlassIcon className="h-4 w-4" />
-                      Get Summary
+                      {t('attendance:summary.getSummary')}
                     </>
                   )}
                 </button>
@@ -856,7 +858,7 @@ function Attendance() {
                     <div className="absolute animate-ping h-8 w-8 rounded-full bg-indigo-400 opacity-20"></div>
                     <div className="h-10 w-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
                   </div>
-                  <p className="mt-4 text-slate-500 font-medium animate-pulse">Loading attendance summary...</p>
+                  <p className="mt-4 text-slate-500 font-medium animate-pulse">{t('attendance:summary.loading')}</p>
                 </div>
               </div>
             ) : attendanceSummary ? (
@@ -867,30 +869,30 @@ function Attendance() {
                     <div>
                       <h3 className="text-xl font-bold text-slate-900">{attendanceSummary.employee_id}</h3>
                       <p className="text-sm text-slate-500">
-                        Period: {attendanceSummary.start_date} to {attendanceSummary.end_date}
+                        {t('attendance:summary.period', { start: attendanceSummary.start_date, end: attendanceSummary.end_date })}
                       </p>
                     </div>
                     <div className="flex flex-wrap gap-6">
                       <div className="text-center">
-                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Total Days</p>
+                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t('attendance:summary.totalDays')}</p>
                         <p className="text-2xl font-black text-indigo-600">
                           {attendanceSummary.totals?.total_days || attendanceSummary.daily_summaries.length}
                         </p>
                       </div>
                       <div className="text-center">
-                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Days with Records</p>
+                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t('attendance:summary.daysWithRecords')}</p>
                         <p className="text-2xl font-black text-blue-600">
                           {attendanceSummary.totals?.days_with_records || attendanceSummary.daily_summaries.filter(d => d.total_records > 0).length}
                         </p>
                       </div>
                       <div className="text-center">
-                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Complete Days</p>
+                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t('attendance:summary.completeDays')}</p>
                         <p className="text-2xl font-black text-emerald-600">
                           {attendanceSummary.totals?.complete_days || attendanceSummary.daily_summaries.filter(d => d.is_complete).length}
                         </p>
                       </div>
                       <div className="text-center">
-                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Total Hours</p>
+                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t('attendance:summary.totalHours')}</p>
                         <p className="text-2xl font-black text-purple-600">
                           {attendanceSummary.totals?.worked_hours || attendanceSummary.daily_summaries.reduce((sum, d) => sum + (d.worked_hours || 0), 0)}
                         </p>
@@ -902,26 +904,26 @@ function Attendance() {
                 {/* --- DAILY SUMMARIES GRID --- */}
                 <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-slate-900">Daily Attendance</h3>
+                    <h3 className="text-lg font-semibold text-slate-900">{t('attendance:summary.dailyAttendance')}</h3>
                     <div className="flex items-center gap-2 text-xs">
                       <div className="flex items-center gap-1">
                         <div className="h-2 w-2 rounded-full bg-emerald-500"></div>
-                        <span>Complete</span>
+                        <span>{t('attendance:status.complete')}</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <div className="h-2 w-2 rounded-full bg-amber-500"></div>
-                        <span>Partial</span>
+                        <span>{t('attendance:status.partial')}</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <div className="h-2 w-2 rounded-full bg-red-500"></div>
-                        <span>Absent</span>
+                        <span>{t('attendance:status.absent')}</span>
                       </div>
                     </div>
                   </div>
                   {attendanceSummary.daily_summaries.length === 0 ? (
                     <div className="text-center py-8">
                       <ClockIcon className="h-16 w-16 mx-auto text-slate-300 mb-4" />
-                      <p className="text-slate-500 font-medium">No attendance records found for this period</p>
+                      <p className="text-slate-500 font-medium">{t('attendance:summary.noRecordsPeriod')}</p>
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -935,19 +937,19 @@ function Attendance() {
                 {/* --- DETAILED TABLE VIEW --- */}
                 <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                   <div className="px-6 py-4 border-b border-slate-100">
-                    <h3 className="text-lg font-semibold text-slate-900">Detailed View</h3>
+                    <h3 className="text-lg font-semibold text-slate-900">{t('attendance:summary.detailedView')}</h3>
                   </div>
                   <div className="overflow-x-auto">
                     <table className={`w-full border-collapse ${isRTL ? 'text-right' : 'text-left'}`}>
                       <thead>
                         <tr className="bg-slate-50/50 border-b border-slate-100">
-                          <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">Date</th>
-                          <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">Day</th>
-                          <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">Check-in</th>
-                          <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">Check-out</th>
-                          <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">Worked Hours</th>
-                          <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">Status</th>
-                          <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">Records</th>
+                          <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('attendance:table.date')}</th>
+                          <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('attendance:table.day')}</th>
+                          <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('attendance:table.checkIn')}</th>
+                          <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('attendance:table.checkOut')}</th>
+                          <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('attendance:table.workedHours')}</th>
+                          <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('attendance:table.status')}</th>
+                          <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('attendance:table.records')}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
@@ -989,7 +991,7 @@ function Attendance() {
                                     status === 'partial' ? 'bg-amber-500' : 
                                     'bg-slate-500'
                                   }`}></div>
-                                  {status.charAt(0).toUpperCase() + status.slice(1)}
+                                  {t(`attendance:status.${status}`)}
                                 </span>
                               </td>
                               <td className="px-6 py-4">
@@ -1010,11 +1012,11 @@ function Attendance() {
               <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8">
                 <div className="text-center">
                   <ChartBarIcon className="h-16 w-16 mx-auto text-slate-300 mb-4" />
-                  <h3 className="text-lg font-semibold text-slate-900 mb-2">No Summary Available</h3>
-                  <p className="text-slate-500 mb-6">Enter an employee ID and date range to view attendance summary</p>
+                  <h3 className="text-lg font-semibold text-slate-900 mb-2">{t('attendance:summary.noSummary')}</h3>
+                  <p className="text-slate-500 mb-6">{t('attendance:summary.noSummaryDesc')}</p>
                   <div className="inline-flex items-center gap-2 text-sm text-slate-400">
                     <InformationCircleIcon className="h-4 w-4" />
-                    <span>Enter Employee ID in the field above to get started</span>
+                    <span>{t('attendance:summary.noSummaryHint')}</span>
                   </div>
                 </div>
               </div>
@@ -1026,7 +1028,7 @@ function Attendance() {
       {activeTab === 'logs' && (
         <div className="fixed bottom-6 right-6 bg-white p-3 rounded-2xl border border-slate-200 shadow-lg shadow-slate-300/20">
           <div className="flex items-center gap-2 text-sm font-bold text-slate-600">
-            <span>Show:</span>
+            <span>{t('attendance:show')}</span>
             <select
               value={pagination.limit}
               onChange={(e) => { 
