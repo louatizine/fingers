@@ -62,7 +62,7 @@ export default function AdminDashboard() {
           <h1 className="text-3xl font-black text-slate-900 tracking-tight">
             {t('dashboard.title_admin')}
           </h1>
-          <p className="text-slate-500 font-medium mt-1">System-wide Overview & Analytics</p>
+          <p className="text-slate-500 font-medium mt-1">{t('dashboard.subtitle_admin')}</p>
         </div>
         <div className="bg-indigo-600 text-white px-6 py-3 rounded-2xl shadow-lg shadow-indigo-200 text-sm font-bold flex items-center gap-2">
            <ClockIcon className="h-4 w-4" />
@@ -77,7 +77,7 @@ export default function AdminDashboard() {
           value={statistics?.total_employees || 0}
           icon={UserGroupIcon}
           color="blue"
-          subtitle={`${statistics?.active_employees || 0} active`}
+          subtitle={`${statistics?.active_employees || 0} ${t('dashboard.active')}`}
         />
         <StatCard
           title={t('dashboard.stats.pending_leaves')}

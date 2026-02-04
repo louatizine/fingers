@@ -123,7 +123,7 @@ export default function EmployeeDashboard() {
                   </p>
                   <h2 className="text-6xl font-black text-white tracking-tight">
                     {vacationBalance || statistics?.vacation_balance || 0}
-                    <span className="text-2xl text-blue-100/60 ml-2">days</span>
+                    <span className="text-2xl text-blue-100/60 ml-2">{t('dashboard.days')}</span>
                   </h2>
                   <p className="text-blue-100/60 mt-3 text-sm font-medium">{t('dashboard.days_available')}</p>
                 </div>
@@ -162,7 +162,7 @@ export default function EmployeeDashboard() {
               {/* Progress Bar */}
               <div className="mt-8">
                 <div className="flex justify-between text-sm text-white/70 mb-2">
-                  <span>Balance Progress</span>
+                  <span>{t('dashboard.balance_progress')}</span>
                   <span>{Math.round(((vacationBalance || 0) / (statistics?.vacation_earned || 1)) * 100)}%</span>
                 </div>
                 <div className="h-2 bg-white/10 rounded-full overflow-hidden">
@@ -182,7 +182,7 @@ export default function EmployeeDashboard() {
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h3 className="text-lg font-bold text-slate-900">{t('dashboard.my_leave_requests')}</h3>
-                  <p className="text-slate-500 text-sm mt-1">Current status overview</p>
+                  <p className="text-slate-500 text-sm mt-1">{t('dashboard.current_status_overview')}</p>
                 </div>
                 <div className="h-12 w-12 rounded-xl bg-blue-50 flex items-center justify-center">
                   <CalendarIcon className="h-6 w-6 text-blue-600" />
@@ -191,24 +191,24 @@ export default function EmployeeDashboard() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="text-center p-4 rounded-2xl bg-slate-50/50">
                   <p className="text-3xl font-black text-slate-900">{leaves.total || 0}</p>
-                  <p className="text-slate-600 text-sm font-medium mt-1">Total</p>
+                  <p className="text-slate-600 text-sm font-medium mt-1">{t('status.total')}</p>
                 </div>
                 <div className="text-center p-4 rounded-2xl bg-emerald-50">
                   <p className="text-3xl font-black text-emerald-600">{leaves.approved || 0}</p>
-                  <p className="text-emerald-600 text-sm font-medium mt-1">Approved</p>
+                  <p className="text-emerald-600 text-sm font-medium mt-1">{t('status.approved')}</p>
                 </div>
                 <div className="text-center p-4 rounded-2xl bg-amber-50">
                   <p className="text-3xl font-black text-amber-600">{leaves.pending || 0}</p>
-                  <p className="text-amber-600 text-sm font-medium mt-1">Pending</p>
+                  <p className="text-amber-600 text-sm font-medium mt-1">{t('status.pending')}</p>
                 </div>
                 <div className="text-center p-4 rounded-2xl bg-rose-50">
                   <p className="text-3xl font-black text-rose-600">{leaves.rejected || 0}</p>
-                  <p className="text-rose-600 text-sm font-medium mt-1">Rejected</p>
+                  <p className="text-rose-600 text-sm font-medium mt-1">{t('status.rejected')}</p>
                 </div>
               </div>
               <div className="mt-6 pt-6 border-t border-slate-100">
                 <p className="text-slate-500 text-sm">
-                  <span className="font-bold text-slate-900">{leaves.total_approved_days || 0}</span> approved days
+                  <span className="font-bold text-slate-900">{leaves.total_approved_days || 0}</span> {t('dashboard.approved_days')}
                 </p>
               </div>
             </div>
@@ -218,7 +218,7 @@ export default function EmployeeDashboard() {
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h3 className="text-lg font-bold text-slate-900">{t('dashboard.my_salary_advances')}</h3>
-                  <p className="text-slate-500 text-sm mt-1">Financial requests summary</p>
+                  <p className="text-slate-500 text-sm mt-1">{t('dashboard.financial_requests_summary')}</p>
                 </div>
                 <div className="h-12 w-12 rounded-xl bg-emerald-50 flex items-center justify-center">
                   <CurrencyDollarIcon className="h-6 w-6 text-emerald-600" />
@@ -227,24 +227,24 @@ export default function EmployeeDashboard() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="text-center p-4 rounded-2xl bg-slate-50/50">
                   <p className="text-3xl font-black text-slate-900">{salaryAdvances.total || 0}</p>
-                  <p className="text-slate-600 text-sm font-medium mt-1">Total</p>
+                  <p className="text-slate-600 text-sm font-medium mt-1">{t('status.total')}</p>
                 </div>
                 <div className="text-center p-4 rounded-2xl bg-emerald-50">
                   <p className="text-3xl font-black text-emerald-600">{salaryAdvances.approved || 0}</p>
-                  <p className="text-emerald-600 text-sm font-medium mt-1">Approved</p>
+                  <p className="text-emerald-600 text-sm font-medium mt-1">{t('status.approved')}</p>
                 </div>
                 <div className="text-center p-4 rounded-2xl bg-amber-50">
                   <p className="text-3xl font-black text-amber-600">{salaryAdvances.pending || 0}</p>
-                  <p className="text-amber-600 text-sm font-medium mt-1">Pending</p>
+                  <p className="text-amber-600 text-sm font-medium mt-1">{t('status.pending')}</p>
                 </div>
                 <div className="text-center p-4 rounded-2xl bg-rose-50">
                   <p className="text-3xl font-black text-rose-600">{salaryAdvances.rejected || 0}</p>
-                  <p className="text-rose-600 text-sm font-medium mt-1">Rejected</p>
+                  <p className="text-rose-600 text-sm font-medium mt-1">{t('status.rejected')}</p>
                 </div>
               </div>
               <div className="mt-6 pt-6 border-t border-slate-100">
                 <p className="text-slate-500 text-sm">
-                  Total approved amount: <span className="font-bold text-slate-900">{salaryAdvances.total_approved_amount?.toFixed(2) || 0} {t('common.currency')}</span>
+                  {t('dashboard.total_approved_amount')}: <span className="font-bold text-slate-900">{salaryAdvances.total_approved_amount?.toFixed(2) || 0} {t('common.currency')}</span>
                 </p>
               </div>
             </div>
@@ -258,7 +258,7 @@ export default function EmployeeDashboard() {
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h3 className="text-lg font-bold text-slate-900">{t('dashboard.recent.leave_requests')}</h3>
-                <p className="text-slate-500 text-sm mt-1">Latest activities</p>
+                <p className="text-slate-500 text-sm mt-1">{t('dashboard.latest_activities')}</p>
               </div>
               <div className="h-10 w-10 rounded-lg bg-indigo-50 flex items-center justify-center">
                 <ClockIcon className="h-5 w-5 text-indigo-600" />
@@ -278,7 +278,7 @@ export default function EmployeeDashboard() {
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-slate-900 truncate">{item.reason}</p>
                     <p className="text-xs text-slate-500">
-                      {new Date(item.date).toLocaleDateString()} • {item.days} days
+                      {new Date(item.date).toLocaleDateString()} • {item.days} {t('dashboard.days')}
                     </p>
                   </div>
                   <ChevronRightIcon className="h-4 w-4 text-slate-400 group-hover:text-indigo-600 transition-colors" />
@@ -286,12 +286,12 @@ export default function EmployeeDashboard() {
               )) || (
                 <div className="text-center py-8 text-slate-400">
                   <CalendarIcon className="h-12 w-12 mx-auto mb-3 opacity-30" />
-                  <p className="text-sm">No recent leave requests</p>
+                  <p className="text-sm">{t('dashboard.no_recent_leave_requests')}</p>
                 </div>
               )}
             </div>
             <button className="w-full mt-6 py-3 text-center text-sm font-medium text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-xl transition-all">
-              View All Requests
+              {t('dashboard.view_all_requests')}
             </button>
           </div>
 
@@ -300,7 +300,7 @@ export default function EmployeeDashboard() {
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h3 className="text-lg font-bold text-slate-900">{t('dashboard.recent.salary_advances')}</h3>
-                <p className="text-slate-500 text-sm mt-1">Financial activities</p>
+                <p className="text-slate-500 text-sm mt-1">{t('dashboard.financial_activities')}</p>
               </div>
               <div className="h-10 w-10 rounded-lg bg-emerald-50 flex items-center justify-center">
                 <CurrencyDollarIcon className="h-5 w-5 text-emerald-600" />
@@ -328,25 +328,25 @@ export default function EmployeeDashboard() {
               )) || (
                 <div className="text-center py-8 text-slate-400">
                   <CurrencyDollarIcon className="h-12 w-12 mx-auto mb-3 opacity-30" />
-                  <p className="text-sm">No recent salary advances</p>
+                  <p className="text-sm">{t('dashboard.no_recent_salary_advances')}</p>
                 </div>
               )}
             </div>
             <button className="w-full mt-6 py-3 text-center text-sm font-medium text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-xl transition-all">
-              View All Advances
+              {t('dashboard.view_all_advances')}
             </button>
           </div>
 
           {/* Quick Actions */}
           <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-6 text-white">
-            <h3 className="text-lg font-bold mb-4">Quick Actions</h3>
+            <h3 className="text-lg font-bold mb-4">{t('dashboard.quick_actions')}</h3>
             <div className="space-y-3">
               <button className="w-full flex items-center justify-between p-3 rounded-xl bg-white/10 hover:bg-white/15 transition-all group">
                 <div className="flex items-center gap-3">
                   <div className="h-8 w-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
                     <CalendarIcon className="h-4 w-4" />
                   </div>
-                  <span className="text-sm font-medium">Request Leave</span>
+                  <span className="text-sm font-medium">{t('dashboard.request_leave')}</span>
                 </div>
                 <ChevronRightIcon className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
               </button>
@@ -355,7 +355,7 @@ export default function EmployeeDashboard() {
                   <div className="h-8 w-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
                     <CurrencyDollarIcon className="h-4 w-4" />
                   </div>
-                  <span className="text-sm font-medium">Request Advance</span>
+                  <span className="text-sm font-medium">{t('dashboard.request_advance')}</span>
                 </div>
                 <ChevronRightIcon className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
               </button>
@@ -364,7 +364,7 @@ export default function EmployeeDashboard() {
                   <div className="h-8 w-8 rounded-lg bg-purple-500/20 flex items-center justify-center">
                     <BriefcaseIcon className="h-4 w-4" />
                   </div>
-                  <span className="text-sm font-medium">View Schedule</span>
+                  <span className="text-sm font-medium">{t('dashboard.view_schedule')}</span>
                 </div>
                 <ChevronRightIcon className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
               </button>

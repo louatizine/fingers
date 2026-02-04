@@ -99,9 +99,9 @@ def create_user(user_data):
         # Auto-generate employee_id if not provided
         if not user_data.get('employee_id'):
             # Find the highest biometric_id to avoid duplicates
-            # Use numeric sorting on biometric_id field
+            # IMPORTANT: Always start from 22 to protect device IDs 1-21
             last_user = db.users.find_one(
-                {'biometric_id': {'$exists': True}},
+                {'biometric_id': {'$exists': True, '$gte': 22}},
                 sort=[('biometric_id', -1)]
             )
             
@@ -109,18 +109,23 @@ def create_user(user_data):
                 try:
                     next_num = int(last_user['biometric_id']) + 1
                 except:
-                    next_num = 1
+                    next_num = 22
             else:
-                next_num = 1
+                # No users with biometric_id >= 22, start from 22
+                next_num = 22
+            
+            # FORCE minimum of 22 - absolutely no IDs below 22
+            if next_num < 22:
+                next_num = 22
             
             # Ensure the employee_id doesn't already exist (double check)
             while db.users.find_one({'employee_id': f"EMP{next_num:04d}"}):
                 next_num += 1
             
-            # Generate employee_id in format EMP0001, EMP0002, etc.
+            # Generate employee_id in format EMP0022, EMP0023, etc.
             user_data['employee_id'] = f"EMP{next_num:04d}"
             
-            # Generate biometric_id as just the number
+            # Generate biometric_id as just the number (always >= 22)
             user_data['biometric_id'] = next_num
             
             logger.info(f"Auto-generated employee_id: {user_data['employee_id']}, biometric_id: {user_data['biometric_id']}")
@@ -130,12 +135,44 @@ def create_user(user_data):
                 return {'success': False, 'error': 'Employee ID already exists'}
             
             # Generate biometric_id from employee_id if it follows EMP#### format
+            # IMPORTANT: Enforce minimum biometric_id of 22
             if user_data['employee_id'].startswith('EMP'):
                 try:
-                    user_data['biometric_id'] = int(user_data['employee_id'].replace('EMP', ''))
+                    extracted_id = int(user_data['employee_id'].replace('EMP', ''))
+                    # FORCE minimum of 22
+                    if extracted_id < 22:
+                        # Find next available ID starting from 22
+                        last_user = db.users.find_one(
+                            {'biometric_id': {'$exists': True, '$gte': 22}},
+                            sort=[('biometric_id', -1)]
+                        )
+                        if last_user and last_user.get('biometric_id'):
+                            user_data['biometric_id'] = int(last_user['biometric_id']) + 1
+                        else:
+                            user_data['biometric_id'] = 22
+                        logger.warning(f"Employee ID {user_data['employee_id']} would use biometric ID {extracted_id}, forcing to {user_data['biometric_id']} (min: 22)")
+                    else:
+                        user_data['biometric_id'] = extracted_id
                 except:
-                    # Fallback: use hash if cannot extract number
-                    user_data['biometric_id'] = hash(user_data['employee_id']) % 100000
+                    # Fallback: find next available ID starting from 22
+                    last_user = db.users.find_one(
+                        {'biometric_id': {'$exists': True, '$gte': 22}},
+                        sort=[('biometric_id', -1)]
+                    )
+                    if last_user and last_user.get('biometric_id'):
+                        user_data['biometric_id'] = int(last_user['biometric_id']) + 1
+                    else:
+                        user_data['biometric_id'] = 22
+            else:
+                # Non-EMP format: find next available ID starting from 22
+                last_user = db.users.find_one(
+                    {'biometric_id': {'$exists': True, '$gte': 22}},
+                    sort=[('biometric_id', -1)]
+                )
+                if last_user and last_user.get('biometric_id'):
+                    user_data['biometric_id'] = int(last_user['biometric_id']) + 1
+                else:
+                    user_data['biometric_id'] = 22
         
         # Set fingerprint status to PENDING for new users
         user_data.setdefault('has_fingerprint', False)

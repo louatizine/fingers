@@ -1,4 +1,5 @@
 import { useAuth } from '../context/AuthContext'
+import { useTranslation } from 'react-i18next'
 import AdminDashboard from './AdminDashboard'
 import SupervisorDashboard from './SupervisorDashboard'
 import EmployeeDashboard from './EmployeeDashboard'
@@ -10,9 +11,10 @@ import LoadingSpinner from '../components/LoadingSpinner'
  */
 export default function Dashboard() {
   const { user, loading } = useAuth()
+  const { t } = useTranslation()
 
   if (loading) {
-    return <LoadingSpinner message="Loading dashboard..." />
+    return <LoadingSpinner message={t('common.loading_message')} />
   }
 
   // Route to role-specific dashboard
