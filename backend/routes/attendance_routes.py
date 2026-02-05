@@ -230,6 +230,12 @@ def get_attendance():
                 date_filter['$lte'] = datetime.fromisoformat(request.args.get('end_date'))
             query['timestamp'] = date_filter
         
+        # Always filter out future timestamps (corrupt data)
+        if 'timestamp' not in query:
+            query['timestamp'] = {}
+        if '$lte' not in query['timestamp']:
+            query['timestamp']['$lte'] = datetime.utcnow()
+        
         # Filter by event type
         if 'event_type' in request.args:
             query['event_type'] = request.args.get('event_type')
@@ -494,4 +500,91 @@ def get_attendance_summary():
         
     except Exception as e:
         logger.error(f"Error fetching attendance summary: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@attendance_bp.route('/user-stats', methods=['GET'])
+def get_user_attendance_stats():
+    """
+    Get attendance statistics for all users - total count per user
+    Optional date filters: start_date, end_date
+    """
+    try:
+        db = get_db()
+        
+        # Get query parameters for filtering
+        start_date = request.args.get('start_date')
+        end_date = request.args.get('end_date')
+        
+        # Build match filter for date range
+        match_filter = {'timestamp': {}}
+        
+        if start_date:
+            match_filter['timestamp']['$gte'] = datetime.fromisoformat(start_date)
+        
+        if end_date:
+            # Include the entire end date
+            end_datetime = datetime.fromisoformat(end_date) + timedelta(days=1)
+            match_filter['timestamp']['$lt'] = end_datetime
+        else:
+            # Always filter out future timestamps (corrupt data)
+            match_filter['timestamp']['$lte'] = datetime.utcnow()
+        
+        # Aggregate attendance counts per employee
+        pipeline = [
+            {'$match': match_filter}
+        ]
+        
+        pipeline.extend([
+            {
+                '$group': {
+                    '_id': '$employee_id',
+                    'total_attendance': {'$sum': 1},
+                    'check_ins': {
+                        '$sum': {'$cond': [{'$eq': ['$event_type', 'check_in']}, 1, 0]}
+                    },
+                    'check_outs': {
+                        '$sum': {'$cond': [{'$eq': ['$event_type', 'check_out']}, 1, 0]}
+                    },
+                    'first_record': {'$min': '$timestamp'},
+                    'last_record': {'$max': '$timestamp'}
+                }
+            },
+            {
+                '$sort': {'total_attendance': -1}
+            }
+        ])
+        
+        attendance_stats = list(db.attendance.aggregate(pipeline))
+        
+        # Get user details and merge with attendance stats
+        user_stats = []
+        for stat in attendance_stats:
+            employee_id = stat['_id']
+            user = db.users.find_one({'employee_id': employee_id})
+            
+            user_stats.append({
+                'employee_id': employee_id,
+                'first_name': user.get('first_name', '') if user else '',
+                'last_name': user.get('last_name', '') if user else '',
+                'department': user.get('department', '') if user else '',
+                'position': user.get('position', '') if user else '',
+                'total_attendance': stat['total_attendance'],
+                'check_ins': stat['check_ins'],
+                'check_outs': stat['check_outs'],
+                'first_record': stat['first_record'].isoformat() if stat.get('first_record') else None,
+                'last_record': stat['last_record'].isoformat() if stat.get('last_record') else None
+            })
+        
+        return jsonify({
+            'success': True,
+            'user_stats': user_stats,
+            'filters': {
+                'start_date': start_date,
+                'end_date': end_date
+            }
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error fetching user attendance stats: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500

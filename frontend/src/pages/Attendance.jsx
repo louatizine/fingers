@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../context/AuthContext';
 import { 
   ClockIcon,
   UserGroupIcon,
@@ -29,14 +30,20 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
  */
 function Attendance() {
   const { t, i18n } = useTranslation();
+  const { user } = useAuth();
   const isRTL = i18n.language === 'ar';
+  const isAdmin = user?.role === 'admin';
   
   // --- State ---
   const [activeTab, setActiveTab] = useState('logs');
   const [attendanceLogs, setAttendanceLogs] = useState([]);
   const [attendanceSummary, setAttendanceSummary] = useState(null);
+  const [userStats, setUserStats] = useState([]);
   const [loading, setLoading] = useState(false);
   const [summaryLoading, setSummaryLoading] = useState(false);
+  const [statsLoading, setStatsLoading] = useState(false);
+  const [syncLoading, setSyncLoading] = useState(false);
+  const [syncStatus, setSyncStatus] = useState(null);
   const [filters, setFilters] = useState({
     employeeId: '',
     startDate: '',
@@ -71,6 +78,12 @@ function Attendance() {
   useEffect(() => {
     fetchAttendance();
   }, [pagination.page, filters]);
+
+  useEffect(() => {
+    if (activeTab === 'userStats') {
+      fetchUserStats();
+    }
+  }, [activeTab]);
 
   // Don't auto-fetch summary, user should click button
 
@@ -153,6 +166,99 @@ function Attendance() {
       setAttendanceSummary(null);
     } finally {
       setSummaryLoading(false);
+    }
+  };
+
+  const fetchUserStats = async () => {
+    setStatsLoading(true);
+    try {
+      const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+      const params = new URLSearchParams();
+      
+      if (filters.startDate) params.append('start_date', filters.startDate);
+      if (filters.endDate) params.append('end_date', filters.endDate);
+      
+      const response = await axios.get(`${API_URL}/attendance/user-stats?${params}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      if (response.data.success) {
+        setUserStats(response.data.user_stats || []);
+      }
+    } catch (error) {
+      console.error('Error fetching user stats:', error);
+      setUserStats([]);
+    } finally {
+      setStatsLoading(false);
+    }
+  };
+
+  const triggerDeviceSync = async () => {
+    setSyncLoading(true);
+    setSyncStatus(null);
+    try {
+      const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+      const response = await axios.post(`${API_URL}/device-sync/trigger`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      if (response.data.success) {
+        setSyncStatus({ type: 'success', message: t('attendance:sync.started') });
+        
+        // Poll for sync status
+        const pollInterval = setInterval(async () => {
+          try {
+            const statusRes = await axios.get(`${API_URL}/device-sync/status`, {
+              headers: { Authorization: `Bearer ${token}` }
+            });
+            
+            if (statusRes.data.success && statusRes.data.status) {
+              const status = statusRes.data.status;
+              
+              if (!status.running && status.last_result) {
+                clearInterval(pollInterval);
+                setSyncLoading(false);
+                
+                if (status.last_result.success) {
+                  setSyncStatus({ 
+                    type: 'success', 
+                    message: t('attendance:sync.completed')
+                  });
+                  
+                  // Refresh data after successful sync
+                  setTimeout(() => {
+                    fetchAttendance();
+                    if (activeTab === 'userStats') fetchUserStats();
+                  }, 1000);
+                } else {
+                  setSyncStatus({ 
+                    type: 'error', 
+                    message: `${t('attendance:sync.failed')}: ${status.last_result.error || 'Unknown error'}` 
+                  });
+                }
+              }
+            }
+          } catch (err) {
+            console.error('Error polling sync status:', err);
+          }
+        }, 2000); // Poll every 2 seconds
+        
+        // Stop polling after 5 minutes
+        setTimeout(() => {
+          clearInterval(pollInterval);
+          if (syncLoading) {
+            setSyncLoading(false);
+            setSyncStatus({ type: 'warning', message: t('attendance:sync.timeout') });
+          }
+        }, 300000);
+      }
+    } catch (error) {
+      console.error('Error triggering sync:', error);
+      setSyncStatus({ 
+        type: 'error', 
+        message: error.response?.data?.error || t('attendance:sync.failed')
+      });
+      setSyncLoading(false);
     }
   };
 
@@ -478,6 +584,29 @@ function Attendance() {
 
           {/* Stats */}
           <div className="flex flex-wrap gap-4">
+            {isAdmin && (
+              <button
+                onClick={triggerDeviceSync}
+                disabled={syncLoading}
+                className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all ${
+                  syncLoading 
+                    ? 'bg-slate-400 text-white cursor-not-allowed' 
+                    : 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:shadow-lg hover:scale-105'
+                }`}
+              >
+                {syncLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                    {t('attendance:sync.syncing')}
+                  </>
+                ) : (
+                  <>
+                    <ArrowPathIcon className="h-5 w-5" />
+                    {t('attendance:sync.button')}
+                  </>
+                )}
+              </button>
+            )}
             <StatCard 
               icon={ClockIcon} 
               label="attendance:stats.today" 
@@ -499,6 +628,32 @@ function Attendance() {
           </div>
         </header>
 
+        {/* Sync Status Alert */}
+        {syncStatus && (
+          <div className={`p-4 rounded-xl border-2 flex items-center gap-3 ${
+            syncStatus.type === 'success' 
+              ? 'bg-emerald-50 border-emerald-200 text-emerald-800' 
+              : syncStatus.type === 'error'
+              ? 'bg-red-50 border-red-200 text-red-800'
+              : 'bg-amber-50 border-amber-200 text-amber-800'
+          }`}>
+            {syncStatus.type === 'success' ? (
+              <CheckCircleIcon className="h-5 w-5 flex-shrink-0" />
+            ) : syncStatus.type === 'error' ? (
+              <XCircleIcon className="h-5 w-5 flex-shrink-0" />
+            ) : (
+              <InformationCircleIcon className="h-5 w-5 flex-shrink-0" />
+            )}
+            <span className="font-medium">{syncStatus.message}</span>
+            <button 
+              onClick={() => setSyncStatus(null)}
+              className="ml-auto p-1 hover:bg-black/5 rounded"
+            >
+              <XMarkIcon className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+
         {/* --- TABS NAVIGATION --- */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm px-6">
           <nav className="-mb-px flex space-x-8">
@@ -511,6 +666,11 @@ function Attendance() {
               id="summary" 
               label={t('attendance:tabs.summary')} 
               icon={<ChartBarIcon className="h-5 w-5" />} 
+            />
+            <TabButton 
+              id="userStats" 
+              label={t('attendance:tabs.userStats')} 
+              icon={<UsersIcon className="h-5 w-5" />} 
             />
           </nav>
         </div>
@@ -745,7 +905,7 @@ function Attendance() {
               )}
             </div>
           </div>
-        ) : (
+        ) : activeTab === 'summary' ? (
           /* --- ATTENDANCE SUMMARY TAB --- */
           <div className="space-y-6">
             {/* --- SUMMARY FILTERS TOOLBAR --- */}
@@ -1022,7 +1182,159 @@ function Attendance() {
               </div>
             )}
           </div>
-        )}
+        ) : activeTab === 'userStats' ? (
+          <div className="space-y-6">
+            {/* User Stats Header */}
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-2">
+                  <UsersIcon className="h-5 w-5 text-slate-400" />
+                  <h2 className="text-lg font-bold text-slate-800">{t('attendance:userStats.title')}</h2>
+                </div>
+                <button
+                  onClick={fetchUserStats}
+                  className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 font-medium"
+                >
+                  <ArrowPathIcon className="h-4 w-4" />
+                  {t('attendance:userStats.refresh')}
+                </button>
+              </div>
+
+              {/* Date Filters */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">{t('attendance:filters.startDate')}</label>
+                  <input
+                    type="date"
+                    name="startDate"
+                    value={filters.startDate}
+                    onChange={(e) => {
+                      handleFilterChange(e);
+                      if (activeTab === 'userStats') fetchUserStats();
+                    }}
+                    className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">{t('attendance:filters.endDate')}</label>
+                  <input
+                    type="date"
+                    name="endDate"
+                    value={filters.endDate}
+                    onChange={(e) => {
+                      handleFilterChange(e);
+                      if (activeTab === 'userStats') fetchUserStats();
+                    }}
+                    className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* User Stats Table */}
+            {statsLoading ? (
+              <div className="bg-white p-12 rounded-2xl border border-slate-200 shadow-sm text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+                <p className="mt-4 text-slate-600">{t('attendance:userStats.loading')}</p>
+              </div>
+            ) : userStats.length > 0 ? (
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-slate-50 border-b border-slate-200">
+                      <tr>
+                        <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-600">{t('attendance:userStats.employee')}</th>
+                        <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-600">{t('attendance:userStats.department')}</th>
+                        <th className="px-6 py-4 text-center text-xs font-bold uppercase tracking-wider text-slate-600">{t('attendance:userStats.totalRecords')}</th>
+                        <th className="px-6 py-4 text-center text-xs font-bold uppercase tracking-wider text-slate-600">{t('attendance:userStats.checkIns')}</th>
+                        <th className="px-6 py-4 text-center text-xs font-bold uppercase tracking-wider text-slate-600">{t('attendance:userStats.checkOuts')}</th>
+                        <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-600">{t('attendance:userStats.lastActivity')}</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {userStats.map((stat, index) => (
+                        <tr key={stat.employee_id} className="hover:bg-slate-50 transition-colors">
+                          <td className="px-6 py-4">
+                            <div>
+                              <p className="font-semibold text-slate-900">{stat.first_name} {stat.last_name}</p>
+                              <p className="text-sm text-slate-500">{stat.employee_id}</p>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700">
+                              {stat.department || 'N/A'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-center">
+                            <span className="inline-flex items-center px-4 py-2 rounded-xl text-sm font-bold bg-indigo-100 text-indigo-700">
+                              {stat.total_attendance}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-center">
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-sm font-medium bg-emerald-50 text-emerald-700">
+                              <CheckCircleIcon className="h-4 w-4" />
+                              {stat.check_ins}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-center">
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-sm font-medium bg-blue-50 text-blue-700">
+                              <XCircleIcon className="h-4 w-4" />
+                              {stat.check_outs}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <p className="text-sm text-slate-600">
+                              {stat.last_record ? formatTimestamp(stat.last_record).date : 'N/A'}
+                            </p>
+                            <p className="text-xs text-slate-400">
+                              {stat.last_record ? formatTimestamp(stat.last_record).time : ''}
+                            </p>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Summary Stats */}
+                <div className="bg-slate-50 px-6 py-4 border-t border-slate-200">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="text-center">
+                      <p className="text-sm text-slate-600">{t('attendance:userStats.totalEmployees')}</p>
+                      <p className="text-2xl font-bold text-slate-900">{userStats.length}</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-sm text-slate-600">{t('attendance:userStats.totalRecordsAll')}</p>
+                      <p className="text-2xl font-bold text-indigo-600">
+                        {userStats.reduce((sum, s) => sum + s.total_attendance, 0)}
+                      </p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-sm text-slate-600">{t('attendance:userStats.totalCheckIns')}</p>
+                      <p className="text-2xl font-bold text-emerald-600">
+                        {userStats.reduce((sum, s) => sum + s.check_ins, 0)}
+                      </p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-sm text-slate-600">{t('attendance:userStats.totalCheckOuts')}</p>
+                      <p className="text-2xl font-bold text-blue-600">
+                        {userStats.reduce((sum, s) => sum + s.check_outs, 0)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-white p-12 rounded-2xl border border-slate-200 shadow-sm">
+                <div className="text-center">
+                  <UsersIcon className="h-16 w-16 mx-auto text-slate-300 mb-4" />
+                  <h3 className="text-lg font-semibold text-slate-900 mb-2">{t('attendance:userStats.noStats')}</h3>
+                  <p className="text-slate-500">{t('attendance:userStats.noStatsDesc')}</p>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : null}
 
       {/* --- ITEMS PER PAGE SELECTOR (hidden on summary tab) --- */}
       {activeTab === 'logs' && (

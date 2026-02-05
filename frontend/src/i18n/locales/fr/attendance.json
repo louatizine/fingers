@@ -1,8 +1,40 @@
 {
   "title": "Gestion des présences",
+  "subtitle": "Suivre et gérer les enregistrements de présence des employés",
   "tabs": {
     "logs": "Registres de présence",
-    "summary": "Résumé des heures travaillées"
+    "summary": "Résumé des heures travaillées",
+    "userStats": "Statistiques Utilisateurs"
+  },
+  "sync": {
+    "button": "Synchroniser depuis l'Appareil",
+    "syncing": "Synchronisation...",
+    "started": "Synchronisation de l'appareil démarrée! Cela peut prendre quelques instants...",
+    "completed": "Synchronisation de l'appareil terminée avec succès! Actualisation des données...",
+    "failed": "Échec de la synchronisation",
+    "timeout": "La synchronisation prend plus de temps que prévu"
+  },
+  "stats": {
+    "today": "Aujourd'hui",
+    "checkIns": "Entrées",
+    "total": "Total des Enregistrements"
+  },
+  "userStats": {
+    "title": "Statistiques de Présence des Employés",
+    "refresh": "Actualiser",
+    "employee": "Employé",
+    "department": "Département",
+    "totalRecords": "Total des Enregistrements",
+    "checkIns": "Entrées",
+    "checkOuts": "Sorties",
+    "lastActivity": "Dernière Activité",
+    "totalEmployees": "Total des Employés",
+    "totalRecordsAll": "Total des Enregistrements",
+    "totalCheckIns": "Total des Entrées",
+    "totalCheckOuts": "Total des Sorties",
+    "noStats": "Aucune Statistique Disponible",
+    "noStatsDesc": "Aucun enregistrement de présence trouvé pour la période sélectionnée",
+    "loading": "Chargement des statistiques..."
   },
   "export": "Exporter en CSV",
   "filters": {
@@ -29,11 +61,19 @@
     "deviceId": "ID Appareil",
     "matchScore": "Score de correspondance"
   },
+  "summary": {
+    "title": "Résumé des heures travaillées",
+    "export": "Exporter le Résumé",
+    "noSummary": "Aucun Résumé Disponible",
+    "noSummaryDesc": "Entrez l'ID de l'employé et la plage de dates pour afficher le résumé",
+    "noSummaryHint": "Utilisez les filtres ci-dessus pour générer un résumé"
+  },
   "status": {
     "complete": "Complet",
     "incomplete": "Incomplet",
     "checkedIn": "Entrée enregistrée"
   },
   "reset": "Réinitialiser les filtres",
+  "show": "Afficher",
   "noRecords": "Aucun enregistrement de présence trouvé"
 }

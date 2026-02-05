@@ -68,10 +68,11 @@ export const useEmployees = () => {
         companyAPI.getCompanies()
       ]);
       
-      setEmployees(employeesRes.data.users);
-      setCompanies(companiesRes.data.companies);
+      console.log('✅ Loaded employees:', employeesRes.data.users?.length || 0, 'users');
+      setEmployees(employeesRes.data.users || []);
+      setCompanies(companiesRes.data.companies || []);
     } catch (err) {
-      console.error('Failed to load data:', err);
+      console.error('❌ Failed to load data:', err);
       setError(err);
       toast.error(err.response?.data?.error || 'Failed to load employees');
     } finally {

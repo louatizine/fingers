@@ -99,7 +99,7 @@ export default function EmployeeDashboard() {
                 <span className="font-medium">{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
               </div>
               <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white px-5 py-2.5 rounded-xl shadow-lg flex items-center gap-2 group hover:from-indigo-600 hover:to-purple-600 transition-all duration-300 cursor-pointer">
-                <span className="text-sm font-bold">View Profile</span>
+                <span className="text-sm font-bold">{t('dashboard:view_profile')}</span>
                 <ChevronRightIcon className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </div>
             </div>
@@ -119,13 +119,13 @@ export default function EmployeeDashboard() {
               <div className="flex items-start justify-between mb-8">
                 <div>
                   <p className="text-blue-100/80 font-semibold text-sm uppercase tracking-widest mb-2">
-                    {t('dashboard.vacation_balance')}
+                    {t('dashboard:vacation_balance')}
                   </p>
                   <h2 className="text-6xl font-black text-white tracking-tight">
                     {vacationBalance || statistics?.vacation_balance || 0}
-                    <span className="text-2xl text-blue-100/60 ml-2">{t('dashboard.days')}</span>
+                    <span className="text-2xl text-blue-100/60 ml-2">{t('dashboard:days')}</span>
                   </h2>
-                  <p className="text-blue-100/60 mt-3 text-sm font-medium">{t('dashboard.days_available')}</p>
+                  <p className="text-blue-100/60 mt-3 text-sm font-medium">{t('dashboard:days_available')}</p>
                 </div>
                 <div className="relative">
                   <CalendarIcon className="h-24 w-24 text-white/30" />
@@ -140,7 +140,7 @@ export default function EmployeeDashboard() {
               {/* Stats Grid */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-5 border border-white/10 group hover:bg-white/15 transition-all duration-300">
-                  <p className="text-blue-100/70 text-sm font-medium mb-2">{t('dashboard.vacation_earned')}</p>
+                  <p className="text-blue-100/70 text-sm font-medium mb-2">{t('dashboard:vacation_earned')}</p>
                   <div className="flex items-end justify-between">
                     <p className="text-3xl font-bold text-white">{statistics?.vacation_earned || 0}</p>
                     <div className="h-10 w-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
@@ -149,7 +149,7 @@ export default function EmployeeDashboard() {
                   </div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-5 border border-white/10 group hover:bg-white/15 transition-all duration-300">
-                  <p className="text-blue-100/70 text-sm font-medium mb-2">{t('dashboard.vacation_used')}</p>
+                  <p className="text-blue-100/70 text-sm font-medium mb-2">{t('dashboard:vacation_used')}</p>
                   <div className="flex items-end justify-between">
                     <p className="text-3xl font-bold text-white">{statistics?.vacation_used || 0}</p>
                     <div className="h-10 w-10 rounded-full bg-rose-500/20 flex items-center justify-center">
@@ -162,7 +162,7 @@ export default function EmployeeDashboard() {
               {/* Progress Bar */}
               <div className="mt-8">
                 <div className="flex justify-between text-sm text-white/70 mb-2">
-                  <span>{t('dashboard.balance_progress')}</span>
+                  <span>{t('dashboard:balance_progress')}</span>
                   <span>{Math.round(((vacationBalance || 0) / (statistics?.vacation_earned || 1)) * 100)}%</span>
                 </div>
                 <div className="h-2 bg-white/10 rounded-full overflow-hidden">
@@ -181,8 +181,8 @@ export default function EmployeeDashboard() {
             <div className="bg-white rounded-3xl border border-slate-200/60 shadow-lg shadow-slate-200/30 p-6">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h3 className="text-lg font-bold text-slate-900">{t('dashboard.my_leave_requests')}</h3>
-                  <p className="text-slate-500 text-sm mt-1">{t('dashboard.current_status_overview')}</p>
+                  <h3 className="text-lg font-bold text-slate-900">{t('dashboard:my_leave_requests')}</h3>
+                  <p className="text-slate-500 text-sm mt-1">{t('dashboard:current_status_overview')}</p>
                 </div>
                 <div className="h-12 w-12 rounded-xl bg-blue-50 flex items-center justify-center">
                   <CalendarIcon className="h-6 w-6 text-blue-600" />
@@ -208,7 +208,7 @@ export default function EmployeeDashboard() {
               </div>
               <div className="mt-6 pt-6 border-t border-slate-100">
                 <p className="text-slate-500 text-sm">
-                  <span className="font-bold text-slate-900">{leaves.total_approved_days || 0}</span> {t('dashboard.approved_days')}
+                  <span className="font-bold text-slate-900">{leaves.total_approved_days || 0}</span> {t('dashboard:approved_days')}
                 </p>
               </div>
             </div>
@@ -217,8 +217,8 @@ export default function EmployeeDashboard() {
             <div className="bg-white rounded-3xl border border-slate-200/60 shadow-lg shadow-slate-200/30 p-6">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h3 className="text-lg font-bold text-slate-900">{t('dashboard.my_salary_advances')}</h3>
-                  <p className="text-slate-500 text-sm mt-1">{t('dashboard.financial_requests_summary')}</p>
+                  <h3 className="text-lg font-bold text-slate-900">{t('dashboard:my_salary_advances')}</h3>
+                  <p className="text-slate-500 text-sm mt-1">{t('dashboard:financial_requests_summary')}</p>
                 </div>
                 <div className="h-12 w-12 rounded-xl bg-emerald-50 flex items-center justify-center">
                   <CurrencyDollarIcon className="h-6 w-6 text-emerald-600" />
@@ -244,7 +244,7 @@ export default function EmployeeDashboard() {
               </div>
               <div className="mt-6 pt-6 border-t border-slate-100">
                 <p className="text-slate-500 text-sm">
-                  {t('dashboard.total_approved_amount')}: <span className="font-bold text-slate-900">{salaryAdvances.total_approved_amount?.toFixed(2) || 0} {t('common.currency')}</span>
+                  {t('dashboard:total_approved_amount')}: <span className="font-bold text-slate-900">{salaryAdvances.total_approved_amount?.toFixed(2) || 0} {t('common.currency')}</span>
                 </p>
               </div>
             </div>
@@ -257,8 +257,8 @@ export default function EmployeeDashboard() {
           <div className="bg-white rounded-3xl border border-slate-200/60 shadow-lg shadow-slate-200/30 p-6">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h3 className="text-lg font-bold text-slate-900">{t('dashboard.recent.leave_requests')}</h3>
-                <p className="text-slate-500 text-sm mt-1">{t('dashboard.latest_activities')}</p>
+                <h3 className="text-lg font-bold text-slate-900">{t('dashboard:recent.leave_requests')}</h3>
+                <p className="text-slate-500 text-sm mt-1">{t('dashboard:latest_activities')}</p>
               </div>
               <div className="h-10 w-10 rounded-lg bg-indigo-50 flex items-center justify-center">
                 <ClockIcon className="h-5 w-5 text-indigo-600" />
@@ -278,7 +278,7 @@ export default function EmployeeDashboard() {
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-slate-900 truncate">{item.reason}</p>
                     <p className="text-xs text-slate-500">
-                      {new Date(item.date).toLocaleDateString()} • {item.days} {t('dashboard.days')}
+                      {new Date(item.date).toLocaleDateString()} • {item.days} {t('dashboard:days')}
                     </p>
                   </div>
                   <ChevronRightIcon className="h-4 w-4 text-slate-400 group-hover:text-indigo-600 transition-colors" />
@@ -286,12 +286,12 @@ export default function EmployeeDashboard() {
               )) || (
                 <div className="text-center py-8 text-slate-400">
                   <CalendarIcon className="h-12 w-12 mx-auto mb-3 opacity-30" />
-                  <p className="text-sm">{t('dashboard.no_recent_leave_requests')}</p>
+                  <p className="text-sm">{t('dashboard:no_recent_leave_requests')}</p>
                 </div>
               )}
             </div>
             <button className="w-full mt-6 py-3 text-center text-sm font-medium text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-xl transition-all">
-              {t('dashboard.view_all_requests')}
+              {t('dashboard:view_all_requests')}
             </button>
           </div>
 
@@ -299,8 +299,8 @@ export default function EmployeeDashboard() {
           <div className="bg-white rounded-3xl border border-slate-200/60 shadow-lg shadow-slate-200/30 p-6">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h3 className="text-lg font-bold text-slate-900">{t('dashboard.recent.salary_advances')}</h3>
-                <p className="text-slate-500 text-sm mt-1">{t('dashboard.financial_activities')}</p>
+                <h3 className="text-lg font-bold text-slate-900">{t('dashboard:recent.salary_advances')}</h3>
+                <p className="text-slate-500 text-sm mt-1">{t('dashboard:financial_activities')}</p>
               </div>
               <div className="h-10 w-10 rounded-lg bg-emerald-50 flex items-center justify-center">
                 <CurrencyDollarIcon className="h-5 w-5 text-emerald-600" />
@@ -328,25 +328,25 @@ export default function EmployeeDashboard() {
               )) || (
                 <div className="text-center py-8 text-slate-400">
                   <CurrencyDollarIcon className="h-12 w-12 mx-auto mb-3 opacity-30" />
-                  <p className="text-sm">{t('dashboard.no_recent_salary_advances')}</p>
+                  <p className="text-sm">{t('dashboard:no_recent_salary_advances')}</p>
                 </div>
               )}
             </div>
             <button className="w-full mt-6 py-3 text-center text-sm font-medium text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-xl transition-all">
-              {t('dashboard.view_all_advances')}
+              {t('dashboard:view_all_advances')}
             </button>
           </div>
 
           {/* Quick Actions */}
           <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-6 text-white">
-            <h3 className="text-lg font-bold mb-4">{t('dashboard.quick_actions')}</h3>
+            <h3 className="text-lg font-bold mb-4">{t('dashboard:quick_actions')}</h3>
             <div className="space-y-3">
               <button className="w-full flex items-center justify-between p-3 rounded-xl bg-white/10 hover:bg-white/15 transition-all group">
                 <div className="flex items-center gap-3">
                   <div className="h-8 w-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
                     <CalendarIcon className="h-4 w-4" />
                   </div>
-                  <span className="text-sm font-medium">{t('dashboard.request_leave')}</span>
+                  <span className="text-sm font-medium">{t('dashboard:request_leave')}</span>
                 </div>
                 <ChevronRightIcon className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
               </button>
@@ -355,7 +355,7 @@ export default function EmployeeDashboard() {
                   <div className="h-8 w-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
                     <CurrencyDollarIcon className="h-4 w-4" />
                   </div>
-                  <span className="text-sm font-medium">{t('dashboard.request_advance')}</span>
+                  <span className="text-sm font-medium">{t('dashboard:request_advance')}</span>
                 </div>
                 <ChevronRightIcon className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
               </button>
@@ -364,7 +364,7 @@ export default function EmployeeDashboard() {
                   <div className="h-8 w-8 rounded-lg bg-purple-500/20 flex items-center justify-center">
                     <BriefcaseIcon className="h-4 w-4" />
                   </div>
-                  <span className="text-sm font-medium">{t('dashboard.view_schedule')}</span>
+                  <span className="text-sm font-medium">{t('dashboard:view_schedule')}</span>
                 </div>
                 <ChevronRightIcon className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
               </button>
@@ -376,12 +376,12 @@ export default function EmployeeDashboard() {
       {/* Bottom Stats - Optional if you want to keep original StatCard components */}
       <div className="hidden">
         <RecentRequestsList
-          title={t('dashboard.recent.leave_requests')}
+          title={t('dashboard:recent.leave_requests')}
           items={statistics?.recent_leaves}
           type="leave"
         />
         <RecentRequestsList
-          title={t('dashboard.recent.salary_advances')}
+          title={t('dashboard:recent.salary_advances')}
           items={statistics?.recent_salary_advances}
           type="advance"
         />

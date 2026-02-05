@@ -590,7 +590,12 @@ def get_all_users(filters=None):
     # Apply filters if provided (e.g., company_id)
     if filters:
         if 'company_id' in filters:
-            query['company_id'] = filters['company_id']
+            # For company filter, include users with matching company_id OR no company_id
+            query['$or'] = [
+                {'company_id': filters['company_id']},
+                {'company_id': {'$exists': False}},
+                {'company_id': None}
+            ]
         if 'role' in filters:
             query['role'] = filters['role']
 

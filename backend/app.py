@@ -22,10 +22,10 @@ def create_app(config_class=Config):
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
     
-    # Enable CORS with proper configuration - allow both localhost:3000 and 127.0.0.1:3000
+    # Enable CORS with proper configuration - allow multiple ports
     CORS(app, resources={
         r"/api/*": {
-            "origins": ["http://localhost:3000", "http://127.0.0.1:3000"],
+            "origins": ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:3001", "http://127.0.0.1:3001"],
             "supports_credentials": True,
             "allow_headers": ["Content-Type", "Authorization"],
             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
@@ -50,6 +50,7 @@ def create_app(config_class=Config):
     from routes.fingerprint_routes import fingerprint_bp
     from routes.attendance_routes import attendance_bp
     from routes.terminal_routes import terminal_bp
+    from routes.device_sync_routes import device_sync_bp
     
     # Register the IN-APP notification routes (for navbar)
     from routes.notif_routes import notif_bp  # This should have /unread-count route
@@ -71,6 +72,7 @@ def create_app(config_class=Config):
     app.register_blueprint(fingerprint_bp, url_prefix='/api/fingerprint')
     app.register_blueprint(attendance_bp, url_prefix='/api/attendance')
     app.register_blueprint(terminal_bp, url_prefix='/api/terminal')
+    app.register_blueprint(device_sync_bp, url_prefix='/api/device-sync')
 
     @app.route('/api/health', methods=['GET'])
     def health_check():

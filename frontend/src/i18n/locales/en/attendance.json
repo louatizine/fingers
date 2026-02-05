@@ -1,8 +1,40 @@
 {
   "title": "Attendance Management",
+  "subtitle": "Track and manage employee attendance records",
   "tabs": {
     "logs": "Attendance Logs",
-    "summary": "Worked Hours Summary"
+    "summary": "Worked Hours Summary",
+    "userStats": "User Statistics"
+  },
+  "sync": {
+    "button": "Sync from Device",
+    "syncing": "Syncing...",
+    "started": "Device sync started! This may take a few moments...",
+    "completed": "Device sync completed successfully! Refreshing data...",
+    "failed": "Sync failed",
+    "timeout": "Sync is taking longer than expected"
+  },
+  "stats": {
+    "today": "Today",
+    "checkIns": "Check-ins",
+    "total": "Total Records"
+  },
+  "userStats": {
+    "title": "Employee Attendance Statistics",
+    "refresh": "Refresh",
+    "employee": "Employee",
+    "department": "Department",
+    "totalRecords": "Total Records",
+    "checkIns": "Check-ins",
+    "checkOuts": "Check-outs",
+    "lastActivity": "Last Activity",
+    "totalEmployees": "Total Employees",
+    "totalRecordsAll": "Total Records",
+    "totalCheckIns": "Total Check-ins",
+    "totalCheckOuts": "Total Check-outs",
+    "noStats": "No Statistics Available",
+    "noStatsDesc": "No attendance records found for the selected period",
+    "loading": "Loading statistics..."
   },
   "export": "Export to CSV",
   "filters": {
@@ -29,11 +61,19 @@
     "deviceId": "Device ID",
     "matchScore": "Match Score"
   },
+  "summary": {
+    "title": "Worked Hours Summary",
+    "export": "Export Summary",
+    "noSummary": "No Summary Available",
+    "noSummaryDesc": "Enter employee ID and date range to view summary",
+    "noSummaryHint": "Use the filters above to generate a summary"
+  },
   "status": {
     "complete": "Complete",
     "incomplete": "Incomplete",
     "checkedIn": "Checked In"
   },
   "reset": "Reset Filters",
+  "show": "Show",
   "noRecords": "No attendance records found"
 }
