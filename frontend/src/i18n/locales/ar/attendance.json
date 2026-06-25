@@ -2,7 +2,7 @@
   "title": "إدارة الحضور",
   "subtitle": "تتبع وإدارة سجلات حضور الموظفين",
   "tabs": {
-    "logs": "سجلات الحضور",
+    "logs": "ملخصات يومية",
     "summary": "ملخص ساعات العمل",
     "userStats": "إحصائيات المستخدمين"
   },
@@ -12,21 +12,33 @@
     "started": "بدأت مزامنة الجهاز! قد يستغرق هذا بضع لحظات...",
     "completed": "اكتملت مزامنة الجهاز بنجاح! جارٍ تحديث البيانات...",
     "failed": "فشلت المزامنة",
-    "timeout": "المزامنة تستغرق وقتًا أطول من المتوقع"
+    "timeout": "المزامنة تستغرق وقتًا أطول من المتوقع",
+    "hint": "سجلات قديمة مفقودة؟ استخدم المزامنة من الجهاز لاستيراد حتى 6 أشهر من السجل."
   },
   "stats": {
-    "today": "اليوم",
-    "checkIns": "تسجيلات الدخول",
-    "total": "إجمالي السجلات"
+    "today": "اليوم (الصفحة)",
+    "totalHours": "إجمالي الساعات",
+    "total": "إجمالي الأيام",
+    "inPeriod": "{{count}} ملخص في الفترة المحددة"
+  },
+  "presets": {
+    "title": "فترات سريعة",
+    "last6Months": "آخر 6 أشهر",
+    "last30Days": "آخر 30 يومًا",
+    "thisMonth": "هذا الشهر",
+    "yearToDate": "منذ بداية السنة"
   },
   "userStats": {
     "title": "إحصائيات حضور الموظفين",
     "refresh": "تحديث",
     "employee": "الموظف",
     "department": "القسم",
-    "totalRecords": "إجمالي السجلات",
-    "checkIns": "تسجيلات الدخول",
-    "checkOuts": "تسجيلات الخروج",
+    "daysWithRecords": "أيام العمل",
+    "totalHours": "إجمالي الساعات",
+    "totalEvents": "أحداث الجهاز",
+    "totalDaysAll": "إجمالي أيام العمل",
+    "totalHoursAll": "إجمالي الساعات",
+    "totalEventsAll": "إجمالي أحداث الجهاز",
     "lastActivity": "آخر نشاط",
     "totalEmployees": "إجمالي الموظفين",
     "totalRecordsAll": "إجمالي السجلات",
@@ -37,8 +49,16 @@
     "loading": "جارٍ تحميل الإحصائيات..."
   },
   "export": "تصدير إلى CSV",
+  "refresh": "تحديث",
+  "retry": "إعادة المحاولة",
+  "loading": "جارٍ تحميل الحضور...",
+  "tryAdjustFilters": "جرّب فترة أوسع أو زامن من جهاز البصمة لاستيراد البيانات التاريخية.",
+  "errors": {
+    "loadFailed": "فشل تحميل سجلات الحضور. يرجى المحاولة مرة أخرى."
+  },
   "filters": {
     "title": "الفلاتر",
+    "employee": "الموظف",
     "employeeId": "معرف الموظف",
     "startDate": "تاريخ البداية",
     "endDate": "تاريخ النهاية",
@@ -46,32 +66,57 @@
     "all": "الكل",
     "checkIn": "تسجيل الدخول",
     "checkOut": "تسجيل الخروج",
-    "placeholder_employee": "أدخل معرف الموظف"
+    "allEmployees": "جميع الموظفين",
+    "selectEmployee": "اختر موظفاً",
+    "searchEmployee": "البحث بالاسم أو المعرف...",
+    "placeholder_employee": "أدخل معرف الموظف",
+    "defaultRangeHint": "يتم عرض آخر 6 أشهر افتراضياً. استخدم الفترات السريعة أو اختر تواريخ مخصصة.",
+    "activeRange": "{{start}} → {{end}}"
   },
   "table": {
     "employee": "الموظف",
-    "employeeId": "رقم الموظف",
+    "employeeId": "الموظف",
     "timestamp": "الوقت والتاريخ",
     "eventType": "نوع الحدث",
     "date": "التاريخ",
+    "day": "اليوم",
     "checkIn": "تسجيل الدخول",
     "checkOut": "تسجيل الخروج",
     "status": "الحالة",
     "device": "الجهاز",
     "deviceId": "رقم الجهاز",
-    "matchScore": "نقاط المطابقة"
+    "matchScore": "نقاط المطابقة",
+    "workedHours": "ساعات العمل",
+    "records": "السجلات"
   },
   "summary": {
     "title": "ملخص ساعات العمل",
     "export": "تصدير الملخص",
+    "getSummary": "إنشاء الملخص",
+    "loading": "جارٍ إنشاء الملخص...",
     "noSummary": "لا يوجد ملخص متاح",
-    "noSummaryDesc": "أدخل معرف الموظف والفترة الزمنية لعرض الملخص",
-    "noSummaryHint": "استخدم الفلاتر أعلاه لإنشاء ملخص"
+    "noSummaryDesc": "اختر موظفاً وفترة زمنية ثم انقر على إنشاء الملخص",
+    "noSummaryHint": "استخدم الفلاتر أعلاه لإنشاء ملخص",
+    "employeeIdInfo": "اختر موظفاً لعرض تفاصيل الحضور اليومي",
+    "period": "من {{start}} إلى {{end}}",
+    "totalDays": "إجمالي الأيام",
+    "daysWithRecords": "أيام بها سجلات",
+    "completeDays": "أيام مكتملة",
+    "totalHours": "إجمالي الساعات",
+    "dailyAttendance": "الحضور اليومي",
+    "detailedView": "عرض تفصيلي",
+    "noRecordsPeriod": "لا توجد سجلات لهذه الفترة"
   },
   "status": {
     "complete": "مكتمل",
+    "partial": "جزئي",
+    "absent": "غائب",
+    "no_data": "لا توجد بيانات",
     "incomplete": "غير مكتمل",
     "checkedIn": "تم تسجيل الدخول"
+  },
+  "pagination": {
+    "showing": "صفحة {{page}} من {{total}} · {{records}} سجل"
   },
   "reset": "إعادة تعيين الفلاتر",
   "show": "عرض",

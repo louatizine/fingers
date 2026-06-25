@@ -2,7 +2,7 @@
   "title": "Attendance Management",
   "subtitle": "Track and manage employee attendance records",
   "tabs": {
-    "logs": "Attendance Logs",
+    "logs": "Daily Summaries",
     "summary": "Worked Hours Summary",
     "userStats": "User Statistics"
   },
@@ -12,21 +12,33 @@
     "started": "Device sync started! This may take a few moments...",
     "completed": "Device sync completed successfully! Refreshing data...",
     "failed": "Sync failed",
-    "timeout": "Sync is taking longer than expected"
+    "timeout": "Sync is taking longer than expected",
+    "hint": "Missing older records? Use Sync from Device to import up to 6 months of history from the terminal."
   },
   "stats": {
-    "today": "Today",
-    "checkIns": "Check-ins",
-    "total": "Total Records"
+    "today": "Today (page)",
+    "totalHours": "Total Hours",
+    "total": "Total Days",
+    "inPeriod": "{{count}} day summaries in selected period"
+  },
+  "presets": {
+    "title": "Quick ranges",
+    "last6Months": "Last 6 months",
+    "last30Days": "Last 30 days",
+    "thisMonth": "This month",
+    "yearToDate": "Year to date"
   },
   "userStats": {
     "title": "Employee Attendance Statistics",
     "refresh": "Refresh",
     "employee": "Employee",
     "department": "Department",
-    "totalRecords": "Total Records",
-    "checkIns": "Check-ins",
-    "checkOuts": "Check-outs",
+    "daysWithRecords": "Days Worked",
+    "totalHours": "Total Hours",
+    "totalEvents": "Device Events",
+    "totalDaysAll": "Total Days Worked",
+    "totalHoursAll": "Total Hours",
+    "totalEventsAll": "Total Device Events",
     "lastActivity": "Last Activity",
     "totalEmployees": "Total Employees",
     "totalRecordsAll": "Total Records",
@@ -37,8 +49,16 @@
     "loading": "Loading statistics..."
   },
   "export": "Export to CSV",
+  "refresh": "Refresh",
+  "retry": "Retry",
+  "loading": "Loading attendance...",
+  "tryAdjustFilters": "Try a wider date range or sync from the fingerprint device to import historical data.",
+  "errors": {
+    "loadFailed": "Failed to load attendance records. Please try again."
+  },
   "filters": {
     "title": "Filters",
+    "employee": "Employee",
     "employeeId": "Employee ID",
     "startDate": "Start Date",
     "endDate": "End Date",
@@ -46,32 +66,57 @@
     "all": "All",
     "checkIn": "Check In",
     "checkOut": "Check Out",
-    "placeholder_employee": "Enter employee ID"
+    "allEmployees": "All employees",
+    "selectEmployee": "Select an employee",
+    "searchEmployee": "Search by name or ID...",
+    "placeholder_employee": "Enter employee ID",
+    "defaultRangeHint": "Showing the last 6 months by default. Use quick ranges or pick custom dates.",
+    "activeRange": "{{start}} → {{end}}"
   },
   "table": {
     "employee": "Employee",
-    "employeeId": "Employee ID",
+    "employeeId": "Employee",
     "timestamp": "Timestamp",
     "eventType": "Event Type",
     "date": "Date",
+    "day": "Day",
     "checkIn": "Check In",
     "checkOut": "Check Out",
     "status": "Status",
     "device": "Device",
     "deviceId": "Device ID",
-    "matchScore": "Match Score"
+    "matchScore": "Match Score",
+    "workedHours": "Worked Hours",
+    "records": "Records"
   },
   "summary": {
     "title": "Worked Hours Summary",
     "export": "Export Summary",
+    "getSummary": "Generate Summary",
+    "loading": "Generating summary...",
     "noSummary": "No Summary Available",
-    "noSummaryDesc": "Enter employee ID and date range to view summary",
-    "noSummaryHint": "Use the filters above to generate a summary"
+    "noSummaryDesc": "Select an employee and date range, then click Generate Summary",
+    "noSummaryHint": "Use the filters above to generate a summary",
+    "employeeIdInfo": "Select an employee to view their daily attendance breakdown",
+    "period": "{{start}} to {{end}}",
+    "totalDays": "Total Days",
+    "daysWithRecords": "Days with Records",
+    "completeDays": "Complete Days",
+    "totalHours": "Total Hours",
+    "dailyAttendance": "Daily Attendance",
+    "detailedView": "Detailed Table",
+    "noRecordsPeriod": "No attendance records found for this period"
   },
   "status": {
     "complete": "Complete",
+    "partial": "Partial",
+    "absent": "Absent",
+    "no_data": "No Data",
     "incomplete": "Incomplete",
     "checkedIn": "Checked In"
+  },
+  "pagination": {
+    "showing": "Page {{page}} of {{total}} · {{records}} records"
   },
   "reset": "Reset Filters",
   "show": "Show",

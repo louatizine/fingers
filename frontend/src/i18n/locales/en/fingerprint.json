@@ -14,7 +14,7 @@
   "show": "Show",
   "note": {
     "title": "Note:",
-    "description": "Fingerprint enrollment is performed using the Windows Desktop Application. This page only displays enrolled users. To enroll new users, use the desktop biometric terminal."
+    "description": "Enroll employees on the ZKTeco fingerprint terminal (device screen or ZKTeco software). The backend automatically syncs enrolled users and attendance every few minutes — no desktop app required."
   },
   "table": {
     "userIdentity": "User Identity",

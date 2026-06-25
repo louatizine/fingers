@@ -23,8 +23,8 @@ export default function Sidebar() {
     { name: t('nav.salary_advances'), href: '/salary-advances', icon: CurrencyDollarIcon, roles: ['admin', 'supervisor', 'employee'] },
     { name: t('nav.projects'), href: '/projects', icon: BriefcaseIcon, roles: ['admin', 'supervisor', 'employee'], employeeRequiresProjects: true },
     { name: t('nav.attendance'), href: '/attendance', icon: ClockIcon, roles: ['admin', 'supervisor'] },
-    { name: t('nav.fingerprint'), href: '/fingerprint', icon: FingerPrintIcon, roles: ['admin', 'supervisor'] },
-    { name: t('nav.settings'), href: '/settings', icon: CogIcon, roles: ['supervisor'] },
+/*     { name: t('nav.fingerprint'), href: '/fingerprint', icon: FingerPrintIcon, roles: ['admin', 'supervisor'] },
+ */    { name: t('nav.settings'), href: '/settings', icon: CogIcon, roles: ['supervisor'] },
   ]
 
   const filteredNavigation = navigation.filter(item => {

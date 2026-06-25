@@ -2,7 +2,7 @@
   "title": "Gestion des présences",
   "subtitle": "Suivre et gérer les enregistrements de présence des employés",
   "tabs": {
-    "logs": "Registres de présence",
+    "logs": "Résumés quotidiens",
     "summary": "Résumé des heures travaillées",
     "userStats": "Statistiques Utilisateurs"
   },
@@ -12,21 +12,33 @@
     "started": "Synchronisation de l'appareil démarrée! Cela peut prendre quelques instants...",
     "completed": "Synchronisation de l'appareil terminée avec succès! Actualisation des données...",
     "failed": "Échec de la synchronisation",
-    "timeout": "La synchronisation prend plus de temps que prévu"
+    "timeout": "La synchronisation prend plus de temps que prévu",
+    "hint": "Des enregistrements manquants? Synchronisez depuis l'appareil pour importer jusqu'à 6 mois d'historique."
   },
   "stats": {
-    "today": "Aujourd'hui",
-    "checkIns": "Entrées",
-    "total": "Total des Enregistrements"
+    "today": "Aujourd'hui (page)",
+    "totalHours": "Heures totales",
+    "total": "Jours totaux",
+    "inPeriod": "{{count}} résumés sur la période"
+  },
+  "presets": {
+    "title": "Périodes rapides",
+    "last6Months": "6 derniers mois",
+    "last30Days": "30 derniers jours",
+    "thisMonth": "Ce mois-ci",
+    "yearToDate": "Depuis janvier"
   },
   "userStats": {
     "title": "Statistiques de Présence des Employés",
     "refresh": "Actualiser",
     "employee": "Employé",
     "department": "Département",
-    "totalRecords": "Total des Enregistrements",
-    "checkIns": "Entrées",
-    "checkOuts": "Sorties",
+    "daysWithRecords": "Jours travaillés",
+    "totalHours": "Heures totales",
+    "totalEvents": "Événements",
+    "totalDaysAll": "Total jours travaillés",
+    "totalHoursAll": "Total heures",
+    "totalEventsAll": "Total événements",
     "lastActivity": "Dernière Activité",
     "totalEmployees": "Total des Employés",
     "totalRecordsAll": "Total des Enregistrements",
@@ -37,8 +49,16 @@
     "loading": "Chargement des statistiques..."
   },
   "export": "Exporter en CSV",
+  "refresh": "Actualiser",
+  "retry": "Réessayer",
+  "loading": "Chargement des présences...",
+  "tryAdjustFilters": "Essayez une période plus large ou synchronisez depuis l'appareil biométrique.",
+  "errors": {
+    "loadFailed": "Échec du chargement des présences. Veuillez réessayer."
+  },
   "filters": {
     "title": "Filtres",
+    "employee": "Employé",
     "employeeId": "ID d'employé",
     "startDate": "Date de début",
     "endDate": "Date de fin",
@@ -46,32 +66,57 @@
     "all": "Tous",
     "checkIn": "Entrée",
     "checkOut": "Sortie",
-    "placeholder_employee": "Entrez l'ID de l'employé"
+    "allEmployees": "Tous les employés",
+    "selectEmployee": "Sélectionner un employé",
+    "searchEmployee": "Rechercher par nom ou ID...",
+    "placeholder_employee": "Entrez l'ID de l'employé",
+    "defaultRangeHint": "Les 6 derniers mois sont affichés par défaut. Utilisez les périodes rapides ou choisissez des dates.",
+    "activeRange": "{{start}} → {{end}}"
   },
   "table": {
     "employee": "Employé",
-    "employeeId": "ID Employé",
+    "employeeId": "Employé",
     "timestamp": "Horodatage",
     "eventType": "Type d'événement",
     "date": "Date",
+    "day": "Jour",
     "checkIn": "Entrée",
     "checkOut": "Sortie",
     "status": "Statut",
     "device": "Appareil",
     "deviceId": "ID Appareil",
-    "matchScore": "Score de correspondance"
+    "matchScore": "Score de correspondance",
+    "workedHours": "Heures travaillées",
+    "records": "Enregistrements"
   },
   "summary": {
     "title": "Résumé des heures travaillées",
     "export": "Exporter le Résumé",
+    "getSummary": "Générer le résumé",
+    "loading": "Génération du résumé...",
     "noSummary": "Aucun Résumé Disponible",
-    "noSummaryDesc": "Entrez l'ID de l'employé et la plage de dates pour afficher le résumé",
-    "noSummaryHint": "Utilisez les filtres ci-dessus pour générer un résumé"
+    "noSummaryDesc": "Sélectionnez un employé et une période, puis cliquez sur Générer le résumé",
+    "noSummaryHint": "Utilisez les filtres ci-dessus pour générer un résumé",
+    "employeeIdInfo": "Sélectionnez un employé pour voir le détail journalier",
+    "period": "{{start}} au {{end}}",
+    "totalDays": "Jours totaux",
+    "daysWithRecords": "Jours avec enregistrements",
+    "completeDays": "Jours complets",
+    "totalHours": "Heures totales",
+    "dailyAttendance": "Présence quotidienne",
+    "detailedView": "Vue détaillée",
+    "noRecordsPeriod": "Aucun enregistrement pour cette période"
   },
   "status": {
     "complete": "Complet",
+    "partial": "Partiel",
+    "absent": "Absent",
+    "no_data": "Aucune donnée",
     "incomplete": "Incomplet",
     "checkedIn": "Entrée enregistrée"
+  },
+  "pagination": {
+    "showing": "Page {{page}} sur {{total}} · {{records}} enregistrements"
   },
   "reset": "Réinitialiser les filtres",
   "show": "Afficher",

@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
-import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
+import apiClient, { userAPI, attendanceAPI } from '../services/api';
 import { 
   ClockIcon,
   UserGroupIcon,
@@ -23,61 +23,175 @@ import {
   QuestionMarkCircleIcon
 } from '@heroicons/react/24/outline';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const formatDateInput = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const getLast6MonthsRange = () => {
+  const now = new Date();
+  const start = new Date(now);
+  start.setMonth(start.getMonth() - 6);
+  return {
+    startDate: formatDateInput(start),
+    endDate: formatDateInput(now),
+  };
+};
+
+const getDatePresets = () => {
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const last30 = new Date(now);
+  last30.setDate(last30.getDate() - 30);
+  const last6 = new Date(now);
+  last6.setMonth(last6.getMonth() - 6);
+  const ytd = new Date(now.getFullYear(), 0, 1);
+
+  return {
+    last6Months: { startDate: formatDateInput(last6), endDate: formatDateInput(now) },
+    last30Days: { startDate: formatDateInput(last30), endDate: formatDateInput(now) },
+    thisMonth: { startDate: formatDateInput(startOfMonth), endDate: formatDateInput(now) },
+    yearToDate: { startDate: formatDateInput(ytd), endDate: formatDateInput(now) },
+  };
+};
+
+const getDefaultDateRange = getLast6MonthsRange;
+
+function DatePresetBar({ activePreset, onSelect, t }) {
+  const presets = [
+    { id: 'last6Months', label: t('attendance:presets.last6Months') },
+    { id: 'last30Days', label: t('attendance:presets.last30Days') },
+    { id: 'thisMonth', label: t('attendance:presets.thisMonth') },
+    { id: 'yearToDate', label: t('attendance:presets.yearToDate') },
+  ];
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      {presets.map((preset) => (
+        <button
+          key={preset.id}
+          type="button"
+          onClick={() => onSelect(preset.id)}
+          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+            activePreset === preset.id
+              ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200'
+              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+          }`}
+        >
+          {preset.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function EmployeeSelect({
+  value,
+  onChange,
+  employees,
+  employeeSearch,
+  onSearchChange,
+  isRTL,
+  t,
+  name = 'employeeId',
+  allowAll = true,
+  required = false,
+}) {
+  const filteredEmployees = useMemo(() => {
+    const query = employeeSearch.trim().toLowerCase();
+    if (!query) return employees;
+    return employees.filter((emp) =>
+      `${emp.first_name} ${emp.last_name} ${emp.employee_id} ${emp.department || ''}`
+        .toLowerCase()
+        .includes(query)
+    );
+  }, [employees, employeeSearch]);
+
+  return (
+    <div className="space-y-2">
+      <div className="relative">
+        <MagnifyingGlassIcon
+          className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400`}
+        />
+        <input
+          type="text"
+          value={employeeSearch}
+          onChange={(e) => onSearchChange(e.target.value)}
+          placeholder={t('attendance:filters.searchEmployee')}
+          className={`w-full ${isRTL ? 'pr-9 pl-3' : 'pl-9 pr-3'} py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400`}
+        />
+      </div>
+      <div className="relative">
+        <UserGroupIcon
+          className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 pointer-events-none`}
+        />
+        <select
+          name={name}
+          value={value}
+          onChange={onChange}
+          required={required}
+          className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500 transition-all font-medium appearance-none cursor-pointer`}
+        >
+          {allowAll && <option value="">{t('attendance:filters.allEmployees')}</option>}
+          {!allowAll && <option value="">{t('attendance:filters.selectEmployee')}</option>}
+          {filteredEmployees.map((emp) => (
+            <option key={emp.employee_id} value={emp.employee_id}>
+              {emp.employee_id} — {emp.first_name} {emp.last_name}
+              {emp.department ? ` (${emp.department})` : ''}
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>
+  );
+}
 
 /**
  * Attendance Management Page - Modern Design
  */
 function Attendance() {
   const { t, i18n } = useTranslation();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const isRTL = i18n.language === 'ar';
   const isAdmin = user?.role === 'admin';
+  const canSelectEmployee = user?.role === 'admin' || user?.role === 'supervisor';
+  const defaultDates = getDefaultDateRange();
   
   // --- State ---
-  const [activeTab, setActiveTab] = useState('logs');
-  const [attendanceLogs, setAttendanceLogs] = useState([]);
+  const [activeTab, setActiveTab] = useState('summary');
   const [attendanceSummary, setAttendanceSummary] = useState(null);
   const [userStats, setUserStats] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [employees, setEmployees] = useState([]);
+  const [employeeSearch, setEmployeeSearch] = useState('');
+  const [summaryEmployeeSearch, setSummaryEmployeeSearch] = useState('');
   const [summaryLoading, setSummaryLoading] = useState(false);
   const [statsLoading, setStatsLoading] = useState(false);
   const [syncLoading, setSyncLoading] = useState(false);
   const [syncStatus, setSyncStatus] = useState(null);
+  const [activeDatePreset, setActiveDatePreset] = useState('last6Months');
   const [filters, setFilters] = useState({
     employeeId: '',
-    startDate: '',
-    endDate: '',
-    eventType: ''
+    ...defaultDates,
   });
-  
-  // Dynamic dates - use current year
-  const getCurrentYearDates = () => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    return {
-      startDate: `${year}-${month}-01`,
-      endDate: `${year}-${month}-${String(new Date(year, now.getMonth() + 1, 0).getDate()).padStart(2, '0')}`
-    };
-  };
   
   const [summaryFilters, setSummaryFilters] = useState({
     employeeId: '',
-    ...getCurrentYearDates()
-  });
-  
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 10,
-    total: 0,
-    pages: 0
+    ...defaultDates,
   });
 
   // --- Effects ---
   useEffect(() => {
-    fetchAttendance();
-  }, [pagination.page, filters]);
+    if (authLoading || !user) return;
+
+    if (canSelectEmployee) {
+      fetchEmployees();
+    } else if (user.employee_id) {
+      setFilters((prev) => ({ ...prev, employeeId: user.employee_id }));
+      setSummaryFilters((prev) => ({ ...prev, employeeId: user.employee_id }));
+    }
+  }, [authLoading, user, canSelectEmployee]);
 
   useEffect(() => {
     if (activeTab === 'userStats') {
@@ -85,80 +199,43 @@ function Attendance() {
     }
   }, [activeTab]);
 
-  // Don't auto-fetch summary, user should click button
-
-  // --- Auth Helper ---
-  const createAuthenticatedRequest = () => {
-    const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
-    
-    return axios.create({
-      baseURL: API_URL,
-      headers: {
-        'Authorization': token ? `Bearer ${token}` : '',
-        'Content-Type': 'application/json'
-      }
-    });
-  };
+  useEffect(() => {
+    if (authLoading || !summaryFilters.employeeId) return;
+    if (activeTab === 'summary') {
+      fetchAttendanceSummary();
+    }
+  }, [authLoading, activeTab, summaryFilters.employeeId, summaryFilters.startDate, summaryFilters.endDate]);
 
   // --- Logic ---
-  const fetchAttendance = async () => {
-    setLoading(true);
+  const fetchEmployees = async () => {
     try {
-      const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
-      const params = new URLSearchParams({
-        page: pagination.page,
-        limit: pagination.limit,
-        ...Object.fromEntries(Object.entries(filters).filter(([_, v]) => v !== ''))
-      });
-
-      const response = await axios.get(`${API_URL}/attendance?${params}`, {
-        headers: {
-          'Authorization': token ? `Bearer ${token}` : '',
-          'Content-Type': 'application/json'
-        }
-      });
-      if (response.data.success) {
-        setAttendanceLogs(response.data.data);
-        setPagination(prev => ({ ...prev, ...response.data.pagination }));
-      }
+      const response = await userAPI.getUsers();
+      const list = (response.data.users || []).filter((u) => u.is_active !== false);
+      list.sort((a, b) =>
+        `${a.first_name} ${a.last_name}`.localeCompare(`${b.first_name} ${b.last_name}`)
+      );
+      setEmployees(list);
     } catch (error) {
-      console.error('Error fetching attendance:', error);
-    } finally {
-      setLoading(false);
+      console.error('Error fetching employees:', error);
     }
   };
 
   const fetchAttendanceSummary = async () => {
     if (!summaryFilters.employeeId) {
-      console.log('No employee ID provided');
       return;
     }
-    
+
     setSummaryLoading(true);
     try {
-      const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
-      const params = new URLSearchParams({
-        employee_id: summaryFilters.employeeId,
-        start_date: summaryFilters.startDate,
-        end_date: summaryFilters.endDate
-      });
+      const response = await attendanceAPI.getAttendanceSummary(
+        summaryFilters.employeeId,
+        summaryFilters.startDate,
+        summaryFilters.endDate
+      );
 
-      console.log('Fetching summary with params:', params.toString());
-      console.log('Date range:', summaryFilters.startDate, 'to', summaryFilters.endDate);
-      
-      const response = await axios.get(`${API_URL}/attendance/summary?${params}`, {
-        headers: {
-          'Authorization': token ? `Bearer ${token}` : '',
-          'Content-Type': 'application/json'
-        }
-      });
-      console.log('Summary response:', response.data);
-      
       if (response.data.success) {
-        console.log('Daily summaries count:', response.data.data.daily_summaries?.length);
         setAttendanceSummary(response.data.data);
       } else {
-        console.error('Summary fetch failed:', response.data);
         setAttendanceSummary(null);
       }
     } catch (error) {
@@ -172,16 +249,12 @@ function Attendance() {
   const fetchUserStats = async () => {
     setStatsLoading(true);
     try {
-      const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
-      const params = new URLSearchParams();
-      
-      if (filters.startDate) params.append('start_date', filters.startDate);
-      if (filters.endDate) params.append('end_date', filters.endDate);
-      
-      const response = await axios.get(`${API_URL}/attendance/user-stats?${params}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
+      const params = {};
+      if (filters.startDate) params.start_date = filters.startDate;
+      if (filters.endDate) params.end_date = filters.endDate;
+
+      const response = await apiClient.get('/attendance/user-stats', { params });
+
       if (response.data.success) {
         setUserStats(response.data.user_stats || []);
       }
@@ -197,43 +270,36 @@ function Attendance() {
     setSyncLoading(true);
     setSyncStatus(null);
     try {
-      const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
-      const response = await axios.post(`${API_URL}/device-sync/trigger`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
+      const response = await apiClient.post('/device-sync/trigger');
+
       if (response.data.success) {
         setSyncStatus({ type: 'success', message: t('attendance:sync.started') });
-        
-        // Poll for sync status
+
         const pollInterval = setInterval(async () => {
           try {
-            const statusRes = await axios.get(`${API_URL}/device-sync/status`, {
-              headers: { Authorization: `Bearer ${token}` }
-            });
-            
+            const statusRes = await apiClient.get('/device-sync/status');
+
             if (statusRes.data.success && statusRes.data.status) {
               const status = statusRes.data.status;
-              
+
               if (!status.running && status.last_result) {
                 clearInterval(pollInterval);
                 setSyncLoading(false);
-                
+
                 if (status.last_result.success) {
-                  setSyncStatus({ 
-                    type: 'success', 
-                    message: t('attendance:sync.completed')
+                  setSyncStatus({
+                    type: 'success',
+                    message: t('attendance:sync.completed'),
                   });
-                  
-                  // Refresh data after successful sync
+
                   setTimeout(() => {
-                    fetchAttendance();
+                    fetchAttendanceSummary();
                     if (activeTab === 'userStats') fetchUserStats();
                   }, 1000);
                 } else {
-                  setSyncStatus({ 
-                    type: 'error', 
-                    message: `${t('attendance:sync.failed')}: ${status.last_result.error || 'Unknown error'}` 
+                  setSyncStatus({
+                    type: 'error',
+                    message: `${t('attendance:sync.failed')}: ${status.last_result.error || 'Unknown error'}`,
                   });
                 }
               }
@@ -241,29 +307,45 @@ function Attendance() {
           } catch (err) {
             console.error('Error polling sync status:', err);
           }
-        }, 2000); // Poll every 2 seconds
-        
-        // Stop polling after 5 minutes
+        }, 2000);
+
         setTimeout(() => {
           clearInterval(pollInterval);
-          if (syncLoading) {
-            setSyncLoading(false);
-            setSyncStatus({ type: 'warning', message: t('attendance:sync.timeout') });
-          }
+          setSyncLoading(false);
+          setSyncStatus((prev) =>
+            prev?.type === 'success' && prev?.message === t('attendance:sync.started')
+              ? { type: 'warning', message: t('attendance:sync.timeout') }
+              : prev
+          );
         }, 300000);
       }
     } catch (error) {
       console.error('Error triggering sync:', error);
-      setSyncStatus({ 
-        type: 'error', 
-        message: error.response?.data?.error || t('attendance:sync.failed')
+      setSyncStatus({
+        type: 'error',
+        message: error.response?.data?.error || t('attendance:sync.failed'),
       });
       setSyncLoading(false);
     }
   };
 
+  const applyDatePreset = (presetId, target = 'logs') => {
+    const presets = getDatePresets();
+    const range = presets[presetId];
+    if (!range) return;
+
+    if (target === 'summary') {
+      setSummaryFilters((prev) => ({ ...prev, ...range }));
+    } else {
+      setActiveDatePreset(presetId);
+      setFilters((prev) => ({ ...prev, ...range }));
+      setPagination((prev) => ({ ...prev, page: 1 }));
+    }
+  };
+
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
+    setActiveDatePreset('');
     setFilters(prev => ({ ...prev, [name]: value }));
     setPagination(prev => ({ ...prev, page: 1 }));
   };
@@ -271,43 +353,24 @@ function Attendance() {
   const handleSummaryFilterChange = (e) => {
     const { name, value } = e.target;
     setSummaryFilters(prev => ({ ...prev, [name]: value }));
-    // Don't auto-fetch, let user click the button
-  };
-
-  const handleExport = async () => {
-    try {
-      const params = new URLSearchParams(
-        Object.fromEntries(Object.entries(filters).filter(([_, v]) => v !== ''))
-      );
-      
-      const response = await axios.get(`${API_URL}/attendance/export?${params}`, {
-        responseType: 'blob'
-      });
-
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `attendance_export_${new Date().toISOString().split('T')[0]}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    } catch (error) {
-      console.error('Error exporting attendance:', error);
-    }
-  };
-
-  const resetFilters = () => {
-    setFilters({ employeeId: '', startDate: '', endDate: '', eventType: '' });
-    setPagination(prev => ({ ...prev, page: 1 }));
   };
 
   const resetSummaryFilters = () => {
     setSummaryFilters({
-      employeeId: '',
-      ...getCurrentYearDates()
+      employeeId: canSelectEmployee ? '' : (user?.employee_id || ''),
+      ...getDefaultDateRange(),
     });
+    setSummaryEmployeeSearch('');
     setAttendanceSummary(null);
   };
+
+  const employeeMap = useMemo(() => {
+    const map = {};
+    employees.forEach((emp) => {
+      map[emp.employee_id] = `${emp.first_name} ${emp.last_name}`;
+    });
+    return map;
+  }, [employees]);
 
   const exportSummaryToCSV = () => {
     if (!attendanceSummary) return;
@@ -318,8 +381,8 @@ function Attendance() {
       return [
         day.date || '',
         day.day_of_week || '',
-        day.check_in ? new Date(day.check_in).toLocaleTimeString() : 'N/A',
-        day.check_out ? new Date(day.check_out).toLocaleTimeString() : 'N/A',
+        day.check_in ? formatTime(day.check_in) : 'N/A',
+        day.check_out ? formatTime(day.check_out) : 'N/A',
         `${day.worked_hours || 0} hours`,
         status.charAt(0).toUpperCase() + status.slice(1),
         day.total_records || 0
@@ -350,80 +413,64 @@ function Attendance() {
     link.remove();
   };
 
-  // --- Statistics ---
+  // --- Statistics (full period, not just current page) ---
   const stats = useMemo(() => {
-    const checkIns = attendanceLogs.filter(log => log.event_type === 'check_in').length;
-    const checkOuts = attendanceLogs.filter(log => log.event_type === 'check_out').length;
     const today = new Date().toISOString().split('T')[0];
-    const todayLogs = attendanceLogs.filter(log => 
-      new Date(log.timestamp).toISOString().split('T')[0] === today
-    ).length;
-    
+    const summaries = attendanceSummary?.daily_summaries || [];
+    const todaySummary = summaries.find((d) => d.date === today);
+
     return {
-      total: attendanceLogs.length,
-      checkIns,
-      checkOuts,
-      today: todayLogs
+      total: attendanceSummary?.totals?.days_with_records ?? 0,
+      totalHours: attendanceSummary?.totals?.worked_hours ?? 0,
+      today: todaySummary?.worked_time_display || (todaySummary?.has_records ? '—' : '0'),
     };
-  }, [attendanceLogs]);
+  }, [attendanceSummary]);
 
   // --- Helpers ---
-  const formatTimestamp = (timestamp) => {
-    if (!timestamp) return 'N/A';
-    const date = new Date(timestamp);
-    return {
-      date: date.toLocaleDateString('en-US', { 
-        month: 'short', 
-        day: '2-digit', 
-        year: 'numeric' 
-      }),
-      time: date.toLocaleTimeString('en-US', { 
-        hour: '2-digit', 
-        minute: '2-digit',
-        hour12: true 
-      })
-    };
-  };
+const parseDeviceTimestamp = (timestamp) => {
+  if (!timestamp) return null;
+  const raw = String(timestamp).replace('Z', '').split('+')[0].split('.')[0];
+  const [datePart, timePart = '00:00:00'] = raw.split('T');
+  if (!datePart) return null;
+  const [year, month, day] = datePart.split('-').map(Number);
+  const [hour, minute, second = 0] = timePart.split(':').map(Number);
+  return { year, month, day, hour, minute, second, datePart, timePart };
+};
 
-  const formatTime = (timestamp) => {
-    if (!timestamp) return 'N/A';
-    return new Date(timestamp).toLocaleTimeString('en-US', { 
-      hour: '2-digit', 
-      minute: '2-digit',
-      hour12: true 
-    });
-  };
+const formatTimestamp = (timestamp) => {
+  const parts = parseDeviceTimestamp(timestamp);
+  if (!parts) return { date: 'N/A', time: 'N/A' };
 
-  const getPageNumbers = () => {
-    const pageNumbers = [];
-    const maxPagesToShow = 5;
-    
-    if (pagination.pages <= maxPagesToShow) {
-      for (let i = 1; i <= pagination.pages; i++) pageNumbers.push(i);
-    } else {
-      let startPage = Math.max(1, pagination.page - 2);
-      let endPage = Math.min(pagination.pages, pagination.page + 2);
-      
-      if (pagination.page <= 3) endPage = maxPagesToShow;
-      if (pagination.page >= pagination.pages - 2) startPage = pagination.pages - maxPagesToShow + 1;
-      
-      for (let i = startPage; i <= endPage; i++) pageNumbers.push(i);
-    }
-    return pageNumbers;
+  const locale = i18n.language === 'ar' ? 'ar-TN' : i18n.language === 'fr' ? 'fr-FR' : 'en-US';
+  const date = new Date(parts.year, parts.month - 1, parts.day);
+  const hh = String(parts.hour).padStart(2, '0');
+  const mm = String(parts.minute).padStart(2, '0');
+
+  return {
+    date: date.toLocaleDateString(locale, {
+      month: 'short',
+      day: '2-digit',
+      year: 'numeric',
+    }),
+    time: `${hh}:${mm}`,
   };
+};
+
+const formatTime = (timestamp) => {
+  const parts = parseDeviceTimestamp(timestamp);
+  if (!parts) return 'N/A';
+  const hh = String(parts.hour).padStart(2, '0');
+  const mm = String(parts.minute).padStart(2, '0');
+  return `${hh}:${mm}`;
+};
 
   // --- Day Status Helper ---
   const getDayStatus = (day) => {
     if (!day) return 'no_data';
     if (day.status) return day.status;
-    
-    const hasCheckIn = !!day.check_in;
-    const hasCheckOut = !!day.check_out;
-    const hasRecords = (day.total_records && day.total_records > 0) || day.has_records;
-    
-    if (hasCheckIn && hasCheckOut) return 'complete';
-    if (hasCheckIn || hasCheckOut) return 'partial';
-    if (hasRecords) return 'absent';
+    if (day.is_complete) return 'complete';
+    if (day.has_records && day.pair_count > 0) return 'partial';
+    if (day.has_records) return 'incomplete';
     return 'no_data';
   };
 
@@ -481,88 +528,6 @@ function Attendance() {
     );
   };
 
-  const SummaryDayCard = ({ day }) => {
-    if (!day) return null;
-    
-    const status = getDayStatus(day);
-    
-    const getStatusClasses = (status) => {
-      switch(status) {
-        case 'complete': 
-          return { bg: 'bg-emerald-50', border: 'border-emerald-200', badge: 'bg-emerald-100 text-emerald-800' };
-        case 'partial': 
-          return { bg: 'bg-amber-50', border: 'border-amber-200', badge: 'bg-amber-100 text-amber-800' };
-        case 'absent': 
-          return { bg: 'bg-red-50', border: 'border-red-200', badge: 'bg-red-100 text-red-800' };
-        default: 
-          return { bg: 'bg-slate-50', border: 'border-slate-200', badge: 'bg-slate-100 text-slate-800' };
-      }
-    };
-    
-    const classes = getStatusClasses(status);
-    
-    return (
-      <div className={`p-4 rounded-xl border ${classes.bg} ${classes.border} transition-all hover:shadow-sm`}>
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <p className="text-sm font-bold text-slate-800">{day.date}</p>
-            <p className="text-xs text-slate-500">{day.day_of_week}</p>
-          </div>
-          <div className="flex flex-col items-end">
-            {status === 'complete' ? (
-              <CheckCircleIcon className="h-5 w-5 text-emerald-500" />
-            ) : status === 'partial' ? (
-              <ExclamationTriangleIcon className="h-5 w-5 text-amber-500" />
-            ) : status === 'absent' ? (
-              <XCircleIcon className="h-5 w-5 text-red-500" />
-            ) : (
-              <QuestionMarkCircleIcon className="h-5 w-5 text-slate-400" />
-            )}
-            {(day.check_in_count > 1 || day.check_out_count > 1) && (
-              <span className="text-xs text-slate-500 mt-1">
-                {day.check_in_count || 0} in, {day.check_out_count || 0} out
-              </span>
-            )}
-          </div>
-        </div>
-        
-        <div className="grid grid-cols-2 gap-3 text-sm">
-          <div>
-            <p className="text-xs text-slate-500 font-medium">{t('attendance:table.checkIn')}</p>
-            <p className="font-semibold text-slate-700">
-              {formatTime(day.check_in) || 'N/A'}
-            </p>
-          </div>
-          <div>
-            <p className="text-xs text-slate-500 font-medium">{t('attendance:table.checkOut')}</p>
-            <p className="font-semibold text-slate-700">
-              {formatTime(day.check_out) || 'N/A'}
-            </p>
-          </div>
-        </div>
-        
-        <div className="mt-3 pt-3 border-t border-slate-200">
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-xs text-slate-500 font-medium">{t('attendance:table.status')}</span>
-            <span className={`text-xs font-bold px-2 py-1 rounded ${classes.badge}`}>
-              {status ? t(`attendance:status.${status}`) : t('attendance:status.no_data')}
-            </span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-slate-500 font-medium">{t('attendance:table.workedHours')}</span>
-            <span className="text-sm font-bold text-slate-800">{day.worked_hours || 0} hrs</span>
-          </div>
-          {day.total_records > 2 && (
-            <div className="flex items-center justify-between mt-1">
-              <span className="text-xs text-slate-500 font-medium">{t('attendance:table.records')}</span>
-              <span className="text-xs font-bold text-slate-700">{day.total_records}</span>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div className="space-y-6">
       
@@ -614,9 +579,9 @@ function Attendance() {
               color="emerald" 
             />
             <StatCard 
-              icon={UserGroupIcon} 
-              label="attendance:stats.checkIns" 
-              value={stats.checkIns} 
+              icon={ChartBarIcon} 
+              label="attendance:stats.totalHours" 
+              value={stats.totalHours} 
               color="blue" 
             />
             <StatCard 
@@ -658,11 +623,6 @@ function Attendance() {
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm px-6">
           <nav className="-mb-px flex space-x-8">
             <TabButton 
-              id="logs" 
-              label={t('attendance:tabs.logs')} 
-              icon={<span className="text-lg">📋</span>} 
-            />
-            <TabButton 
               id="summary" 
               label={t('attendance:tabs.summary')} 
               icon={<ChartBarIcon className="h-5 w-5" />} 
@@ -676,236 +636,7 @@ function Attendance() {
         </div>
 
         {/* --- TAB CONTENT --- */}
-        {activeTab === 'logs' ? (
-          <div className="space-y-6">
-            {/* --- FILTERS TOOLBAR --- */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-2">
-                  <FunnelIcon className="h-5 w-5 text-slate-400" />
-                  <h2 className="text-lg font-bold text-slate-800">{t('attendance:filters.title')}</h2>
-                </div>
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={resetFilters}
-                    className="text-sm font-bold text-slate-500 hover:text-slate-700 transition-colors"
-                  >
-                    {t('attendance:reset')}
-                  </button>
-                  <button
-                    onClick={handleExport}
-                    className="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white text-sm font-bold rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-200/50 hover:shadow-indigo-200/70 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                  >
-                    <ArrowDownTrayIcon className="h-4 w-4" />
-                    <span>{t('attendance:export')}</span>
-                  </button>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-                <div>
-                    <label className={`block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ${isRTL ? 'mr-1' : 'ml-1'}`}>
-                      {t('attendance:filters.employeeId')}
-                    </label>
-                  <div className="relative">
-                    <UserGroupIcon className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400`} />
-                    <input
-                      type="text"
-                      name="employeeId"
-                      value={filters.employeeId}
-                      onChange={handleFilterChange}
-                      placeholder={t('attendance:filters.placeholder_employee')}
-                      className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400 font-medium`}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                    <label className={`block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ${isRTL ? 'mr-1' : 'ml-1'}`}>
-                      {t('attendance:filters.startDate')}
-                    </label>
-                  <div className="relative">
-                    <CalendarIcon className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400`} />
-                    <input
-                      type="date"
-                      name="startDate"
-                      value={filters.startDate}
-                      onChange={handleFilterChange}
-                      className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400 font-medium`}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                    <label className={`block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ${isRTL ? 'mr-1' : 'ml-1'}`}>
-                      {t('attendance:filters.endDate')}
-                    </label>
-                  <div className="relative">
-                    <CalendarIcon className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400`} />
-                    <input
-                      type="date"
-                      name="endDate"
-                      value={filters.endDate}
-                      onChange={handleFilterChange}
-                      className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400 font-medium`}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                    <label className={`block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ${isRTL ? 'mr-1' : 'ml-1'}`}>
-                      {t('attendance:filters.eventType')}
-                    </label>
-                  <select
-                    name="eventType"
-                    value={filters.eventType}
-                    onChange={handleFilterChange}
-                    className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 transition-all placeholder:text-slate-400 font-medium"
-                  >
-                    <option value="">{t('attendance:filters.all')}</option>
-                    <option value="check_in">{t('attendance:filters.checkIn')}</option>
-                    <option value="check_out">{t('attendance:filters.checkOut')}</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            {/* --- ATTENDANCE TABLE --- */}
-            <div className="bg-white rounded-3xl border border-slate-200 shadow-xl shadow-slate-200/50 overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className={`w-full border-collapse ${isRTL ? 'text-right' : 'text-left'}`}>
-                  <thead>
-                    <tr className="bg-slate-50/50 border-b border-slate-100">
-                      <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('attendance:table.employeeId')}</th>
-                      <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('attendance:table.timestamp')}</th>
-                      <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('attendance:table.eventType')}</th>
-                      <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('attendance:table.deviceId')}</th>
-                      <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('attendance:table.matchScore')}</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {loading ? (
-                      <tr>
-                        <td colSpan="5" className="py-20 text-center">
-                          <div className="flex flex-col items-center">
-                            <div className="relative flex items-center justify-center">
-                              <div className="absolute animate-ping h-8 w-8 rounded-full bg-indigo-400 opacity-20"></div>
-                              <div className="h-10 w-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-                            </div>
-                            <p className="mt-4 text-slate-500 font-medium animate-pulse">{t('attendance.loading')}</p>
-                          </div>
-                        </td>
-                      </tr>
-                    ) : attendanceLogs.length === 0 ? (
-                      <tr>
-                        <td colSpan="5" className="py-16 text-center">
-                          <div className="flex flex-col items-center text-slate-400">
-                            <div className="h-16 w-16 mb-4">
-                              <ClockIcon className="h-full w-full opacity-50" />
-                            </div>
-                            <p className="font-medium">{t('attendance:noRecords')}</p>
-                            {Object.values(filters).some(v => v !== '') && (
-                              <p className="text-sm mt-1">{t('attendance:tryAdjustFilters')}</p>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    ) : (
-                      attendanceLogs.map((log, index) => {
-                        const formattedTime = formatTimestamp(log.timestamp);
-                        return (
-                          <tr key={index} className="group hover:bg-indigo-50/30 transition-colors">
-                            <td className="px-6 py-4">
-                              <div className="flex items-center gap-3">
-                                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-indigo-600 font-bold shadow-sm group-hover:from-indigo-100 group-hover:to-indigo-200 transition-all">
-                                  {log.employee_id && log.employee_id.length > 0 ? log.employee_id.charAt(0).toUpperCase() : '?'}
-                                </div>
-                                <div>
-                                  <p className="text-sm font-bold text-slate-800">{log.employee_id}</p>
-                                  <p className="text-xs font-medium text-slate-500">{t('attendance.employee')}</p>
-                                </div>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="text-sm font-semibold text-slate-700">{formattedTime.date}</div>
-                              <div className="text-[10px] text-slate-400 uppercase tracking-tight font-bold">
-                                {formattedTime.time}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <StatusBadge type={log.event_type} />
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="flex items-center gap-2 text-sm text-slate-600 font-medium">
-                                <div className="h-2 w-2 rounded-full bg-slate-300"></div>
-                                {log.device_id || 'N/A'}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <span className={`text-sm font-bold ${
-                                log.match_score > 0.8 
-                                  ? 'text-emerald-600' 
-                                  : log.match_score > 0.6 
-                                  ? 'text-amber-600' 
-                                  : 'text-slate-500'
-                              }`}>
-                                {log.match_score ? `${(log.match_score * 100).toFixed(1)}%` : 'N/A'}
-                              </span>
-                            </td>
-                          </tr>
-                        );
-                      })
-                    )}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* --- PAGINATION FOOTER --- */}
-              {attendanceLogs.length > 0 && (
-                <footer className="bg-slate-50/80 border-t border-slate-100 p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <p className="text-sm font-bold text-slate-500">
-                    {t('attendance.pagination.showing', { 
-                      page: pagination.page, 
-                      total: pagination.pages, 
-                      records: pagination.total 
-                    })}
-                  </p>
-                  <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                    <button 
-                      disabled={pagination.page === 1}
-                      onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
-                      className="p-2 rounded-lg border border-slate-200 bg-white disabled:opacity-50 hover:bg-slate-50 transition-colors"
-                    >
-                      {isRTL ? <ChevronRightIcon className="h-5 w-5 text-slate-600" /> : <ChevronLeftIcon className="h-5 w-5 text-slate-600" />}
-                    </button>
-                    
-                    {getPageNumbers().map(num => (
-                      <button
-                        key={num}
-                        onClick={() => setPagination(prev => ({ ...prev, page: num }))}
-                        className={`h-9 w-9 rounded-lg text-sm font-bold transition-all ${
-                          pagination.page === num 
-                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' 
-                            : 'text-slate-600 hover:bg-blue-50'
-                        }`}
-                      >
-                        {num}
-                      </button>
-                    ))}
-
-                    <button 
-                      disabled={pagination.page >= pagination.pages}
-                      onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
-                      className="p-2 rounded-lg border border-slate-200 bg-white disabled:opacity-50 hover:bg-slate-50 transition-colors"
-                    >
-                      {isRTL ? <ChevronLeftIcon className="h-5 w-5 text-slate-600" /> : <ChevronRightIcon className="h-5 w-5 text-slate-600" />}
-                    </button>
-                  </div>
-                </footer>
-              )}
-            </div>
-          </div>
-        ) : activeTab === 'summary' ? (
+        {activeTab === 'summary' ? (
           /* --- ATTENDANCE SUMMARY TAB --- */
           <div className="space-y-6">
             {/* --- SUMMARY FILTERS TOOLBAR --- */}
@@ -933,23 +664,46 @@ function Attendance() {
                   )}
                 </div>
               </div>
+
+              <div className="mb-5">
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                  {t('attendance:presets.title')}
+                </p>
+                <DatePresetBar
+                  activePreset=""
+                  onSelect={(id) => applyDatePreset(id, 'summary')}
+                  t={t}
+                />
+              </div>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                 <div>
                   <label className={`block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ${isRTL ? 'mr-1' : 'ml-1'}`}>
-                    {t('attendance:filters.employeeId')}
+                    {t('attendance:filters.employee')}
                   </label>
-                  <div className="relative">
-                    <UsersIcon className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400`} />
-                    <input
-                      type="text"
-                      name="employeeId"
+                  {canSelectEmployee ? (
+                    <EmployeeSelect
                       value={summaryFilters.employeeId}
                       onChange={handleSummaryFilterChange}
-                      placeholder={t('attendance:filters.placeholder_employee')}
-                      className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400 font-medium`}
+                      employees={employees}
+                      employeeSearch={summaryEmployeeSearch}
+                      onSearchChange={setSummaryEmployeeSearch}
+                      isRTL={isRTL}
+                      t={t}
+                      allowAll={false}
+                      required
                     />
-                  </div>
+                  ) : (
+                    <div className="relative">
+                      <UsersIcon className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400`} />
+                      <input
+                        type="text"
+                        value={summaryFilters.employeeId}
+                        readOnly
+                        className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-slate-100 border-none rounded-xl text-sm font-medium text-slate-600`}
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -1061,39 +815,6 @@ function Attendance() {
                   </div>
                 </div>
 
-                {/* --- DAILY SUMMARIES GRID --- */}
-                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-slate-900">{t('attendance:summary.dailyAttendance')}</h3>
-                    <div className="flex items-center gap-2 text-xs">
-                      <div className="flex items-center gap-1">
-                        <div className="h-2 w-2 rounded-full bg-emerald-500"></div>
-                        <span>{t('attendance:status.complete')}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <div className="h-2 w-2 rounded-full bg-amber-500"></div>
-                        <span>{t('attendance:status.partial')}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <div className="h-2 w-2 rounded-full bg-red-500"></div>
-                        <span>{t('attendance:status.absent')}</span>
-                      </div>
-                    </div>
-                  </div>
-                  {attendanceSummary.daily_summaries.length === 0 ? (
-                    <div className="text-center py-8">
-                      <ClockIcon className="h-16 w-16 mx-auto text-slate-300 mb-4" />
-                      <p className="text-slate-500 font-medium">{t('attendance:summary.noRecordsPeriod')}</p>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                      {attendanceSummary.daily_summaries.map((day, index) => (
-                        <SummaryDayCard key={index} day={day} />
-                      ))}
-                    </div>
-                  )}
-                </div>
-
                 {/* --- DETAILED TABLE VIEW --- */}
                 <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                   <div className="px-6 py-4 border-b border-slate-100">
@@ -1123,19 +844,19 @@ function Attendance() {
                               <td className="px-6 py-4">
                                 <div className="text-sm text-slate-600">{day.day_of_week}</div>
                               </td>
-                              <td className="px-6 py-4">
+                              <td className="px-6 py-4" dir="ltr">
                                 <div className="text-sm font-medium text-slate-800">
                                   {formatTime(day.check_in) || 'N/A'}
                                 </div>
                               </td>
-                              <td className="px-6 py-4">
+                              <td className="px-6 py-4" dir="ltr">
                                 <div className="text-sm font-medium text-slate-800">
-                                  {formatTime(day.check_out) || 'N/A'}
+                                  {formatTime(day.check_out || day.check_out_at) || 'N/A'}
                                 </div>
                               </td>
                               <td className="px-6 py-4">
-                                <span className={`text-sm font-bold ${day.worked_hours > 0 ? 'text-emerald-600' : 'text-slate-500'}`}>
-                                  {day.worked_hours || 0} hours
+                                <span className={`text-sm font-bold ${(day.total_worked_minutes || 0) > 0 ? 'text-emerald-600' : 'text-slate-500'}`}>
+                                  {day.worked_time_display || `${day.worked_hours ?? day.total_worked_hours ?? 0}h`}
                                 </span>
                               </td>
                               <td className="px-6 py-4">
@@ -1245,9 +966,9 @@ function Attendance() {
                       <tr>
                         <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-600">{t('attendance:userStats.employee')}</th>
                         <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-600">{t('attendance:userStats.department')}</th>
-                        <th className="px-6 py-4 text-center text-xs font-bold uppercase tracking-wider text-slate-600">{t('attendance:userStats.totalRecords')}</th>
-                        <th className="px-6 py-4 text-center text-xs font-bold uppercase tracking-wider text-slate-600">{t('attendance:userStats.checkIns')}</th>
-                        <th className="px-6 py-4 text-center text-xs font-bold uppercase tracking-wider text-slate-600">{t('attendance:userStats.checkOuts')}</th>
+                        <th className="px-6 py-4 text-center text-xs font-bold uppercase tracking-wider text-slate-600">{t('attendance:userStats.daysWithRecords')}</th>
+                        <th className="px-6 py-4 text-center text-xs font-bold uppercase tracking-wider text-slate-600">{t('attendance:userStats.totalHours')}</th>
+                        <th className="px-6 py-4 text-center text-xs font-bold uppercase tracking-wider text-slate-600">{t('attendance:userStats.totalEvents')}</th>
                         <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-600">{t('attendance:userStats.lastActivity')}</th>
                       </tr>
                     </thead>
@@ -1267,27 +988,24 @@ function Attendance() {
                           </td>
                           <td className="px-6 py-4 text-center">
                             <span className="inline-flex items-center px-4 py-2 rounded-xl text-sm font-bold bg-indigo-100 text-indigo-700">
-                              {stat.total_attendance}
+                              {stat.days_with_records}
                             </span>
                           </td>
                           <td className="px-6 py-4 text-center">
                             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-sm font-medium bg-emerald-50 text-emerald-700">
                               <CheckCircleIcon className="h-4 w-4" />
-                              {stat.check_ins}
+                              {stat.total_worked_hours}
                             </span>
                           </td>
                           <td className="px-6 py-4 text-center">
                             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-sm font-medium bg-blue-50 text-blue-700">
                               <XCircleIcon className="h-4 w-4" />
-                              {stat.check_outs}
+                              {stat.total_events}
                             </span>
                           </td>
                           <td className="px-6 py-4">
                             <p className="text-sm text-slate-600">
-                              {stat.last_record ? formatTimestamp(stat.last_record).date : 'N/A'}
-                            </p>
-                            <p className="text-xs text-slate-400">
-                              {stat.last_record ? formatTimestamp(stat.last_record).time : ''}
+                              {stat.last_date || 'N/A'}
                             </p>
                           </td>
                         </tr>
@@ -1304,21 +1022,21 @@ function Attendance() {
                       <p className="text-2xl font-bold text-slate-900">{userStats.length}</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-sm text-slate-600">{t('attendance:userStats.totalRecordsAll')}</p>
+                      <p className="text-sm text-slate-600">{t('attendance:userStats.totalDaysAll')}</p>
                       <p className="text-2xl font-bold text-indigo-600">
-                        {userStats.reduce((sum, s) => sum + s.total_attendance, 0)}
+                        {userStats.reduce((sum, s) => sum + s.days_with_records, 0)}
                       </p>
                     </div>
                     <div className="text-center">
-                      <p className="text-sm text-slate-600">{t('attendance:userStats.totalCheckIns')}</p>
+                      <p className="text-sm text-slate-600">{t('attendance:userStats.totalHoursAll')}</p>
                       <p className="text-2xl font-bold text-emerald-600">
-                        {userStats.reduce((sum, s) => sum + s.check_ins, 0)}
+                        {userStats.reduce((sum, s) => sum + s.total_worked_hours, 0).toFixed(1)}
                       </p>
                     </div>
                     <div className="text-center">
-                      <p className="text-sm text-slate-600">{t('attendance:userStats.totalCheckOuts')}</p>
+                      <p className="text-sm text-slate-600">{t('attendance:userStats.totalEventsAll')}</p>
                       <p className="text-2xl font-bold text-blue-600">
-                        {userStats.reduce((sum, s) => sum + s.check_outs, 0)}
+                        {userStats.reduce((sum, s) => sum + s.total_events, 0)}
                       </p>
                     </div>
                   </div>
@@ -1335,30 +1053,6 @@ function Attendance() {
             )}
           </div>
         ) : null}
-
-      {/* --- ITEMS PER PAGE SELECTOR (hidden on summary tab) --- */}
-      {activeTab === 'logs' && (
-        <div className="fixed bottom-6 right-6 bg-white p-3 rounded-2xl border border-slate-200 shadow-lg shadow-slate-300/20">
-          <div className="flex items-center gap-2 text-sm font-bold text-slate-600">
-            <span>{t('attendance:show')}</span>
-            <select
-              value={pagination.limit}
-              onChange={(e) => { 
-                setPagination(prev => ({ 
-                  ...prev, 
-                  limit: Number(e.target.value), 
-                  page: 1 
-                })); 
-              }}
-              className="bg-transparent border-none p-0 focus:ring-0 text-indigo-600 font-bold cursor-pointer"
-            >
-              {[10, 25, 50, 100].map(val => (
-                <option key={val} value={val}>{val}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

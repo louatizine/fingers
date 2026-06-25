@@ -55,8 +55,8 @@ function App() {
               <Route path="salary-advances" element={<SalaryAdvances />} />
               <Route path="projects" element={<ProtectedRoute allowedRoles={['admin', 'supervisor','employee']}><Projects /></ProtectedRoute>} />
               <Route path="attendance" element={<ProtectedRoute allowedRoles={['admin', 'supervisor']}><Attendance /></ProtectedRoute>} />
-              <Route path="fingerprint" element={<ProtectedRoute allowedRoles={['admin', 'supervisor']}><FingerprintManagement /></ProtectedRoute>} />
-              <Route path="profile" element={<Profile />} />
+{/*               <Route path="fingerprint" element={<ProtectedRoute allowedRoles={['admin', 'supervisor']}><FingerprintManagement /></ProtectedRoute>} />
+ */}              <Route path="profile" element={<Profile />} />
               <Route path="settings" element={<ProtectedRoute allowedRoles={['supervisor']}><Settings /></ProtectedRoute>} />
              </Route>
             

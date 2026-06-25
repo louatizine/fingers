@@ -14,7 +14,7 @@
   "show": "Afficher",
   "note": {
     "title": "Remarque :",
-    "description": "L'inscription des empreintes digitales s'effectue à l'aide de l'application de bureau Windows. Cette page affiche uniquement les utilisateurs inscrits. Pour inscrire de nouveaux utilisateurs, utilisez le terminal biométrique de bureau."
+    "description": "Inscrivez les employés sur le terminal ZKTeco (écran de l'appareil ou logiciel ZKTeco). Le backend synchronise automatiquement les utilisateurs et les présences toutes les quelques minutes — aucune application de bureau requise."
   },
   "table": {
     "userIdentity": "Identité de l'utilisateur",
