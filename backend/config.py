@@ -2,7 +2,7 @@
 Application Configuration
 """
 import os
-from datetime import timedelta
+from datetime import timedelta, datetime
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -31,3 +31,16 @@ class Config:
     # Application
     APP_NAME = 'HR Management System'
     FRONTEND_URL = os.environ.get('FRONTEND_URL') or 'http://localhost:3000'
+
+    # ZKTeco fingerprint device (K80 / similar terminals)
+    ZK_DEVICE_IP = os.environ.get('ZK_DEVICE_IP', '192.168.100.5')
+    ZK_DEVICE_PORT = int(os.environ.get('ZK_DEVICE_PORT') or 4370)
+    ZK_DEVICE_NAME = os.environ.get('ZK_DEVICE_NAME') or 'ZKTeco K80'
+    ZK_SYNC_ENABLED = os.environ.get('ZK_SYNC_ENABLED', 'true').lower() == 'true'
+    ZK_SYNC_INTERVAL_MINUTES = int(os.environ.get('ZK_SYNC_INTERVAL_MINUTES') or 5)
+    # Only import attendance on or after this date (default: 6 months ago)
+    ZK_SYNC_MIN_DATE = os.environ.get('ZK_SYNC_MIN_DATE') or (
+        datetime.now() - timedelta(days=180)
+    ).strftime('%Y-%m-%d')
+    # Local timezone for grouping device events into calendar days
+    ATTENDANCE_TIMEZONE = os.environ.get('ATTENDANCE_TIMEZONE') or 'Africa/Algiers'

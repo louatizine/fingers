@@ -10,9 +10,13 @@ class AttendanceModel:
     @staticmethod
     def to_dict(data: dict) -> dict:
         """Convert database document to response dict"""
-        if '_id' in data:
-            data['_id'] = str(data['_id'])
-        return data
+        result = dict(data)
+        if '_id' in result:
+            result['_id'] = str(result['_id'])
+        if 'timestamp' in result and result['timestamp'] is not None:
+            from services.zk_attendance_utils import format_timestamp_for_api
+            result['timestamp'] = format_timestamp_for_api(result['timestamp'])
+        return result
     
     @staticmethod
     def validate_attendance(data: dict) -> tuple[bool, Optional[str]]:

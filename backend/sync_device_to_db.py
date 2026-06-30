@@ -14,11 +14,16 @@ This script:
 import sys
 import logging
 from datetime import datetime, timezone
-from typing import Dict, List, Tuple
+from typing import Dict, List
+from zoneinfo import ZoneInfo
 from zk_device_manager import ZKDeviceManager
+from services.zk_attendance_utils import normalize_device_timestamp
+from services.daily_attendance_aggregator import (
+    AttendanceEvent,
+    aggregate_events_to_daily_summaries,
+)
+from services.daily_attendance_service import upsert_daily_summaries
 from pymongo import MongoClient
-from models.user_model import create_user, find_user_by_employee_id
-from models.attendance_model import create_attendance_log, get_last_attendance
 from bson.objectid import ObjectId
 from dotenv import load_dotenv
 import os
@@ -43,7 +48,7 @@ class DeviceToDBSyncer:
     Handles user and attendance data mapping and deduplication.
     """
     
-    def __init__(self, device_ip: str, device_port: int = 4370, device_name: str = "ZKTeco Device"):
+    def __init__(self, device_ip: str, device_port: int = 4370, device_name: str = "ZKTeco Device", min_sync_date: str = None):
         """
         Initialize the syncer.
         
@@ -51,10 +56,16 @@ class DeviceToDBSyncer:
             device_ip: IP address of the ZKTeco device
             device_port: Port of the device (default: 4370)
             device_name: Friendly name for the device
+            min_sync_date: Only sync attendance on or after this date (YYYY-MM-DD)
         """
         self.device_ip = device_ip
         self.device_port = device_port
         self.device_name = device_name
+        self.min_sync_date = None
+        if min_sync_date:
+            self.min_sync_date = datetime.fromisoformat(min_sync_date).replace(
+                hour=0, minute=0, second=0, microsecond=0, tzinfo=timezone.utc
+            )
         self.device_manager = ZKDeviceManager()
         self.db = None
         
@@ -69,11 +80,20 @@ class DeviceToDBSyncer:
             },
             'attendance': {
                 'total_on_device': 0,
-                'new_synced': 0,
-                'duplicates_skipped': 0,
-                'failed': 0
+                'events_processed': 0,
+                'summaries_created': 0,
+                'summaries_updated': 0,
+                'summaries_unchanged': 0,
+                'daily_summaries': 0,
+                'skipped_before_min_date': 0,
+                'skipped_unknown_user': 0,
+                'legacy_events': 0,
+                'failed': 0,
             }
         }
+        self._attendance_tz = ZoneInfo(
+            os.getenv('ATTENDANCE_TIMEZONE', 'Africa/Algiers')
+        )
     
     def connect_to_database(self) -> bool:
         """Connect to MongoDB database."""
@@ -125,8 +145,8 @@ class DeviceToDBSyncer:
         self.stats['users']['total_on_device'] = len(device_users)
         
         if not device_users:
-            logger.warning("No users found on device")
-            return False
+            logger.info("No users found on device")
+            return True
         
         logger.info(f"Retrieved {len(device_users)} users from device")
         
@@ -170,7 +190,7 @@ class DeviceToDBSyncer:
             
             for emp_id in possible_employee_ids:
                 if emp_id:
-                    existing_user = find_user_by_employee_id(emp_id)
+                    existing_user = self._find_user_by_employee_id(emp_id)
                     if existing_user:
                         break
         
@@ -246,14 +266,25 @@ class DeviceToDBSyncer:
             }
             user_data['role'] = privilege_to_role.get(device_user.get('privilege', 0), 'employee')
             
-            # Create user
-            result = create_user(user_data)
-            
-            if result.get('success'):
-                return True
-            else:
-                logger.error(f"Failed to create user: {result.get('error')}")
+            # Create user directly in database (preserve device biometric_id)
+            if self.db.users.find_one({'employee_id': user_data['employee_id']}):
+                logger.error(f"Employee ID already exists: {user_data['employee_id']}")
                 return False
+
+            if self.db.users.find_one({'email': user_data['email']}):
+                user_data['email'] = f"{user_data['employee_id'].lower()}@company.com"
+
+            if self.db.users.find_one({'biometric_id': user_data['biometric_id']}):
+                logger.error(f"Biometric ID already exists: {user_data['biometric_id']}")
+                return False
+
+            user_data.setdefault('department', 'Unassigned')
+            user_data.setdefault('position', 'Employee')
+            user_data.setdefault('password', '')
+            user_data.setdefault('leave_balance', {'annual': 20, 'sick': 10, 'unpaid': 5})
+
+            self.db.users.insert_one(user_data)
+            return True
                 
         except Exception as e:
             logger.error(f"Error creating user from device data: {e}")
@@ -287,131 +318,122 @@ class DeviceToDBSyncer:
     
     def sync_attendance(self, limit: int = None, clear_after_sync: bool = False) -> bool:
         """
-        Sync attendance logs from device to database.
-        
-        Args:
-            limit: Maximum number of logs to sync (None = all)
-            clear_after_sync: Clear device logs after successful sync (use with caution!)
-            
-        Returns:
-            bool: True if sync completed successfully
+        Sync attendance from device into daily worked-hours summaries.
+
+        Raw device punches are aggregated in memory and never stored individually.
         """
         logger.info("=" * 80)
-        logger.info("SYNCING ATTENDANCE LOGS FROM DEVICE TO DATABASE")
+        logger.info("SYNCING ATTENDANCE → DAILY WORKED-HOURS SUMMARIES")
         logger.info("=" * 80)
-        
-        # Get attendance logs from device
+
         device_logs = self.device_manager.get_attendance_logs()
         self.stats['attendance']['total_on_device'] = len(device_logs)
-        
-        if not device_logs:
-            logger.warning("No attendance logs found on device")
-            return False
-        
-        logger.info(f"Retrieved {len(device_logs)} attendance logs from device")
-        
-        # Apply limit if specified
-        if limit:
-            device_logs = device_logs[:limit]
-            logger.info(f"Limiting sync to {limit} logs")
-        
-        # Sort by timestamp (oldest first for chronological insertion)
-        device_logs.sort(key=lambda x: x['timestamp'])
-        
-        # Process each log
-        for device_log in device_logs:
-            try:
-                self._sync_single_attendance(device_log)
-            except Exception as e:
-                logger.error(f"Error syncing attendance log: {e}")
-                self.stats['attendance']['failed'] += 1
-        
-        # Print summary
+
+        if device_logs:
+            logger.info(f"Retrieved {len(device_logs)} raw attendance events from device")
+            if limit:
+                device_logs = device_logs[:limit]
+                logger.info(f"Limiting sync to {limit} events")
+            device_logs.sort(key=lambda x: x['timestamp'])
+        else:
+            logger.info("No attendance logs found on device")
+
+        device_events = self._collect_device_events(device_logs) if device_logs else []
+        legacy_events = self._collect_legacy_attendance_events()
+        events = device_events + legacy_events
+        self.stats['attendance']['events_processed'] = len(events)
+        self.stats['attendance']['legacy_events'] = len(legacy_events)
+
+        if not events:
+            logger.info("No attendance events to aggregate after filtering")
+            return True
+
+        summaries = aggregate_events_to_daily_summaries(events, self._attendance_tz)
+        self.stats['attendance']['daily_summaries'] = len(summaries)
+
+        upsert_stats = upsert_daily_summaries(
+            self.db,
+            summaries,
+            device_id=self.device_name,
+            source='device_sync',
+        )
+        self.stats['attendance']['summaries_created'] = upsert_stats['created']
+        self.stats['attendance']['summaries_updated'] = upsert_stats['updated']
+        self.stats['attendance']['summaries_unchanged'] = upsert_stats['unchanged']
+
         self._print_attendance_sync_summary()
-        
-        # Clear device logs if requested
-        if clear_after_sync and self.stats['attendance']['new_synced'] > 0:
-            confirmation = input("\n⚠️  Are you sure you want to CLEAR device logs? (yes/no): ").strip().lower()
+
+        if clear_after_sync and (
+            upsert_stats['created'] + upsert_stats['updated'] > 0
+        ):
+            confirmation = input(
+                "\n⚠️  Are you sure you want to CLEAR device logs? (yes/no): "
+            ).strip().lower()
             if confirmation == 'yes':
                 if self.device_manager.clear_attendance_logs():
                     logger.info("✓ Device attendance logs cleared successfully")
                 else:
                     logger.error("✗ Failed to clear device logs")
-        
+
         return True
-    
-    def _sync_single_attendance(self, device_log: Dict):
-        """
-        Sync a single attendance log from device to database.
-        
-        Maps device log to database schema and avoids duplicates.
-        """
-        device_user_id = device_log.get('user_id', '')
-        timestamp_str = device_log.get('timestamp', '')
-        punch_type = device_log.get('punch', 0)
-        
-        # Parse timestamp
-        try:
-            timestamp = datetime.fromisoformat(timestamp_str)
-            # Ensure UTC timezone
-            if timestamp.tzinfo is None:
-                timestamp = timestamp.replace(tzinfo=timezone.utc)
-        except:
-            logger.error(f"Invalid timestamp format: {timestamp_str}")
-            self.stats['attendance']['failed'] += 1
-            return
-        
-        # Find corresponding user in database
-        user = self._find_user_by_device_id(device_user_id)
-        
-        if not user:
-            logger.warning(f"User not found for device_user_id: {device_user_id} - skipping attendance")
-            self.stats['attendance']['failed'] += 1
-            return
-        
-        employee_id = user.get('employee_id')
-        
-        # Check for duplicate (same user, same timestamp within 1 minute)
-        existing_log = self.db.attendance.find_one({
-            'employee_id': employee_id,
-            'timestamp': {
-                '$gte': timestamp.replace(second=0, microsecond=0),
-                '$lt': timestamp.replace(second=59, microsecond=999999)
-            }
-        })
-        
-        if existing_log:
-            self.stats['attendance']['duplicates_skipped'] += 1
-            return
-        
-        # Map punch type to event type
-        punch_to_event = {
-            0: 'check_in',    # Check-In
-            1: 'check_out',   # Check-Out
-            2: 'check_out',   # Break-Out (treated as check-out)
-            3: 'check_in',    # Break-In (treated as check-in)
-            4: 'check_in',    # OT-In (treated as check-in)
-            5: 'check_out'    # OT-Out (treated as check-out)
-        }
-        
-        event_type = punch_to_event.get(punch_type, 'check_in')
-        
-        # Create attendance log in database
-        try:
-            create_attendance_log(
-                employee_id=employee_id,
-                event_type=event_type,
-                device_id=self.device_name,
-                match_score=100,  # Device attendance is 100% match
-                notes=f"Synced from device - Punch type: {device_log.get('punch_type')}",
-                timestamp=timestamp
-            )
-            
-            self.stats['attendance']['new_synced'] += 1
-            
-        except Exception as e:
-            logger.error(f"Failed to create attendance log: {e}")
-            self.stats['attendance']['failed'] += 1
+
+    def _collect_device_events(self, device_logs: List[Dict]) -> List[AttendanceEvent]:
+        """Map device punches to employee events (timestamps only)."""
+        events: List[AttendanceEvent] = []
+
+        for device_log in device_logs:
+            try:
+                timestamp = normalize_device_timestamp(device_log.get('timestamp', ''))
+            except Exception:
+                logger.error(f"Invalid timestamp format: {device_log.get('timestamp')}")
+                self.stats['attendance']['failed'] += 1
+                continue
+
+            if self.min_sync_date:
+                if timestamp < self.min_sync_date.replace(tzinfo=None):
+                    self.stats['attendance']['skipped_before_min_date'] += 1
+                    continue
+
+            device_user_id = device_log.get('user_id', '')
+            user = self._find_user_by_device_id(device_user_id)
+            if not user:
+                logger.warning(
+                    "User not found for device_user_id: %s — skipping event",
+                    device_user_id,
+                )
+                self.stats['attendance']['skipped_unknown_user'] += 1
+                continue
+
+            employee_id = user.get('employee_id')
+            events.append(AttendanceEvent(employee_id=employee_id, timestamp=timestamp))
+
+        return events
+
+    def _collect_legacy_attendance_events(self) -> List[AttendanceEvent]:
+        """Rebuild events from previously stored raw attendance logs (timestamps only)."""
+        events: List[AttendanceEvent] = []
+        if self.db is None:
+            return events
+
+        for doc in self.db.attendance.find({}, {'employee_id': 1, 'timestamp': 1}):
+            employee_id = doc.get('employee_id')
+            timestamp = doc.get('timestamp')
+            if not employee_id or not timestamp:
+                continue
+            try:
+                ts = normalize_device_timestamp(timestamp)
+            except Exception:
+                self.stats['attendance']['failed'] += 1
+                continue
+
+            if self.min_sync_date and ts < self.min_sync_date.replace(tzinfo=None):
+                continue
+
+            events.append(AttendanceEvent(employee_id=employee_id, timestamp=ts))
+
+        if events:
+            logger.info('Loaded %s legacy attendance events from database', len(events))
+        return events
     
     def _find_user_by_device_id(self, device_user_id: str) -> Dict:
         """
@@ -436,7 +458,7 @@ class DeviceToDBSyncer:
         
         for emp_id in possible_employee_ids:
             if emp_id:
-                user = find_user_by_employee_id(emp_id)
+                user = self._find_user_by_employee_id(emp_id)
                 if user:
                     # Update with device_user_id for future lookups
                     user_id = user['_id'] if isinstance(user['_id'], ObjectId) else ObjectId(user['_id'])
@@ -453,6 +475,10 @@ class DeviceToDBSyncer:
                 return user
         
         return None
+
+    def _find_user_by_employee_id(self, employee_id: str) -> Dict:
+        """Find a user by employee_id using the syncer's database connection."""
+        return self.db.users.find_one({'employee_id': employee_id})
     
     def _print_user_sync_summary(self):
         """Print user sync statistics."""
@@ -468,13 +494,20 @@ class DeviceToDBSyncer:
     
     def _print_attendance_sync_summary(self):
         """Print attendance sync statistics."""
+        stats = self.stats['attendance']
         print("\n" + "=" * 80)
-        print("  ATTENDANCE SYNC SUMMARY")
+        print("  DAILY ATTENDANCE SUMMARY SYNC")
         print("=" * 80)
-        print(f"  Total logs on device:      {self.stats['attendance']['total_on_device']}")
-        print(f"  New logs synced:           {self.stats['attendance']['new_synced']}")
-        print(f"  Duplicates skipped:        {self.stats['attendance']['duplicates_skipped']}")
-        print(f"  Failed:                    {self.stats['attendance']['failed']}")
+        print(f"  Raw events on device:      {stats['total_on_device']}")
+        print(f"  Events processed:          {stats['events_processed']}")
+        print(f"  Legacy DB events merged:   {stats['legacy_events']}")
+        print(f"  Daily summaries built:     {stats['daily_summaries']}")
+        print(f"  Summaries created:         {stats['summaries_created']}")
+        print(f"  Summaries updated:         {stats['summaries_updated']}")
+        print(f"  Summaries unchanged:       {stats['summaries_unchanged']}")
+        print(f"  Before min date skipped:   {stats['skipped_before_min_date']}")
+        print(f"  Unknown user skipped:      {stats['skipped_unknown_user']}")
+        print(f"  Failed:                    {stats['failed']}")
         print("=" * 80 + "\n")
     
     def full_sync(self, auto_create_users: bool = True, clear_device_after: bool = False) -> bool:

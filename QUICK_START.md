@@ -3,60 +3,42 @@
 ## 🚀 5-Minute Setup
 
 ### Prerequisites Checklist
-- [ ] Windows 10/11 (64-bit)
-- [ ] .NET 8 Runtime installed
 - [ ] Python 3.11+ installed
 - [ ] Node.js 18+ installed
-- [ ] MongoDB Atlas account created
-- [ ] Fingerprint scanner connected
-- [ ] SDK folder at project root
+- [ ] MongoDB (local or Atlas)
+- [ ] ZKTeco K80 (or similar) on the same network as the backend server
 
 ---
 
 ## Step 1: Backend Setup (2 minutes)
 
 ```bash
-# 1. Navigate to backend
 cd backend
-
-# 2. Create virtual environment
 python -m venv venv
-
-# 3. Activate it
-venv\Scripts\activate  # Windows
-# source venv/bin/activate  # Linux/Mac
-
-# 4. Install dependencies
+venv\Scripts\activate
 pip install -r requirements.txt
+copy .env.example .env
+```
 
-# 5. Create .env file
-copy .env.example .env  # Windows
-# cp .env.example .env  # Linux/Mac
+Edit `.env`:
+- `MONGO_URI` — your MongoDB connection string
+- `ZK_DEVICE_IP` — IP address of your ZKTeco terminal (default port `4370`)
 
-# 6. Edit .env and add your MongoDB connection string
-# MONGO_URI=mongodb+srv://...
-
-# 7. Run backend
+```bash
 python app.py
 ```
 
-✅ Backend running on http://localhost:5000
+✅ Backend running on http://localhost:5000  
+✅ **Auto-sync** pulls employees + attendance from the ZKTeco device every 5 minutes (configurable via `ZK_SYNC_INTERVAL_MINUTES`)
 
 ---
 
 ## Step 2: Frontend Setup (1 minute)
 
 ```bash
-# 1. Navigate to frontend
 cd frontend
-
-# 2. Install dependencies
 npm install
-
-# 3. Create .env
 echo VITE_API_URL=http://localhost:5000/api > .env
-
-# 4. Run frontend
 npm run dev
 ```
 
@@ -64,74 +46,57 @@ npm run dev
 
 ---
 
-## Step 3: Desktop App Setup (2 minutes)
+## ZKTeco Device Sync
 
-### Option A: Using Visual Studio
-1. Open `desktop/FingerprintAttendanceApp.sln`
-2. Verify SDK path in `.csproj`
-3. Set platform to **x64**
-4. Build → Build Solution
-5. Run as Administrator
+| Setting | Description |
+|---------|-------------|
+| `ZK_DEVICE_IP` | Device IP on your LAN |
+| `ZK_DEVICE_PORT` | Usually `4370` |
+| `ZK_SYNC_ENABLED` | `true` to enable background sync |
+| `ZK_SYNC_INTERVAL_MINUTES` | How often to sync (default `5`) |
 
-### Option B: Using .NET CLI
-```bash
-cd desktop/FingerprintAttendanceApp
-dotnet restore
-dotnet build --configuration Release
-cd bin\x64\Release\net8.0-windows
-# Run as Administrator:
-FingerprintAttendanceApp.exe
-```
+**Manual sync:** Attendance page → **Sync from Device** (admin only)
 
-✅ Desktop app running and connected to scanner
+Auto-sync also runs in the background when `ZK_SYNC_ENABLED=true`.
+
+### Enrolling fingerprints (without desktop app)
+
+Enroll employees on the **ZKTeco device** using ZKTeco official software or the device screen. The backend sync will:
+1. Import users from the device into MongoDB
+2. Import all attendance punches
+3. Display them on the **Attendance** page
 
 ---
 
 ## First Use
 
-### 1. Login to Web App
-- URL: http://localhost:5173
-- Default admin: (create via MongoDB or registration)
-
-### 2. Enroll First User (Desktop App)
-1. Run desktop app as Administrator
-2. Select "1. Enroll New User"
-3. Enter employee ID
-4. Follow prompts to capture fingerprint (3 times)
-5. Verify enrollment in web app
-
-### 3. Test Verification (Desktop App)
-1. Select "2. Verify Fingerprint"
-2. Place finger on scanner
-3. Check attendance recorded in web app
+1. Login to the web app (http://localhost:5173)
+2. Ensure the ZKTeco device is reachable from the server (`ZK_DEVICE_IP`)
+3. Wait for auto-sync (~10s after backend start, then every N minutes) or click **Sync Device** on Attendance
+4. View attendance logs, summaries, and exports
 
 ---
 
 ## Common Issues
 
-### "SDK Not Found"
-- Verify `SDK` folder exists at `../../SDK/Bin/Win64_x64`
-- Check DLL paths in `.csproj`
+### "Failed to connect to device"
+- Verify `ZK_DEVICE_IP` in `.env`
+- Ping the device from the same machine running the backend
+- Check firewall / same subnet; port `4370` must be open
 
-### "Backend Connection Failed"
-- Ensure backend is running on http://localhost:5000
-- Check `appsettings.json` in desktop app
+### "Backend Connection Failed" (frontend)
+- Backend must run on http://localhost:5000
+- Check `VITE_API_URL` in `frontend/.env`
 
-### "Scanner Not Detected"
-- Install scanner drivers
-- Run desktop app as Administrator
-- Check Device Manager
+### No attendance records
+- Employees must be enrolled on the ZKTeco device first
+- Use **Sync from Device** on the Attendance page (admin) and check backend logs
+- Confirm users exist in MongoDB with matching `device_user_id` / `biometric_id`
 
 ---
 
 ## Next Steps
 
-1. Read full documentation: `FINGERPRINT_SYSTEM_DOCUMENTATION.md`
-2. Configure production settings
-3. Deploy to production servers
-4. Test with multiple users
-5. Review security settings
-
----
-
-**Support:** See full documentation for troubleshooting guide
+1. Adjust `ZK_SYNC_INTERVAL_MINUTES` for your needs (e.g. `1` for near-real-time)
+2. Configure production MongoDB and deploy backend where it can reach the device LAN
+3. Review security settings and admin accounts

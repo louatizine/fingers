@@ -6,7 +6,6 @@ These are trusted device endpoints for fingerprint enrollment and attendance
 from flask import Blueprint, request, jsonify
 from models.user_model import find_user_by_employee_id, create_user, get_all_users
 from models.fingerprint_model import update_fingerprint_template, get_enrolled_templates
-from models.attendance_model import create_attendance_log, get_last_attendance
 import logging
 
 logger = logging.getLogger(__name__)
@@ -186,43 +185,36 @@ def get_templates():
 
 @terminal_bp.route('/attendance', methods=['POST'])
 def submit_attendance():
-    """Submit attendance log (from biometric terminal)"""
-    try:
-        data = request.get_json()
-        
-        # Validate required fields
-        required_fields = ['employee_id', 'event_type']
-        for field in required_fields:
-            if field not in data:
-                return jsonify({'error': f'{field} is required'}), 400
-        
-        attendance = create_attendance_log(
-            employee_id=data['employee_id'],
-            event_type=data['event_type'],
-            device_id=data.get('device_id'),
-            match_score=data.get('match_score'),
-            notes=data.get('notes')
-        )
-        
-        return jsonify({'data': attendance}), 201
-        
-    except Exception as e:
-        logger.error(f"Terminal submit attendance error: {e}")
-        return jsonify({'error': str(e)}), 500
+    """Raw attendance events are no longer stored on the terminal API."""
+    return jsonify({
+        'error': (
+            'Raw attendance events are no longer stored. '
+            'Use ZKTeco device sync to aggregate daily worked hours.'
+        ),
+    }), 410
 
 @terminal_bp.route('/attendance/last/<employee_id>', methods=['GET'])
 def get_last_attendance_record(employee_id):
-    """Get last attendance record for employee (from biometric terminal)"""
+    """Get last daily summary for employee (from biometric terminal)."""
     try:
-        attendance = get_last_attendance(employee_id)
-        
-        if not attendance:
+        from database import get_db
+        from models.daily_attendance_model import DailyAttendanceModel
+
+        db = get_db()
+        summary = db[DailyAttendanceModel.COLLECTION].find_one(
+            {'employee_id': employee_id},
+            sort=[('date', -1)],
+        )
+
+        if not summary:
             return jsonify({'data': None}), 200
-        
-        return jsonify({'data': attendance}), 200
-        
+
+        return jsonify({
+            'data': DailyAttendanceModel.summary_to_response(summary),
+        }), 200
+
     except Exception as e:
-        logger.error(f"Terminal get last attendance error: {e}")
+        logger.error(f'Terminal get last attendance error: {e}')
         return jsonify({'error': str(e)}), 500
 
 @terminal_bp.route('/health', methods=['GET'])

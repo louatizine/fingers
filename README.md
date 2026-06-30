@@ -20,12 +20,11 @@ A comprehensive web-based HR Management System built with React, Flask, and Mong
 - Employee search and filtering
 
 ### Biometric Attendance System
-- ZKTeco fingerprint device integration
-- Real-time attendance tracking
-- Fingerprint enrollment and verification
-- Attendance history and reports
-- Device status monitoring
-- Desktop fingerprint management UI (WPF)
+- ZKTeco fingerprint device integration (K80 / similar)
+- Automatic background sync (users + attendance via `pyzk`)
+- Manual sync from the Attendance page
+- Attendance history, summaries, and CSV export
+- Enroll fingerprints on the device (ZKTeco software or device screen)
 
 ### Leave Management
 - Multiple leave types (annual, sick, unpaid)
@@ -95,12 +94,7 @@ A comprehensive web-based HR Management System built with React, Flask, and Mong
 - **Flask-CORS** - Cross-origin resource sharing
 - **Python 3.8+**
 - **Flask-Mail** - Email notifications
-
-### Desktop Applications
-- **WPF (Windows Presentation Foundation)** - Fingerprint Admin UI
-- **.NET 6.0** - Console Application for attendance
-- **C#** - Desktop development
-- **ZKTeco SDK** - Fingerprint device integration
+- **pyzk** - ZKTeco device communication
 
 ### Database
 - **MongoDB** - NoSQL database
@@ -192,18 +186,6 @@ Employees_Managements/
 │       │   └── NotFound.jsx
 │       └── services/
 │           └── api.js
-└── desktop/
-    ├── Fingerprint.AdminUI/     # WPF Admin Application
-    │   ├── App.xaml
-    │   ├── MainWindow.xaml
-    │   ├── ViewModels/
-    │   ├── Views/
-    │   ├── Services/
-    │   └── Models/
-    └── FingerprintAttendanceApp/ # Console Attendance App
-        ├── Program.cs
-        ├── Services/
-        └── Models/
 ```
 
 ## 🛠️ Installation & Setup
@@ -212,8 +194,7 @@ Employees_Managements/
 - Node.js 16+ and npm
 - Python 3.8+
 - MongoDB 4.4+
-- .NET 6.0+ (for desktop applications)
-- ZKTeco fingerprint device (optional, for attendance)
+- ZKTeco fingerprint device on the same network as the backend (optional)
 
 ### Quick Start
 
@@ -312,36 +293,19 @@ npm run dev
 
 Frontend will run on `http://localhost:5173`
 
-### Desktop Applications Setup (Optional)
+### ZKTeco Device Sync
 
-#### Fingerprint Admin UI (WPF)
+Configure in `backend/.env`:
 
-1. **Navigate to desktop directory:**
-```bash
-cd desktop/Fingerprint.AdminUI
+```env
+ZK_DEVICE_IP=192.168.100.5
+ZK_DEVICE_PORT=4370
+ZK_DEVICE_NAME=ZKTeco K80
+ZK_SYNC_ENABLED=true
+ZK_SYNC_INTERVAL_MINUTES=5
 ```
 
-2. **Build and run:**
-```bash
-dotnet build
-dotnet run
-# Or use: run.bat
-```
-
-#### Fingerprint Attendance Console App
-
-1. **Navigate to attendance app:**
-```bash
-cd desktop/FingerprintAttendanceApp
-```
-
-2. **Configure settings:**
-Edit `appsettings.json` with your backend API URL and device settings.
-
-3. **Run the application:**
-```bash
-dotnet run
-```
+The backend auto-syncs employees and attendance on startup and every N minutes. Admins can also trigger sync from the **Attendance** page. See `QUICK_START.md` for details.
 
 ## 🔑 Default Credentials
 
@@ -608,7 +572,7 @@ For issues and questions:
 - [x] Attendance tracking with fingerprint devices
 - [x] Role-based dashboards
 - [x] In-app notification system
-- [x] Desktop fingerprint management UI
+- [x] Automatic ZKTeco device sync
 - [ ] Advanced performance reporting
 - [ ] Payroll management integration
 - [ ] Document management system
@@ -620,6 +584,5 @@ For issues and questions:
 
 ---
 
-**Built with ❤️ using React, Flask, MongoDB, and .NET**
 
-**Key Technologies:** React 18 • Flask 3.0 • MongoDB • WPF • i18next • Tailwind CSS • ZKTeco SDK
+**Key Technologies:** React 18 • Flask 3.0 • MongoDB • pyzk • i18next • Tailwind CSS • ZKTeco

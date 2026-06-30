@@ -199,17 +199,18 @@ class ZKDeviceManager:
             
             attendance_list = []
             for att in attendances:
-                # Ensure timestamp is timezone-aware (convert to UTC)
+                # Device stores local wall-clock time; keep as naive datetime
                 timestamp = att.timestamp
-                if timestamp.tzinfo is None:
-                    timestamp = timestamp.replace(tzinfo=timezone.utc)
+                if timestamp.tzinfo is not None:
+                    timestamp = timestamp.replace(tzinfo=None)
                 
                 attendance_data = {
                     'user_id': att.user_id,
                     'timestamp': timestamp.isoformat(),
                     'status': att.status,
                     'punch': att.punch,
-                    'punch_type': self._get_punch_type_name(att.punch)
+                    'punch_type': self._get_punch_type_name(att.punch),
+                    'state_label': self._get_state_type_name(att.status),
                 }
                 attendance_list.append(attendance_data)
             
@@ -424,24 +425,20 @@ class ZKDeviceManager:
                 pass
     
     def _get_punch_type_name(self, punch_code: int) -> str:
-        """
-        Convert punch code to human-readable name.
-        
-        Args:
-            punch_code: Numeric punch type code
-            
-        Returns:
-            String representation of punch type
-        """
-        punch_types = {
+        """Legacy name helper — on many devices punch is attendance state."""
+        return self._get_state_type_name(punch_code)
+
+    def _get_state_type_name(self, state_code: int) -> str:
+        """Convert attendance state code to human-readable name."""
+        state_types = {
             0: 'Check-In',
             1: 'Check-Out',
             2: 'Break-Out',
             3: 'Break-In',
             4: 'OT-In',
-            5: 'OT-Out'
+            5: 'OT-Out',
         }
-        return punch_types.get(punch_code, f'Unknown({punch_code})')
+        return state_types.get(state_code, f'Code({state_code})')
     
     def __enter__(self):
         """Context manager entry."""

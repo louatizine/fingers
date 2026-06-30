@@ -5,7 +5,7 @@ HR Management System - ERP
 from dotenv import load_dotenv
 load_dotenv()  # Load environment variables first
 
-from flask import Flask, request
+from flask import Flask
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from config import Config
@@ -22,15 +22,21 @@ def create_app(config_class=Config):
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
     
-    # Enable CORS with proper configuration - allow multiple ports
-    CORS(app, resources={
-        r"/api/*": {
-            "origins": ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:3001", "http://127.0.0.1:3001"],
-            "supports_credentials": True,
-            "allow_headers": ["Content-Type", "Authorization"],
-            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
-        }
-    })
+    # Enable CORS — single global config (avoid duplicate Access-Control-Allow-Origin headers)
+    CORS(
+        app,
+        origins=[
+            'http://localhost:3000',
+            'http://127.0.0.1:3000',
+            'http://localhost:3001',
+            'http://127.0.0.1:3001',
+            'http://localhost:5173',
+            'http://127.0.0.1:5173',
+        ],
+        supports_credentials=True,
+        allow_headers=['Content-Type', 'Authorization'],
+        methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    )
     
     # Initialize JWT
     jwt = JWTManager(app)
@@ -74,37 +80,18 @@ def create_app(config_class=Config):
     app.register_blueprint(terminal_bp, url_prefix='/api/terminal')
     app.register_blueprint(device_sync_bp, url_prefix='/api/device-sync')
 
+    # Start automatic ZKTeco device sync (users + attendance)
+    from services.zk_sync_scheduler import ZKSyncScheduler
+    scheduler = ZKSyncScheduler(app)
+    scheduler.start()
+    app.zk_sync_scheduler = scheduler
+
     @app.route('/api/health', methods=['GET'])
     def health_check():
         return {'status': 'healthy', 'message': 'HR Management System API is running'}, 200
-    
-    # Add CORS headers for preflight requests
-    @app.after_request
-    def after_request(response):
-        origin = request.headers.get('Origin')
-        if origin in ['http://localhost:3000', 'http://127.0.0.1:3000']:
-            response.headers.add('Access-Control-Allow-Origin', origin)
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-        response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
-        response.headers.add('Access-Control-Allow-Credentials', 'true')
-        return response
-    
-    # Handle preflight OPTIONS requests
-    @app.route('/api/notifications/<path:path>', methods=['OPTIONS'])
-    @app.route('/api/<path:path>', methods=['OPTIONS'])
-    def handle_options(path):
-        from flask import request
-        response = app.make_default_options_response()
-        origin = request.headers.get('Origin')
-        if origin in ['http://localhost:3000', 'http://127.0.0.1:3000']:
-            response.headers.add('Access-Control-Allow-Origin', origin)
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-        response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
-        response.headers.add('Access-Control-Allow-Credentials', 'true')
-        return response
     
     return app
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(debug=True, host='0.0.0.0', port=5000, use_reloader=False)
+    app.run(debug=True, host='0.0.0.0', port=5000, use_reloader=True)

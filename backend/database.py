@@ -57,6 +57,13 @@ def create_indexes():
         
         # Companies collection
         db.companies.create_index([("name", ASCENDING)])
+
+        # Daily attendance summaries (worked hours per employee per day)
+        db.daily_attendance_summaries.create_index(
+            [("employee_id", ASCENDING), ("date", ASCENDING)],
+            unique=True,
+        )
+        db.daily_attendance_summaries.create_index([("date", DESCENDING)])
         
         logger.info("Database indexes created successfully")
     except Exception as e:
@@ -93,7 +100,7 @@ def create_default_admin():
                 "password": generate_password_hash("admin123"),
                 "first_name": "System",
                 "last_name": "Administrator",
-                "role": "supervisor",
+                "role": "admin",
                 "company_id": company_id,
                 "department": "Administration",
                 "position": "System Administrator",

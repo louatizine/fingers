@@ -37,35 +37,6 @@ def get_users():
         return jsonify({'error': 'An error occurred'}), 500
 
 
-user_bp.route('', methods=['GET'])
-@jwt_required()
-@admin_or_supervisor_required
-def get_users():
-    """Get all users (Admin/Supervisor only)"""
-    try:
-        current_user_id = get_jwt_identity()
-        current_user = find_user_by_id(current_user_id)
-        
-        if not current_user:
-            return jsonify({'error': 'Unauthorized'}), 401
-        
-        # Security Logic: Supervisors only see users from their own company
-        filters = {}
-        if current_user.get('role') == 'supervisor':
-            filters['company_id'] = current_user.get('company_id')
-        
-        users = get_all_users(filters)
-        
-        return jsonify({
-            'success': True,
-            'users': users,
-            'count': len(users)
-        }), 200
-        
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
 @user_bp.route('/<user_id>/activate', methods=['POST'])
 @jwt_required()
 @admin_or_supervisor_required

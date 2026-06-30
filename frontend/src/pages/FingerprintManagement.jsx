@@ -17,7 +17,7 @@ import {
   FunnelIcon
 } from '@heroicons/react/24/outline';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 function FingerprintManagement() {
   const { t, i18n } = useTranslation();
