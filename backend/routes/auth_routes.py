@@ -44,6 +44,12 @@ def login():
         
         # Remove password from response
         user.pop('password', None)
+
+        db = get_db()
+        from services.zk_attendance_utils import resolve_attendance_employee_id
+        attendance_employee_id = resolve_attendance_employee_id(db, user)
+        if attendance_employee_id:
+            user['attendance_employee_id'] = attendance_employee_id
         
         # If employee, check if assigned to any projects
         if user.get('role') == 'employee':
@@ -104,6 +110,12 @@ def get_current_user():
             return jsonify({'error': 'User not found'}), 404
         
         user.pop('password', None)
+
+        db = get_db()
+        from services.zk_attendance_utils import resolve_attendance_employee_id
+        attendance_employee_id = resolve_attendance_employee_id(db, user)
+        if attendance_employee_id:
+            user['attendance_employee_id'] = attendance_employee_id
         
         # If employee, check if assigned to any projects
         if user.get('role') == 'employee':

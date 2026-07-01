@@ -30,6 +30,68 @@ const formatDateInput = (date) => {
   return `${year}-${month}-${day}`;
 };
 
+const getLocalToday = () => formatDateInput(new Date());
+
+const resolveAttendanceEmployeeId = (currentUser, employeeList = []) => {
+  if (!currentUser) return '';
+
+  // Admin/supervisor accounts without a device profile should pick an employee manually
+  const isPrivileged = currentUser.role === 'admin' || currentUser.role === 'supervisor';
+  if (isPrivileged && !currentUser.device_user_id && !currentUser.has_fingerprint) {
+    return '';
+  }
+
+  const preferredId =
+    currentUser.attendance_employee_id ||
+    currentUser.employee_id ||
+    '';
+
+  if (preferredId && employeeList.some((emp) => emp.employee_id === preferredId)) {
+    return preferredId;
+  }
+
+  if (currentUser.device_user_id) {
+    const byDevice = employeeList.find(
+      (emp) => String(emp.device_user_id) === String(currentUser.device_user_id)
+    );
+    if (byDevice) return byDevice.employee_id;
+  }
+
+  if (currentUser.email) {
+    const byEmail = employeeList.find(
+      (emp) => emp.email?.toLowerCase() === currentUser.email.toLowerCase()
+    );
+    if (byEmail) return byEmail.employee_id;
+  }
+
+  const byName = employeeList.find(
+    (emp) =>
+      emp.first_name === currentUser.first_name &&
+      emp.last_name === currentUser.last_name
+  );
+  if (byName) return byName.employee_id;
+
+  return preferredId;
+};
+
+const parseDeviceTimestamp = (timestamp) => {
+  if (!timestamp) return null;
+  const raw = String(timestamp).replace('Z', '').split('+')[0].split('.')[0];
+  const [datePart, timePart = '00:00:00'] = raw.split('T');
+  if (!datePart) return null;
+  const [year, month, day] = datePart.split('-').map(Number);
+  const [hour, minute, second = 0] = timePart.split(':').map(Number);
+  return { year, month, day, hour, minute, second, datePart, timePart };
+};
+
+const formatTime = (timestamp) => {
+  const parts = parseDeviceTimestamp(timestamp);
+  if (!parts) return 'N/A';
+  const hh = String(parts.hour).padStart(2, '0');
+  const mm = String(parts.minute).padStart(2, '0');
+  return `${hh}:${mm}`;
+};
+
 const getLast6MonthsRange = () => {
   const now = new Date();
   const start = new Date(now);
@@ -50,6 +112,7 @@ const getDatePresets = () => {
   const ytd = new Date(now.getFullYear(), 0, 1);
 
   return {
+    today: { startDate: formatDateInput(now), endDate: formatDateInput(now) },
     last6Months: { startDate: formatDateInput(last6), endDate: formatDateInput(now) },
     last30Days: { startDate: formatDateInput(last30), endDate: formatDateInput(now) },
     thisMonth: { startDate: formatDateInput(startOfMonth), endDate: formatDateInput(now) },
@@ -61,6 +124,7 @@ const getDefaultDateRange = getLast6MonthsRange;
 
 function DatePresetBar({ activePreset, onSelect, t }) {
   const presets = [
+    { id: 'today', label: t('attendance:presets.today') },
     { id: 'last6Months', label: t('attendance:presets.last6Months') },
     { id: 'last30Days', label: t('attendance:presets.last30Days') },
     { id: 'thisMonth', label: t('attendance:presets.thisMonth') },
@@ -91,59 +155,33 @@ function EmployeeSelect({
   value,
   onChange,
   employees,
-  employeeSearch,
-  onSearchChange,
   isRTL,
   t,
   name = 'employeeId',
   allowAll = true,
   required = false,
 }) {
-  const filteredEmployees = useMemo(() => {
-    const query = employeeSearch.trim().toLowerCase();
-    if (!query) return employees;
-    return employees.filter((emp) =>
-      `${emp.first_name} ${emp.last_name} ${emp.employee_id} ${emp.department || ''}`
-        .toLowerCase()
-        .includes(query)
-    );
-  }, [employees, employeeSearch]);
-
   return (
-    <div className="space-y-2">
-      <div className="relative">
-        <MagnifyingGlassIcon
-          className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400`}
-        />
-        <input
-          type="text"
-          value={employeeSearch}
-          onChange={(e) => onSearchChange(e.target.value)}
-          placeholder={t('attendance:filters.searchEmployee')}
-          className={`w-full ${isRTL ? 'pr-9 pl-3' : 'pl-9 pr-3'} py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400`}
-        />
-      </div>
-      <div className="relative">
-        <UserGroupIcon
-          className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 pointer-events-none`}
-        />
-        <select
-          name={name}
-          value={value}
-          onChange={onChange}
-          required={required}
-          className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500 transition-all font-medium appearance-none cursor-pointer`}
-        >
-          {allowAll && <option value="">{t('attendance:filters.allEmployees')}</option>}
-          {!allowAll && <option value="">{t('attendance:filters.selectEmployee')}</option>}
-          {filteredEmployees.map((emp) => (
-            <option key={emp.employee_id} value={emp.employee_id}>
-              {emp.employee_id} — {emp.first_name} {emp.last_name}
-              {emp.department ? ` (${emp.department})` : ''}
-            </option>
-          ))}
-        </select>
-      </div>
+    <div className="relative">
+      <UserGroupIcon
+        className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 pointer-events-none`}
+      />
+      <select
+        name={name}
+        value={value}
+        onChange={onChange}
+        required={required}
+        className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500 transition-all font-medium appearance-none cursor-pointer`}
+      >
+        {allowAll && <option value="">{t('attendance:filters.allEmployees')}</option>}
+        {!allowAll && <option value="">{t('attendance:filters.selectEmployee')}</option>}
+        {employees.map((emp) => (
+          <option key={emp.employee_id} value={emp.employee_id}>
+            {emp.first_name} {emp.last_name}
+            {emp.department ? ` (${emp.department})` : ''}
+          </option>
+        ))}
+      </select>
     </div>
   );
 }
@@ -164,13 +202,13 @@ function Attendance() {
   const [attendanceSummary, setAttendanceSummary] = useState(null);
   const [userStats, setUserStats] = useState([]);
   const [employees, setEmployees] = useState([]);
-  const [employeeSearch, setEmployeeSearch] = useState('');
-  const [summaryEmployeeSearch, setSummaryEmployeeSearch] = useState('');
   const [summaryLoading, setSummaryLoading] = useState(false);
   const [statsLoading, setStatsLoading] = useState(false);
   const [syncLoading, setSyncLoading] = useState(false);
   const [syncStatus, setSyncStatus] = useState(null);
+  const [syncInfo, setSyncInfo] = useState(null);
   const [activeDatePreset, setActiveDatePreset] = useState('last6Months');
+  const [summaryDatePreset, setSummaryDatePreset] = useState('last6Months');
   const [filters, setFilters] = useState({
     employeeId: '',
     ...defaultDates,
@@ -183,15 +221,28 @@ function Attendance() {
 
   // --- Effects ---
   useEffect(() => {
+    const today = getLocalToday();
+    setFilters((prev) => (prev.endDate < today ? { ...prev, endDate: today } : prev));
+    setSummaryFilters((prev) => (prev.endDate < today ? { ...prev, endDate: today } : prev));
+  }, []);
+
+  useEffect(() => {
     if (authLoading || !user) return;
 
+    const resolvedEmployeeId = resolveAttendanceEmployeeId(user, employees);
+
     if (canSelectEmployee) {
-      fetchEmployees();
-    } else if (user.employee_id) {
-      setFilters((prev) => ({ ...prev, employeeId: user.employee_id }));
-      setSummaryFilters((prev) => ({ ...prev, employeeId: user.employee_id }));
+      if (!employees.length) {
+        fetchEmployees();
+      } else if (resolvedEmployeeId && !summaryFilters.employeeId) {
+        setSummaryFilters((prev) => ({ ...prev, employeeId: resolvedEmployeeId }));
+        setFilters((prev) => ({ ...prev, employeeId: resolvedEmployeeId }));
+      }
+    } else if (resolvedEmployeeId) {
+      setFilters((prev) => ({ ...prev, employeeId: resolvedEmployeeId }));
+      setSummaryFilters((prev) => ({ ...prev, employeeId: resolvedEmployeeId }));
     }
-  }, [authLoading, user, canSelectEmployee]);
+  }, [authLoading, user, canSelectEmployee, employees]);
 
   useEffect(() => {
     if (activeTab === 'userStats') {
@@ -206,6 +257,29 @@ function Attendance() {
     }
   }, [authLoading, activeTab, summaryFilters.employeeId, summaryFilters.startDate, summaryFilters.endDate]);
 
+  useEffect(() => {
+    fetchSyncInfo();
+    const interval = setInterval(fetchSyncInfo, 60_000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (activeTab !== 'summary' || !summaryFilters.employeeId) return;
+
+    const today = getLocalToday();
+    const todaySummary = attendanceSummary?.daily_summaries?.find((d) => d.date === today);
+    const needsRefresh = !todaySummary?.has_records;
+
+    if (!needsRefresh) return;
+
+    const interval = setInterval(() => {
+      fetchSyncInfo();
+      fetchAttendanceSummary();
+    }, 180_000);
+
+    return () => clearInterval(interval);
+  }, [activeTab, summaryFilters.employeeId, attendanceSummary?.daily_summaries]);
+
   // --- Logic ---
   const fetchEmployees = async () => {
     try {
@@ -215,8 +289,29 @@ function Attendance() {
         `${a.first_name} ${a.last_name}`.localeCompare(`${b.first_name} ${b.last_name}`)
       );
       setEmployees(list);
+
+      const resolvedEmployeeId = resolveAttendanceEmployeeId(user, list);
+      if (resolvedEmployeeId) {
+        setSummaryFilters((prev) =>
+          prev.employeeId ? prev : { ...prev, employeeId: resolvedEmployeeId }
+        );
+        setFilters((prev) =>
+          prev.employeeId ? prev : { ...prev, employeeId: resolvedEmployeeId }
+        );
+      }
     } catch (error) {
       console.error('Error fetching employees:', error);
+    }
+  };
+
+  const fetchSyncInfo = async () => {
+    try {
+      const response = await apiClient.get('/device-sync/info');
+      if (response.data.success) {
+        setSyncInfo(response.data.status);
+      }
+    } catch (error) {
+      console.error('Error fetching sync info:', error);
     }
   };
 
@@ -294,6 +389,7 @@ function Attendance() {
 
                   setTimeout(() => {
                     fetchAttendanceSummary();
+                    fetchSyncInfo();
                     if (activeTab === 'userStats') fetchUserStats();
                   }, 1000);
                 } else {
@@ -335,6 +431,7 @@ function Attendance() {
     if (!range) return;
 
     if (target === 'summary') {
+      setSummaryDatePreset(presetId);
       setSummaryFilters((prev) => ({ ...prev, ...range }));
     } else {
       setActiveDatePreset(presetId);
@@ -352,6 +449,7 @@ function Attendance() {
 
   const handleSummaryFilterChange = (e) => {
     const { name, value } = e.target;
+    setSummaryDatePreset('');
     setSummaryFilters(prev => ({ ...prev, [name]: value }));
   };
 
@@ -360,9 +458,14 @@ function Attendance() {
       employeeId: canSelectEmployee ? '' : (user?.employee_id || ''),
       ...getDefaultDateRange(),
     });
-    setSummaryEmployeeSearch('');
+    setSummaryDatePreset('last6Months');
     setAttendanceSummary(null);
   };
+
+  const displayedDailySummaries = useMemo(() => {
+    const rows = attendanceSummary?.daily_summaries || [];
+    return [...rows].sort((a, b) => b.date.localeCompare(a.date));
+  }, [attendanceSummary]);
 
   const employeeMap = useMemo(() => {
     const map = {};
@@ -415,28 +518,39 @@ function Attendance() {
 
   // --- Statistics (full period, not just current page) ---
   const stats = useMemo(() => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getLocalToday();
     const summaries = attendanceSummary?.daily_summaries || [];
     const todaySummary = summaries.find((d) => d.date === today);
+    const todayHasCheckIn = todaySummary?.has_records && (todaySummary.check_in || todaySummary.check_in_at);
 
     return {
       total: attendanceSummary?.totals?.days_with_records ?? 0,
       totalHours: attendanceSummary?.totals?.worked_hours ?? 0,
-      today: todaySummary?.worked_time_display || (todaySummary?.has_records ? '—' : '0'),
+      today: todayHasCheckIn
+        ? (
+            todaySummary.total_worked_minutes > 0
+              ? todaySummary.worked_time_display
+              : formatTime(todaySummary.check_in || todaySummary.check_in_at) || '—'
+          )
+        : '0',
+      todayMissing: summaryFilters.endDate >= today && !todayHasCheckIn,
     };
-  }, [attendanceSummary]);
+  }, [attendanceSummary, summaryFilters.endDate]);
+
+  const formatSyncTime = (iso) => {
+    if (!iso) return null;
+    const date = new Date(iso);
+    if (Number.isNaN(date.getTime())) return null;
+    const locale = i18n.language === 'ar' ? 'ar-TN' : i18n.language === 'fr' ? 'fr-FR' : 'en-US';
+    return date.toLocaleString(locale, {
+      day: '2-digit',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
 
   // --- Helpers ---
-const parseDeviceTimestamp = (timestamp) => {
-  if (!timestamp) return null;
-  const raw = String(timestamp).replace('Z', '').split('+')[0].split('.')[0];
-  const [datePart, timePart = '00:00:00'] = raw.split('T');
-  if (!datePart) return null;
-  const [year, month, day] = datePart.split('-').map(Number);
-  const [hour, minute, second = 0] = timePart.split(':').map(Number);
-  return { year, month, day, hour, minute, second, datePart, timePart };
-};
-
 const formatTimestamp = (timestamp) => {
   const parts = parseDeviceTimestamp(timestamp);
   if (!parts) return { date: 'N/A', time: 'N/A' };
@@ -454,14 +568,6 @@ const formatTimestamp = (timestamp) => {
     }),
     time: `${hh}:${mm}`,
   };
-};
-
-const formatTime = (timestamp) => {
-  const parts = parseDeviceTimestamp(timestamp);
-  if (!parts) return 'N/A';
-  const hh = String(parts.hour).padStart(2, '0');
-  const mm = String(parts.minute).padStart(2, '0');
-  return `${hh}:${mm}`;
 };
 
   // --- Day Status Helper ---
@@ -549,7 +655,7 @@ const formatTime = (timestamp) => {
 
           {/* Stats */}
           <div className="flex flex-wrap gap-4">
-            {isAdmin && (
+            {canSelectEmployee && (
               <button
                 onClick={triggerDeviceSync}
                 disabled={syncLoading}
@@ -595,7 +701,7 @@ const formatTime = (timestamp) => {
 
         {/* Sync Status Alert */}
         {syncStatus && (
-          <div className={`p-4 rounded-xl border-2 flex items-center gap-3 ${
+          <div className={`mb-6 p-4 rounded-xl border-2 flex items-center gap-3 ${
             syncStatus.type === 'success' 
               ? 'bg-emerald-50 border-emerald-200 text-emerald-800' 
               : syncStatus.type === 'error'
@@ -616,6 +722,27 @@ const formatTime = (timestamp) => {
             >
               <XMarkIcon className="h-4 w-4" />
             </button>
+          </div>
+        )}
+
+        {stats.todayMissing && (
+          <div className="mb-6 p-4 rounded-xl flex items-start gap-3 bg-amber-50 text-amber-900 border border-amber-200">
+            <InformationCircleIcon className="h-5 w-5 flex-shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <p className="font-medium">
+                {t('attendance:sync.pendingToday', {
+                  minutes: syncInfo?.sync_interval_minutes || 5,
+                })}
+              </p>
+              <p className="text-sm text-amber-800">
+                {syncInfo?.last_sync
+                  ? t('attendance:sync.lastSync', { time: formatSyncTime(syncInfo.last_sync) })
+                  : t('attendance:sync.neverSynced')}
+                {syncInfo?.last_success === false && syncInfo?.last_error
+                  ? ` — ${syncInfo.last_error}`
+                  : ''}
+              </p>
+            </div>
           </div>
         )}
 
@@ -670,7 +797,7 @@ const formatTime = (timestamp) => {
                   {t('attendance:presets.title')}
                 </p>
                 <DatePresetBar
-                  activePreset=""
+                  activePreset={summaryDatePreset}
                   onSelect={(id) => applyDatePreset(id, 'summary')}
                   t={t}
                 />
@@ -686,8 +813,6 @@ const formatTime = (timestamp) => {
                       value={summaryFilters.employeeId}
                       onChange={handleSummaryFilterChange}
                       employees={employees}
-                      employeeSearch={summaryEmployeeSearch}
-                      onSearchChange={setSummaryEmployeeSearch}
                       isRTL={isRTL}
                       t={t}
                       allowAll={false}
@@ -698,7 +823,7 @@ const formatTime = (timestamp) => {
                       <UsersIcon className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400`} />
                       <input
                         type="text"
-                        value={summaryFilters.employeeId}
+                        value={employeeMap[summaryFilters.employeeId] || `${user?.first_name || ''} ${user?.last_name || ''}`.trim()}
                         readOnly
                         className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-slate-100 border-none rounded-xl text-sm font-medium text-slate-600`}
                       />
@@ -739,11 +864,7 @@ const formatTime = (timestamp) => {
                 </div>
               </div>
 
-              <div className="mt-4 flex items-center justify-between">
-                <div className="text-sm text-slate-500">
-                  <InformationCircleIcon className="h-4 w-4 inline mr-1" />
-                  {t('attendance:summary.employeeIdInfo')}
-                </div>
+              <div className="mt-4 flex items-center justify-end">
                 <button
                   onClick={fetchAttendanceSummary}
                   disabled={!summaryFilters.employeeId || summaryLoading}
@@ -781,7 +902,9 @@ const formatTime = (timestamp) => {
                 <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
-                      <h3 className="text-xl font-bold text-slate-900">{attendanceSummary.employee_id}</h3>
+                      <h3 className="text-xl font-bold text-slate-900">
+                        {employeeMap[attendanceSummary.employee_id] || attendanceSummary.employee_id}
+                      </h3>
                       <p className="text-sm text-slate-500">
                         {t('attendance:summary.period', { start: attendanceSummary.start_date, end: attendanceSummary.end_date })}
                       </p>
@@ -834,7 +957,7 @@ const formatTime = (timestamp) => {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
-                        {attendanceSummary.daily_summaries.map((day, index) => {
+                        {displayedDailySummaries.map((day, index) => {
                           const status = getDayStatus(day) || 'no_data';
                           return (
                             <tr key={index} className="group hover:bg-slate-50/30 transition-colors">

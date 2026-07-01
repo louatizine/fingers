@@ -46,6 +46,23 @@ def trigger_sync():
         return jsonify({'error': str(e)}), 500
 
 
+@device_sync_bp.route('/info', methods=['GET'])
+def get_sync_info():
+    """Public read-only sync status (last run time, no credentials)."""
+    last_result = sync_status.get('last_result') or {}
+    return jsonify({
+        'success': True,
+        'status': {
+            'running': sync_status.get('running', False),
+            'last_sync': sync_status.get('last_sync'),
+            'auto_sync_enabled': sync_status.get('auto_sync_enabled', False),
+            'sync_interval_minutes': sync_status.get('sync_interval_minutes'),
+            'last_success': last_result.get('success'),
+            'last_error': sync_status.get('error') or last_result.get('error'),
+        },
+    }), 200
+
+
 @device_sync_bp.route('/status', methods=['GET'])
 @jwt_required()
 @admin_or_supervisor_required

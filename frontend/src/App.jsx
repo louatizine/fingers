@@ -12,6 +12,7 @@ import Projects from './pages/Projects'
 import Profile from './pages/Profile'
 import Settings from './pages/Settings'
 import Attendance from './pages/Attendance'
+import PublicHolidays from './pages/PublicHolidays'
 import FingerprintManagement from './pages/FingerprintManagement'
 import NotFound from './pages/NotFound'
 
@@ -52,6 +53,7 @@ function App() {
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="employees" element={<ProtectedRoute allowedRoles={['admin', 'supervisor']}><Employees /></ProtectedRoute>} />
               <Route path="leaves" element={<Leaves />} />
+              <Route path="holidays" element={<PublicHolidays />} />
               <Route path="salary-advances" element={<SalaryAdvances />} />
               <Route path="projects" element={<ProtectedRoute allowedRoles={['admin', 'supervisor','employee']}><Projects /></ProtectedRoute>} />
               <Route path="attendance" element={<ProtectedRoute allowedRoles={['admin', 'supervisor']}><Attendance /></ProtectedRoute>} />

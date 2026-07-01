@@ -158,7 +158,7 @@ export default function Login() {
                     type="button"
                     className="text-xs font-medium text-blue-600 hover:text-blue-800 transition-colors"
                     onClick={() => {
-                      setUserId('admin@hrdynamix.com')
+                      setUserId('admin@hrmanagement.com')
                       setPassword('admin123')
                     }}
                   >

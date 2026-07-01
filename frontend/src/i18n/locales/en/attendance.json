@@ -13,7 +13,10 @@
     "completed": "Device sync completed successfully! Refreshing data...",
     "failed": "Sync failed",
     "timeout": "Sync is taking longer than expected",
-    "hint": "Missing older records? Use Sync from Device to import up to 6 months of history from the terminal."
+    "hint": "Missing older records? Use Sync from Device to import up to 6 months of history from the terminal.",
+    "lastSync": "Last device sync: {{time}}",
+    "neverSynced": "No recent device sync",
+    "pendingToday": "Today's punch has not been imported from the fingerprint device yet. Auto-sync runs every {{minutes}} minutes, or ask an admin to click \"Sync from Device\"."
   },
   "stats": {
     "today": "Today (page)",
@@ -23,6 +26,7 @@
   },
   "presets": {
     "title": "Quick ranges",
+    "today": "Today",
     "last6Months": "Last 6 months",
     "last30Days": "Last 30 days",
     "thisMonth": "This month",
@@ -68,7 +72,7 @@
     "checkOut": "Check Out",
     "allEmployees": "All employees",
     "selectEmployee": "Select an employee",
-    "searchEmployee": "Search by name or ID...",
+    "searchEmployee": "Search by name...",
     "placeholder_employee": "Enter employee ID",
     "defaultRangeHint": "Showing the last 6 months by default. Use quick ranges or pick custom dates.",
     "activeRange": "{{start}} → {{end}}"

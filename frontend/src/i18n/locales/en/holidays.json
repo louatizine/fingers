@@ -1,0 +1,37 @@
+{
+  "title": "Public Holidays",
+  "subtitle": "Official public holidays in Tunisia",
+  "year": "Year",
+  "today": "Today",
+  "loading": "Loading holidays…",
+  "error": "Could not load public holidays. Please try again.",
+  "retry": "Retry",
+  "noHolidays": "No public holidays found for this year.",
+  "holidayCount": "{{count}} public holiday",
+  "holidayCount_plural": "{{count}} public holidays",
+  "upcoming": "Upcoming",
+  "past": "Past",
+  "allHolidays": "All holidays",
+  "selectDay": "Click a highlighted day to see details.",
+  "types": {
+    "Public": "Public holiday"
+  },
+  "weekdays": {
+    "short": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+  },
+  "months": {
+    "january": "January",
+    "february": "February",
+    "march": "March",
+    "april": "April",
+    "may": "May",
+    "june": "June",
+    "july": "July",
+    "august": "August",
+    "september": "September",
+    "october": "October",
+    "november": "November",
+    "december": "December"
+  },
+  "poweredBy": "Data from Nager.Date API"
+}

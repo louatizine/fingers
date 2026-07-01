@@ -7,7 +7,7 @@ check-in vs check-out. When codes are ambiguous, we alternate per employee.
 """
 
 from datetime import datetime
-from typing import Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 # ZKTeco attendance state codes (when carried in status or punch)
 _STATE_TO_EVENT = {
@@ -104,3 +104,124 @@ def get_state_label(status: int, punch: int) -> str:
     if punch in _STATE_LABELS:
         return _STATE_LABELS[punch]
     return f'status={status},punch={punch}'
+
+
+def employee_id_candidates(device_user_id: str) -> List[str]:
+    """
+    Build equivalent employee_id values for a ZKTeco badge/user_id.
+
+    Handles legacy formats such as EMP001 vs EMP0001 for device user "1".
+    """
+    device_user_id = str(device_user_id).strip()
+    if not device_user_id:
+        return []
+
+    candidates = [device_user_id, f'EMP{device_user_id}']
+    if device_user_id.isdigit():
+        number = int(device_user_id)
+        candidates.extend([
+            f'EMP{number:04d}',
+            f'EMP{number:03d}',
+            f'EMP{number}',
+            str(number),
+        ])
+    else:
+        upper = device_user_id.upper()
+        if upper.startswith('EMP'):
+            candidates.append(upper)
+
+    seen = set()
+    ordered: List[str] = []
+    for candidate in candidates:
+        if candidate and candidate not in seen:
+            seen.add(candidate)
+            ordered.append(candidate)
+    return ordered
+
+
+def pick_best_device_user_match(users: List[dict], device_user_id: str) -> Optional[dict]:
+    """Prefer linked/admin accounts over auto-synced duplicates."""
+    if not users:
+        return None
+    if len(users) == 1:
+        return users[0]
+
+    device_user_id = str(device_user_id).strip()
+
+    for user in users:
+        if str(user.get('device_user_id', '')).strip() == device_user_id:
+            return user
+
+    for user in users:
+        if not user.get('synced_from_device') and user.get('role') in ('admin', 'supervisor', 'manager'):
+            return user
+
+    for user in users:
+        if not user.get('synced_from_device'):
+            return user
+
+    return users[0]
+
+
+def find_user_for_device_user_id(db, device_user_id: str) -> Optional[dict]:
+    """Resolve the database user for a ZKTeco attendance log user_id."""
+    device_user_id = str(device_user_id).strip()
+    if not device_user_id:
+        return None
+
+    user = db.users.find_one({'device_user_id': device_user_id})
+    if user:
+        return user
+
+    if device_user_id.isdigit():
+        number = int(device_user_id)
+        for biometric_id in (number, str(number)):
+            user = db.users.find_one({'biometric_id': biometric_id})
+            if user:
+                return user
+
+    matches: List[dict] = []
+    seen_ids = set()
+    for employee_id in employee_id_candidates(device_user_id):
+        user = db.users.find_one({'employee_id': employee_id})
+        if user and user['_id'] not in seen_ids:
+            seen_ids.add(user['_id'])
+            matches.append(user)
+
+    user = pick_best_device_user_match(matches, device_user_id)
+    if user and not user.get('device_user_id'):
+        db.users.update_one(
+            {'_id': user['_id']},
+            {'$set': {'device_user_id': device_user_id}},
+        )
+        user['device_user_id'] = device_user_id
+    return user
+
+
+def resolve_attendance_employee_id(db, user: Optional[dict]) -> Optional[str]:
+    """Return the employee_id that should be used for attendance lookups."""
+    if not user:
+        return None
+
+    employee_id = user.get('employee_id')
+    if not employee_id:
+        return None
+
+    if user.get('device_user_id'):
+        return employee_id
+
+    if user.get('biometric_id') is not None:
+        linked = db.users.find_one({
+            'biometric_id': user['biometric_id'],
+            'device_user_id': {'$exists': True, '$ne': ''},
+        })
+        if linked:
+            return linked.get('employee_id')
+
+    numeric = str(employee_id).upper().removeprefix('EMP')
+    if numeric.isdigit():
+        linked = find_user_for_device_user_id(db, numeric)
+        if linked:
+            return linked.get('employee_id')
+
+    return employee_id

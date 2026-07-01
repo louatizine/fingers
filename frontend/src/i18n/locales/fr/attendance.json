@@ -13,7 +13,10 @@
     "completed": "Synchronisation de l'appareil terminée avec succès! Actualisation des données...",
     "failed": "Échec de la synchronisation",
     "timeout": "La synchronisation prend plus de temps que prévu",
-    "hint": "Des enregistrements manquants? Synchronisez depuis l'appareil pour importer jusqu'à 6 mois d'historique."
+    "hint": "Des enregistrements manquants? Synchronisez depuis l'appareil pour importer jusqu'à 6 mois d'historique.",
+    "lastSync": "Dernière synchronisation : {{time}}",
+    "neverSynced": "Aucune synchronisation récente",
+    "pendingToday": "Votre pointage du jour n'est pas encore importé depuis l'appareil. La synchronisation automatique s'exécute toutes les {{minutes}} minutes, ou demandez à un administrateur de cliquer sur « Synchroniser depuis l'Appareil »."
   },
   "stats": {
     "today": "Aujourd'hui (page)",
@@ -23,6 +26,7 @@
   },
   "presets": {
     "title": "Périodes rapides",
+    "today": "Aujourd'hui",
     "last6Months": "6 derniers mois",
     "last30Days": "30 derniers jours",
     "thisMonth": "Ce mois-ci",
@@ -68,7 +72,7 @@
     "checkOut": "Sortie",
     "allEmployees": "Tous les employés",
     "selectEmployee": "Sélectionner un employé",
-    "searchEmployee": "Rechercher par nom ou ID...",
+    "searchEmployee": "Rechercher par nom...",
     "placeholder_employee": "Entrez l'ID de l'employé",
     "defaultRangeHint": "Les 6 derniers mois sont affichés par défaut. Utilisez les périodes rapides ou choisissez des dates.",
     "activeRange": "{{start}} → {{end}}"

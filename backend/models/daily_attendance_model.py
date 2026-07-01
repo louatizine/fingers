@@ -60,6 +60,7 @@ class DailyAttendanceModel:
         pair_count = doc.get('pair_count', 0)
         check_in = doc.get('check_in_at') or doc.get('first_event_at')
         check_out = doc.get('check_out_at') if pair_count > 0 else None
+        has_records = doc.get('event_count', 0) > 0
         return {
             'employee_id': doc.get('employee_id'),
             'date': doc.get('date'),
@@ -86,5 +87,6 @@ class DailyAttendanceModel:
                 and doc.get('pair_count', 0) > 0
                 and doc.get('total_worked_minutes', 0) > 0
             ),
-            'has_records': doc.get('event_count', 0) > 0,
+            'has_records': has_records,
+            'in_progress': has_records and pair_count == 0,
         }

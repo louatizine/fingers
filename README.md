@@ -583,6 +583,14 @@ For issues and questions:
 - [ ] Employee self-service portal enhancements
 
 ---
+** build and push 
+- cd "c:\Users\ZineeddineLouati\OneDrive - dynamix-services.com\Bureau\Employees_Managements"
+- $REGISTRY = "192.168.100.19:5000"
 
+- docker login $REGISTRY
+- docker build -t ${REGISTRY}/hr-backend:latest ./backend
+- docker build -t ${REGISTRY}/hr-frontend:latest --build-arg VITE_API_URL=/api ./frontend
+- docker push ${REGISTRY}/hr-backend:latest
+- docker push ${REGISTRY}/hr-frontend:latest
 
 **Key Technologies:** React 18 • Flask 3.0 • MongoDB • pyzk • i18next • Tailwind CSS • ZKTeco

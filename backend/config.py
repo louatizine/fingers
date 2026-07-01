@@ -36,6 +36,8 @@ class Config:
     ZK_DEVICE_IP = os.environ.get('ZK_DEVICE_IP', '192.168.100.5')
     ZK_DEVICE_PORT = int(os.environ.get('ZK_DEVICE_PORT') or 4370)
     ZK_DEVICE_NAME = os.environ.get('ZK_DEVICE_NAME') or 'ZKTeco K80'
+    # Device communication password (0 = default / none). Set if configured on the terminal.
+    ZK_DEVICE_PASSWORD = int(os.environ.get('ZK_DEVICE_PASSWORD') or 0)
     ZK_SYNC_ENABLED = os.environ.get('ZK_SYNC_ENABLED', 'true').lower() == 'true'
     ZK_SYNC_INTERVAL_MINUTES = int(os.environ.get('ZK_SYNC_INTERVAL_MINUTES') or 5)
     # Only import attendance on or after this date (default: 6 months ago)
@@ -44,3 +46,5 @@ class Config:
     ).strftime('%Y-%m-%d')
     # Local timezone for grouping device events into calendar days
     ATTENDANCE_TIMEZONE = os.environ.get('ATTENDANCE_TIMEZONE') or 'Africa/Algiers'
+    ZK_DEVICE_TIMEOUT = int(os.environ.get('ZK_DEVICE_TIMEOUT') or 15)
+    ZK_DEVICE_MAX_RETRIES = int(os.environ.get('ZK_DEVICE_MAX_RETRIES') or 5)

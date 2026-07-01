@@ -1,0 +1,37 @@
+{
+  "title": "Jours fériés",
+  "subtitle": "Jours fériés officiels en Tunisie",
+  "year": "Année",
+  "today": "Aujourd'hui",
+  "loading": "Chargement des jours fériés…",
+  "error": "Impossible de charger les jours fériés. Veuillez réessayer.",
+  "retry": "Réessayer",
+  "noHolidays": "Aucun jour férié trouvé pour cette année.",
+  "holidayCount": "{{count}} jour férié",
+  "holidayCount_plural": "{{count}} jours fériés",
+  "upcoming": "À venir",
+  "past": "Passés",
+  "allHolidays": "Tous les jours fériés",
+  "selectDay": "Cliquez sur un jour surligné pour voir les détails.",
+  "types": {
+    "Public": "Jour férié"
+  },
+  "weekdays": {
+    "short": ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"]
+  },
+  "months": {
+    "january": "Janvier",
+    "february": "Février",
+    "march": "Mars",
+    "april": "Avril",
+    "may": "Mai",
+    "june": "Juin",
+    "july": "Juillet",
+    "august": "Août",
+    "september": "Septembre",
+    "october": "Octobre",
+    "november": "Novembre",
+    "december": "Décembre"
+  },
+  "poweredBy": "Données fournies par l'API Nager.Date"
+}

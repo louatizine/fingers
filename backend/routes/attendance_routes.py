@@ -12,6 +12,10 @@ import csv
 
 from io import StringIO
 
+from zoneinfo import ZoneInfo
+
+from config import Config
+
 
 
 from services.daily_attendance_service import (
@@ -40,9 +44,17 @@ DEFAULT_LOOKBACK_DAYS = 180
 
 
 
+def _local_now() -> datetime:
+
+    return datetime.now(ZoneInfo(Config.ATTENDANCE_TIMEZONE))
+
+
+
+
+
 def _default_start_date() -> str:
 
-    start = datetime.now() - timedelta(days=DEFAULT_LOOKBACK_DAYS)
+    start = _local_now() - timedelta(days=DEFAULT_LOOKBACK_DAYS)
 
     return start.strftime('%Y-%m-%d')
 
@@ -52,7 +64,7 @@ def _default_start_date() -> str:
 
 def _default_end_date() -> str:
 
-    return datetime.now().strftime('%Y-%m-%d')
+    return _local_now().strftime('%Y-%m-%d')
 
 
 
@@ -234,7 +246,7 @@ def get_employee_attendance(employee_id):
 
     try:
 
-        date_str = request.args.get('date') or datetime.now().strftime('%Y-%m-%d')
+        date_str = request.args.get('date') or _default_end_date()
 
         date_str = _parse_date_str(date_str)
 
@@ -432,7 +444,7 @@ def get_daily_summary(employee_id):
 
         db = get_db()
 
-        date_str = request.args.get('date', datetime.now().strftime('%Y-%m-%d'))
+        date_str = request.args.get('date', _default_end_date())
 
         date_str = _parse_date_str(date_str)
 

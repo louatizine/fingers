@@ -28,7 +28,7 @@ Edit `.env`:
 python app.py
 ```
 
-✅ Backend running on http://localhost:5000  
+✅ Backend running on http://localhost:5559  
 ✅ **Auto-sync** pulls employees + attendance from the ZKTeco device every 5 minutes (configurable via `ZK_SYNC_INTERVAL_MINUTES`)
 
 ---
@@ -38,7 +38,7 @@ python app.py
 ```bash
 cd frontend
 npm install
-echo VITE_API_URL=http://localhost:5000/api > .env
+echo VITE_API_URL=http://localhost:5559/api > .env
 npm run dev
 ```
 
@@ -85,7 +85,7 @@ Enroll employees on the **ZKTeco device** using ZKTeco official software or the 
 - Check firewall / same subnet; port `4370` must be open
 
 ### "Backend Connection Failed" (frontend)
-- Backend must run on http://localhost:5000
+- Backend must run on http://localhost:5559
 - Check `VITE_API_URL` in `frontend/.env`
 
 ### No attendance records

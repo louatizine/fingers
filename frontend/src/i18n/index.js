@@ -15,6 +15,9 @@ import fingerprintAr from './locales/ar/fingerprint.json'
 import dashboardFr from './locales/fr/dashboard.json'
 import dashboardEn from './locales/en/dashboard.json'
 import dashboardAr from './locales/ar/dashboard.json'
+import holidaysFr from './locales/fr/holidays.json'
+import holidaysEn from './locales/en/holidays.json'
+import holidaysAr from './locales/ar/holidays.json'
 
 // Configure i18n
 i18n
@@ -52,18 +55,21 @@ i18n
         attendance: attendanceFr,
         fingerprint: fingerprintFr,
         dashboard: dashboardFr,
+        holidays: holidaysFr,
       },
       en: {
         common: commonEn,
         attendance: attendanceEn,
         fingerprint: fingerprintEn,
         dashboard: dashboardEn,
+        holidays: holidaysEn,
       },
       ar: {
         common: commonAr,
         attendance: attendanceAr,
         fingerprint: fingerprintAr,
         dashboard: dashboardAr,
+        holidays: holidaysAr,
       },
     },
     

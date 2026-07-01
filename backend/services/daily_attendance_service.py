@@ -5,11 +5,18 @@ Persistence layer for daily attendance summaries.
 import logging
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple
+from zoneinfo import ZoneInfo
 
+from config import Config
 from models.daily_attendance_model import DailyAttendanceModel
 from services.daily_attendance_aggregator import DailyWorkedSummary
 
 logger = logging.getLogger(__name__)
+
+
+def _local_today_str() -> str:
+    tz = ZoneInfo(Config.ATTENDANCE_TIMEZONE)
+    return datetime.now(tz).strftime('%Y-%m-%d')
 
 
 def upsert_daily_summaries(
@@ -81,12 +88,12 @@ def build_date_filter(
     if start_date:
         date_filter['$gte'] = start_date
     else:
-        start = datetime.now() - timedelta(days=default_lookback_days)
+        start = datetime.now(ZoneInfo(Config.ATTENDANCE_TIMEZONE)) - timedelta(days=default_lookback_days)
         date_filter['$gte'] = start.strftime('%Y-%m-%d')
     if end_date:
         date_filter['$lte'] = end_date
     else:
-        date_filter['$lte'] = datetime.now().strftime('%Y-%m-%d')
+        date_filter['$lte'] = _local_today_str()
     return date_filter
 
 

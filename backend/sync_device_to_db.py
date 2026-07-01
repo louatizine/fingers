@@ -17,7 +17,12 @@ from datetime import datetime, timezone
 from typing import Dict, List
 from zoneinfo import ZoneInfo
 from zk_device_manager import ZKDeviceManager
-from services.zk_attendance_utils import normalize_device_timestamp
+from services.zk_attendance_utils import (
+    employee_id_candidates,
+    find_user_for_device_user_id,
+    normalize_device_timestamp,
+    pick_best_device_user_match,
+)
 from services.daily_attendance_aggregator import (
     AttendanceEvent,
     aggregate_events_to_daily_summaries,
@@ -118,8 +123,14 @@ class DeviceToDBSyncer:
     
     def connect_to_device(self) -> bool:
         """Connect to ZKTeco device."""
+        from config import Config
         logger.info(f"Connecting to device at {self.device_ip}:{self.device_port}...")
-        return self.device_manager.connect(self.device_ip, self.device_port)
+        return self.device_manager.connect(
+            self.device_ip,
+            self.device_port,
+            timeout=Config.ZK_DEVICE_TIMEOUT,
+            max_retries=Config.ZK_DEVICE_MAX_RETRIES,
+        )
     
     def disconnect(self):
         """Disconnect from device."""
@@ -175,24 +186,18 @@ class DeviceToDBSyncer:
         device_user_id = device_user.get('user_id', '')
         device_uid = device_user.get('uid', 0)
         device_name = device_user.get('name', 'Unknown')
-        
-        # Try to find user by biometric_id (uid from device)
+
         existing_user = self.db.users.find_one({'biometric_id': device_uid})
-        
-        # If not found, try by employee_id if it matches device user_id
+
         if not existing_user:
-            # Try formats: user_id directly, EMP{user_id}, EMP{user_id:04d}
-            possible_employee_ids = [
-                device_user_id,
-                f"EMP{device_user_id}",
-                f"EMP{int(device_user_id):04d}" if device_user_id.isdigit() else None
-            ]
-            
-            for emp_id in possible_employee_ids:
-                if emp_id:
-                    existing_user = self._find_user_by_employee_id(emp_id)
-                    if existing_user:
-                        break
+            matches = []
+            seen_ids = set()
+            for emp_id in employee_id_candidates(str(device_user_id)):
+                user = self._find_user_by_employee_id(emp_id)
+                if user and user['_id'] not in seen_ids:
+                    seen_ids.add(user['_id'])
+                    matches.append(user)
+            existing_user = pick_best_device_user_match(matches, str(device_user_id))
         
         if existing_user:
             # User exists in database
@@ -301,8 +306,11 @@ class DeviceToDBSyncer:
                 'has_fingerprint': True,
                 'fingerprint_status': 'ENROLLED',
                 'last_device_sync': datetime.utcnow(),
-                'device_user_id': device_user['user_id']
+                'device_user_id': str(device_user['user_id']),
             }
+
+            if device_user.get('uid') is not None and not existing_user.get('biometric_id'):
+                update_data['biometric_id'] = device_user['uid']
             
             # Update card number if changed
             if device_user.get('card') and device_user['card'] != 0:
@@ -436,45 +444,8 @@ class DeviceToDBSyncer:
         return events
     
     def _find_user_by_device_id(self, device_user_id: str) -> Dict:
-        """
-        Find user in database by device user_id.
-        
-        Tries multiple strategies:
-        1. Match by device_user_id field
-        2. Match by employee_id variants
-        3. Match by biometric_id
-        """
-        # Strategy 1: Direct device_user_id match
-        user = self.db.users.find_one({'device_user_id': device_user_id})
-        if user:
-            return user
-        
-        # Strategy 2: Employee ID variants
-        possible_employee_ids = [
-            device_user_id,
-            f"EMP{device_user_id}",
-            f"EMP{int(device_user_id):04d}" if device_user_id.isdigit() else None
-        ]
-        
-        for emp_id in possible_employee_ids:
-            if emp_id:
-                user = self._find_user_by_employee_id(emp_id)
-                if user:
-                    # Update with device_user_id for future lookups
-                    user_id = user['_id'] if isinstance(user['_id'], ObjectId) else ObjectId(user['_id'])
-                    self.db.users.update_one(
-                        {'_id': user_id},
-                        {'$set': {'device_user_id': device_user_id}}
-                    )
-                    return user
-        
-        # Strategy 3: Match by user_id as integer to biometric_id
-        if device_user_id.isdigit():
-            user = self.db.users.find_one({'biometric_id': int(device_user_id)})
-            if user:
-                return user
-        
-        return None
+        """Find user in database by device attendance log user_id."""
+        return find_user_for_device_user_id(self.db, str(device_user_id))
 
     def _find_user_by_employee_id(self, employee_id: str) -> Dict:
         """Find a user by employee_id using the syncer's database connection."""

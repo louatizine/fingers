@@ -19,8 +19,29 @@ from typing import List, Dict, Optional, Callable
 from zk import ZK
 from zk.exception import ZKError, ZKErrorConnection, ZKErrorResponse
 
+from config import Config
+
 # Configure logging
 logger = logging.getLogger(__name__)
+
+# Errors that often clear on retry (device busy, another client, flaky LAN)
+_TRANSIENT_CONNECT_MARKERS = (
+    'broken pipe',
+    'connection reset',
+    'timed out',
+    'timeout',
+    'errno 32',
+    'errno 104',
+    'errno 110',
+    'errno 111',
+    'connection refused',
+    'device is locked',
+)
+
+
+def _is_transient_connect_error(exc: BaseException) -> bool:
+    message = str(exc).lower()
+    return any(marker in message for marker in _TRANSIENT_CONNECT_MARKERS)
 
 
 class ZKDeviceManager:
@@ -38,13 +59,28 @@ class ZKDeviceManager:
         self.ip_address = None
         self.port = None
         self.is_connected = False
+
+    def _reset_connection(self) -> None:
+        """Drop any half-open SDK connection before retrying."""
+        if self.conn:
+            try:
+                self.conn.enable_device()
+            except Exception:
+                pass
+            try:
+                self.conn.disconnect()
+            except Exception:
+                pass
+        self.conn = None
+        self.zk = None
+        self.is_connected = False
         
     def connect(
         self, 
         ip: str, 
         port: int = 4370, 
-        timeout: int = 5,
-        max_retries: int = 3
+        timeout: int = 15,
+        max_retries: int = 5
     ) -> bool:
         """
         Connect to ZKTeco device with retry logic.
@@ -62,11 +98,23 @@ class ZKDeviceManager:
         self.port = port
         
         for attempt in range(1, max_retries + 1):
+            self._reset_connection()
+            force_udp = attempt >= max_retries - 1
             try:
-                logger.info(f"Attempting to connect to {ip}:{port} (attempt {attempt}/{max_retries})")
+                logger.info(
+                    "Attempting to connect to %s:%s (attempt %s/%s, udp=%s)",
+                    ip, port, attempt, max_retries, force_udp,
+                )
                 
-                # Create ZK instance
-                self.zk = ZK(ip, port=port, timeout=timeout, password=0, force_udp=False, ommit_ping=False)
+                # Skip ICMP ping — Docker/WiFi often blocks it while TCP 4370 still works
+                self.zk = ZK(
+                    ip,
+                    port=port,
+                    timeout=timeout,
+                    password=Config.ZK_DEVICE_PASSWORD,
+                    force_udp=force_udp,
+                    ommit_ping=True,
+                )
                 
                 # Establish connection
                 self.conn = self.zk.connect()
@@ -80,23 +128,29 @@ class ZKDeviceManager:
                 
             except ZKErrorConnection as e:
                 logger.warning(f"Connection attempt {attempt} failed: {e}")
-                if attempt < max_retries:
-                    # Exponential backoff: 1s, 2s, 4s
-                    wait_time = 2 ** (attempt - 1)
-                    logger.info(f"Retrying in {wait_time} seconds...")
-                    time.sleep(wait_time)
-                else:
-                    logger.error(f"Failed to connect after {max_retries} attempts")
                     
             except ZKError as e:
-                logger.error(f"ZK SDK error during connection: {e}")
-                break
-                
+                if _is_transient_connect_error(e):
+                    logger.warning(f"Transient ZK error on attempt {attempt}: {e}")
+                else:
+                    logger.error(f"ZK SDK error during connection: {e}")
+                    break
+                    
             except Exception as e:
-                logger.error(f"Unexpected error during connection: {e}")
-                break
+                if _is_transient_connect_error(e):
+                    logger.warning(f"Transient error on attempt {attempt}: {e}")
+                else:
+                    logger.error(f"Unexpected error during connection: {e}")
+                    break
+
+            if attempt < max_retries:
+                wait_time = min(2 ** attempt, 10)
+                logger.info(f"Retrying in {wait_time} seconds...")
+                time.sleep(wait_time)
+            else:
+                logger.error(f"Failed to connect after {max_retries} attempts")
         
-        self.is_connected = False
+        self._reset_connection()
         return False
     
     def disconnect(self) -> None:
