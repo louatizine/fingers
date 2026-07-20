@@ -2,7 +2,7 @@
   "title": "Attendance Management",
   "subtitle": "Track and manage employee attendance records",
   "tabs": {
-    "logs": "Daily Summaries",
+    "logs": "Daily View",
     "summary": "Worked Hours Summary",
     "userStats": "User Statistics"
   },
@@ -124,5 +124,20 @@
   },
   "reset": "Reset Filters",
   "show": "Show",
-  "noRecords": "No attendance records found"
+  "noRecords": "No attendance records found",
+  "daily": {
+    "title": "Daily Attendance",
+    "subtitle": "View attendance for all employees on a specific day",
+    "selectDate": "Select Date",
+    "load": "Load Attendance",
+    "loading": "Loading daily attendance...",
+    "noData": "No employees found",
+    "noDataDesc": "No active employees in the system",
+    "present": "Present",
+    "absent": "Absent",
+    "complete": "Complete",
+    "partial": "Partial",
+    "totalHours": "Total Hours",
+    "searchPlaceholder": "Search by name or department..."
+  }
 }

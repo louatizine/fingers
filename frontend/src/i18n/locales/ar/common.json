@@ -195,6 +195,7 @@
     "getStarted": "ابدأ بإضافة موظفك الأول",
     "confirmDeactivate": "هل أنت متأكد من أنك تريد إلغاء تفعيل هذا الموظف؟",
     "workforceManagement": "إدارة القوى العاملة",
+    "selected": "محدد",
     "firstNamePlaceholder": "أحمد",
     "lastNamePlaceholder": "محمد",
     "months": "أشهر",
@@ -231,6 +232,27 @@
     "status": {
       "active": "نشط",
       "inactive": "غير نشط"
+    },
+    "account": {
+      "hasAccount": "لديه حساب",
+      "noAccount": "بدون حساب"
+    },
+    "createAccounts": {
+      "action": "إنشاء حسابات",
+      "title": "إنشاء حسابات ويب",
+      "subtitle": "تفعيل تسجيل الدخول للموظفين المحددين",
+      "selectedEmployees": "الموظفون المراد تفعيلهم",
+      "password": "كلمة المرور",
+      "confirmPassword": "تأكيد كلمة المرور",
+      "passwordHint": "سيتم تعيين نفس كلمة المرور المؤقتة لجميع الموظفين المحددين. يجب عليهم تغييرها بعد أول تسجيل دخول.",
+      "passwordMismatch": "كلمات المرور غير متطابقة",
+      "noEligible": "لا يوجد موظفون محددون يحتاجون إلى حساب",
+      "skippedCount": "{{count}} لديهم حساب بالفعل وسيتم تخطيهم",
+      "submit": "إنشاء الحسابات",
+      "success": "تم إنشاء {{count}} حساب بنجاح",
+      "skippedToast": "{{count}} موظف لديهم حساب بالفعل",
+      "error": "فشل إنشاء الحسابات",
+      "partialError": "تعذر إنشاء بعض الحسابات"
     },
     "departments": {
       "engineering": "الهندسة",

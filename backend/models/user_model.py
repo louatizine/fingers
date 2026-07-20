@@ -70,6 +70,90 @@ def verify_password(user, password):
         logger.error(f"Error verifying password: {e}")
         return False
 
+
+def has_web_account(user):
+    """True when the user has a hashed password and can log in to the web app."""
+    if not user:
+        return False
+    if user.get('has_web_account') is False:
+        return False
+    pwd = user.get('password')
+    if not pwd:
+        return False
+    if isinstance(pwd, str):
+        return (
+            pwd.startswith('$2b$')
+            or pwd.startswith('$2a$')
+            or pwd.startswith('scrypt:')
+        )
+    return isinstance(pwd, bytes)
+
+
+def create_web_accounts(user_ids, password):
+    """
+    Enable web login for existing employees (e.g. synced from fingerprint device).
+    Returns created, skipped, and error details.
+    """
+    if not password or len(password) < 8:
+        return {'success': False, 'error': 'Password must be at least 8 characters'}
+
+    db = get_db()
+    hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+    created = []
+    skipped = []
+    errors = []
+
+    for user_id in user_ids:
+        try:
+            user = db.users.find_one({'_id': ObjectId(user_id)})
+            if not user:
+                errors.append({'user_id': user_id, 'error': 'User not found'})
+                continue
+
+            if has_web_account(user):
+                skipped.append({
+                    'user_id': user_id,
+                    'employee_id': user.get('employee_id'),
+                    'name': f"{user.get('first_name', '')} {user.get('last_name', '')}".strip(),
+                    'reason': 'already_has_account',
+                })
+                continue
+
+            if not user.get('email'):
+                errors.append({
+                    'user_id': user_id,
+                    'employee_id': user.get('employee_id'),
+                    'error': 'Email is required to create an account',
+                })
+                continue
+
+            db.users.update_one(
+                {'_id': ObjectId(user_id)},
+                {'$set': {
+                    'password': hashed,
+                    'has_web_account': True,
+                    'account_created_at': datetime.utcnow(),
+                    'updated_at': datetime.utcnow(),
+                }},
+            )
+            created.append({
+                'user_id': user_id,
+                'employee_id': user.get('employee_id'),
+                'email': user.get('email'),
+                'name': f"{user.get('first_name', '')} {user.get('last_name', '')}".strip(),
+            })
+        except Exception as e:
+            logger.error(f"Create web account error for {user_id}: {e}")
+            errors.append({'user_id': user_id, 'error': str(e)})
+
+    return {
+        'success': True,
+        'created': created,
+        'skipped': skipped,
+        'errors': errors,
+    }
+
+
 def find_user_by_employee_id(employee_id):
     """
     Find a user by employee ID
@@ -188,6 +272,10 @@ def create_user(user_data):
         user_data.setdefault('is_active', True)
         user_data.setdefault('role', 'employee')
         user_data.setdefault('created_at', datetime.utcnow())
+        if user_data.get('password'):
+            user_data['has_web_account'] = True
+        else:
+            user_data.setdefault('has_web_account', False)
         
         result = db.users.insert_one(user_data)
         user_data['_id'] = str(result.inserted_id)
@@ -211,6 +299,7 @@ def update_user(user_id, update_data):
             if not update_data['password'].startswith('$2b$') and not update_data['password'].startswith('$2a$'):
                 hashed = bcrypt.hashpw(update_data['password'].encode('utf-8'), bcrypt.gensalt())
                 update_data['password'] = hashed.decode('utf-8')
+            update_data['has_web_account'] = True
         
         update_data['updated_at'] = datetime.utcnow()
         
@@ -609,6 +698,7 @@ def get_all_users(filters=None):
             user['_id'] = str(user['_id'])
             # Remove sensitive information
             user.pop('password', None)
+            user['has_web_account'] = has_web_account(user)
             
             # Ensure essential fields exist for the frontend table
             user.setdefault('is_active', True)

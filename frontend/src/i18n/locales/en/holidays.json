@@ -14,7 +14,22 @@
   "allHolidays": "All holidays",
   "selectDay": "Click a highlighted day to see details.",
   "types": {
-    "Public": "Public holiday"
+    "Public": "Public holiday",
+    "religious": "Religious holiday"
+  },
+  "legend": {
+    "public": "National",
+    "religious": "Religious",
+    "both": "Both"
+  },
+  "totalCount": "{{public}} national · {{religious}} religious",
+  "calendar": {
+    "title": "Holiday calendar",
+    "month": "Month",
+    "week": "Week",
+    "previous": "Previous period",
+    "next": "Next period",
+    "noHoliday": "No holiday"
   },
   "weekdays": {
     "short": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
@@ -33,5 +48,63 @@
     "november": "November",
     "december": "December"
   },
-  "poweredBy": "Data from Nager.Date API"
+  "poweredBy": "Data from Nager.Date API",
+  "religious": {
+    "title": "Religious holidays planning",
+    "subtitle": "Plan lunar and faith-based days once official dates are announced",
+    "add": "Plan holiday",
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save",
+    "cancel": "Cancel",
+    "empty": "No religious holidays planned for {{year}} yet.",
+    "readOnlyHint": "Only supervisors and admins can plan religious holidays.",
+    "confirmDelete": "Delete this religious holiday?",
+    "saved": "Religious holiday saved",
+    "deleted": "Religious holiday deleted",
+    "failed": "Could not save religious holiday",
+    "loadFailed": "Could not load religious holidays",
+    "days": "{{count}} day",
+    "days_plural": "{{count}} days",
+    "fields": {
+      "preset": "Holiday type",
+      "name": "Name (FR/EN)",
+      "localName": "Arabic name",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "notes": "Notes (optional)"
+    },
+    "presets": {
+      "eid_fitr": {
+        "label": "Eid al-Fitr",
+        "name": "Eid al-Fitr",
+        "localName": "عيد الفطر"
+      },
+      "eid_adha": {
+        "label": "Eid al-Adha",
+        "name": "Eid al-Adha",
+        "localName": "عيد الأضحى"
+      },
+      "islamic_new_year": {
+        "label": "Islamic New Year",
+        "name": "Islamic New Year",
+        "localName": "رأس السنة الهجرية"
+      },
+      "mawlid": {
+        "label": "Mawlid (Prophet's Birthday)",
+        "name": "Mawlid",
+        "localName": "المولد النبوي"
+      },
+      "ashura": {
+        "label": "Ashura",
+        "name": "Ashura",
+        "localName": "عاشوراء"
+      },
+      "custom": {
+        "label": "Custom",
+        "name": "",
+        "localName": ""
+      }
+    }
+  }
 }

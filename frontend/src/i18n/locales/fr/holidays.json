@@ -14,7 +14,22 @@
   "allHolidays": "Tous les jours fériés",
   "selectDay": "Cliquez sur un jour surligné pour voir les détails.",
   "types": {
-    "Public": "Jour férié"
+    "Public": "Jour férié",
+    "religious": "Fête religieuse"
+  },
+  "legend": {
+    "public": "National",
+    "religious": "Religieux",
+    "both": "Les deux"
+  },
+  "totalCount": "{{public}} nationaux · {{religious}} religieux",
+  "calendar": {
+    "title": "Calendrier des jours fériés",
+    "month": "Mois",
+    "week": "Semaine",
+    "previous": "Période précédente",
+    "next": "Période suivante",
+    "noHoliday": "Pas de jour férié"
   },
   "weekdays": {
     "short": ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"]
@@ -33,5 +48,63 @@
     "november": "Novembre",
     "december": "Décembre"
   },
-  "poweredBy": "Données fournies par l'API Nager.Date"
+  "poweredBy": "Données fournies par l'API Nager.Date",
+  "religious": {
+    "title": "Planification des fêtes religieuses",
+    "subtitle": "Planifiez les jours lunaires et religieux dès l'annonce des dates officielles",
+    "add": "Planifier",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "empty": "Aucune fête religieuse planifiée pour {{year}}.",
+    "readOnlyHint": "Seuls les superviseurs et administrateurs peuvent planifier les fêtes religieuses.",
+    "confirmDelete": "Supprimer cette fête religieuse ?",
+    "saved": "Fête religieuse enregistrée",
+    "deleted": "Fête religieuse supprimée",
+    "failed": "Impossible d'enregistrer la fête religieuse",
+    "loadFailed": "Impossible de charger les fêtes religieuses",
+    "days": "{{count}} jour",
+    "days_plural": "{{count}} jours",
+    "fields": {
+      "preset": "Type de fête",
+      "name": "Nom (FR/EN)",
+      "localName": "Nom en arabe",
+      "startDate": "Date de début",
+      "endDate": "Date de fin",
+      "notes": "Notes (optionnel)"
+    },
+    "presets": {
+      "eid_fitr": {
+        "label": "Aïd el-Fitr",
+        "name": "Aïd el-Fitr",
+        "localName": "عيد الفطر"
+      },
+      "eid_adha": {
+        "label": "Aïd el-Adha",
+        "name": "Aïd el-Adha",
+        "localName": "عيد الأضحى"
+      },
+      "islamic_new_year": {
+        "label": "Nouvel An hijri",
+        "name": "Nouvel An hijri",
+        "localName": "رأس السنة الهجرية"
+      },
+      "mawlid": {
+        "label": "Mawlid (anniversaire du Prophète)",
+        "name": "Mawlid",
+        "localName": "المولد النبوي"
+      },
+      "ashura": {
+        "label": "Achoura",
+        "name": "Achoura",
+        "localName": "عاشوراء"
+      },
+      "custom": {
+        "label": "Personnalisé",
+        "name": "",
+        "localName": ""
+      }
+    }
+  }
 }

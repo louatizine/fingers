@@ -84,8 +84,7 @@ i18n
     
     // React options
     react: {
-      // Wait for translations before rendering
-      useSuspense: true,
+      useSuspense: false,
     },
   })
 

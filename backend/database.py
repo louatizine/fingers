@@ -64,6 +64,10 @@ def create_indexes():
             unique=True,
         )
         db.daily_attendance_summaries.create_index([("date", DESCENDING)])
+
+        # Religious holidays (planned per year)
+        db.religious_holidays.create_index([("year", ASCENDING)])
+        db.religious_holidays.create_index([("start_date", ASCENDING)])
         
         logger.info("Database indexes created successfully")
     except Exception as e:

@@ -4,8 +4,8 @@ User Routes
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models.user_model import (
-    create_user, find_user_by_id, update_user, 
-    delete_user, get_all_users
+    create_user, find_user_by_id, update_user,
+    delete_user, get_all_users, create_web_accounts,
 )
 from utils.auth_utils import admin_required, admin_or_supervisor_required
 import logging
@@ -79,6 +79,56 @@ def get_user(user_id):
     except Exception as e:
         logger.error(f"Get user error: {e}")
         return jsonify({'error': 'An error occurred'}), 500
+
+@user_bp.route('/create-accounts', methods=['POST'])
+@jwt_required()
+@admin_or_supervisor_required
+def create_employee_accounts():
+    """Create web login accounts for selected employees."""
+    try:
+        data = request.get_json() or {}
+        user_ids = data.get('user_ids') or []
+        password = (data.get('password') or '').strip()
+
+        if not user_ids:
+            return jsonify({'error': 'user_ids is required'}), 400
+        if not password:
+            return jsonify({'error': 'password is required'}), 400
+        if len(password) < 8:
+            return jsonify({'error': 'Password must be at least 8 characters'}), 400
+
+        current_user_id = get_jwt_identity()
+        current_user = find_user_by_id(current_user_id)
+
+        if current_user['role'] == 'supervisor':
+            allowed_ids = set()
+            for uid in user_ids:
+                target = find_user_by_id(uid)
+                if not target:
+                    continue
+                target_company = target.get('company_id')
+                supervisor_company = current_user.get('company_id')
+                if target_company == supervisor_company or not target_company:
+                    allowed_ids.add(uid)
+            user_ids = list(allowed_ids)
+            if not user_ids:
+                return jsonify({'error': 'No eligible employees in your company'}), 403
+
+        result = create_web_accounts(user_ids, password)
+        if not result.get('success'):
+            return jsonify({'error': result.get('error', 'Failed to create accounts')}), 400
+
+        return jsonify({
+            'message': f"{len(result['created'])} account(s) created",
+            'created': result['created'],
+            'skipped': result['skipped'],
+            'errors': result['errors'],
+        }), 200
+
+    except Exception as e:
+        logger.error(f"Create employee accounts error: {e}")
+        return jsonify({'error': 'An error occurred'}), 500
+
 
 @user_bp.route('', methods=['POST'])
 @jwt_required()

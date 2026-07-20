@@ -2,7 +2,7 @@
   "title": "Gestion des présences",
   "subtitle": "Suivre et gérer les enregistrements de présence des employés",
   "tabs": {
-    "logs": "Résumés quotidiens",
+    "logs": "Vue Quotidienne",
     "summary": "Résumé des heures travaillées",
     "userStats": "Statistiques Utilisateurs"
   },
@@ -124,5 +124,20 @@
   },
   "reset": "Réinitialiser les filtres",
   "show": "Afficher",
-  "noRecords": "Aucun enregistrement de présence trouvé"
+  "noRecords": "Aucun enregistrement de présence trouvé",
+  "daily": {
+    "title": "Présence Quotidienne",
+    "subtitle": "Voir la présence de tous les employés pour un jour donné",
+    "selectDate": "Sélectionner la date",
+    "load": "Charger la présence",
+    "loading": "Chargement de la présence quotidienne...",
+    "noData": "Aucun employé trouvé",
+    "noDataDesc": "Aucun employé actif dans le système",
+    "present": "Présent",
+    "absent": "Absent",
+    "complete": "Complet",
+    "partial": "Partiel",
+    "totalHours": "Heures Totales",
+    "searchPlaceholder": "Rechercher par nom ou département..."
+  }
 }

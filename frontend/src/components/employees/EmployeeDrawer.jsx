@@ -8,7 +8,8 @@ import {
   MapPinIcon,
   ClockIcon,
   CakeIcon,
-  UserGroupIcon
+  UserGroupIcon,
+  KeyIcon,
 } from '@heroicons/react/24/outline';
 import { useTranslation } from 'react-i18next';
 import { useDirection } from '../../hooks/useDirection';
@@ -24,7 +25,8 @@ const EmployeeDrawer = ({
   onClose, 
   employee, 
   onDeactivate, 
-  onActivate
+  onActivate,
+  onCreateAccount,
 }) => {
   const { t } = useTranslation();
   const { isRTL } = useDirection();
@@ -99,6 +101,15 @@ const EmployeeDrawer = ({
                     <span className="px-4 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-full bg-brand-surface text-brand-dark border border-brand-border">
                       {employmentType.label}
                     </span>
+                    <span className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-full ${
+                      employee.has_web_account
+                        ? 'bg-blue-50 text-blue-700 border border-blue-100'
+                        : 'bg-amber-50 text-amber-700 border border-amber-100'
+                    }`}>
+                      {employee.has_web_account
+                        ? t('employees.account.hasAccount')
+                        : t('employees.account.noAccount')}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -169,16 +180,28 @@ const EmployeeDrawer = ({
           {/* Footer - Solid Neutral Bar */}
           <div className="px-8 py-6 border-t border-brand-border bg-brand-surface">
             <div className={`flex flex-col sm:flex-row gap-4 justify-between ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
-              <button
-                onClick={handleStatusAction}
-                className={`flex-1 sm:flex-none px-8 py-3 rounded-item text-xs font-black uppercase tracking-widest transition-all ${
-                  employee.is_active
-                    ? 'border-2 border-status-error text-status-error hover:bg-status-error hover:text-white'
-                    : 'border-2 border-status-success text-status-success hover:bg-status-success hover:text-white'
-                }`}
-              >
-                {employee.is_active ? t('actions.deactivate') : t('actions.activate')}
-              </button>
+              <div className={`flex flex-col sm:flex-row gap-4 flex-1 ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
+                {!employee.has_web_account && onCreateAccount && (
+                  <button
+                    type="button"
+                    onClick={() => onCreateAccount(employee)}
+                    className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-8 py-3 rounded-item text-xs font-black uppercase tracking-widest border-2 border-indigo-200 text-indigo-700 hover:bg-indigo-600 hover:text-white transition-all"
+                  >
+                    <KeyIcon className="h-4 w-4 stroke-[2.5px]" />
+                    {t('employees.createAccounts.action')}
+                  </button>
+                )}
+                <button
+                  onClick={handleStatusAction}
+                  className={`flex-1 sm:flex-none px-8 py-3 rounded-item text-xs font-black uppercase tracking-widest transition-all ${
+                    employee.is_active
+                      ? 'border-2 border-status-error text-status-error hover:bg-status-error hover:text-white'
+                      : 'border-2 border-status-success text-status-success hover:bg-status-success hover:text-white'
+                  }`}
+                >
+                  {employee.is_active ? t('actions.deactivate') : t('actions.activate')}
+                </button>
+              </div>
               <button
                 onClick={onClose}
                 className="flex-1 sm:flex-none px-8 py-3 border-2 border-brand-border rounded-item text-xs font-black uppercase tracking-widest text-brand-dark hover:bg-white transition-all"

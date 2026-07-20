@@ -286,6 +286,7 @@ class DeviceToDBSyncer:
             user_data.setdefault('department', 'Unassigned')
             user_data.setdefault('position', 'Employee')
             user_data.setdefault('password', '')
+            user_data.setdefault('has_web_account', False)
             user_data.setdefault('leave_balance', {'annual': 20, 'sick': 10, 'unpaid': 5})
 
             self.db.users.insert_one(user_data)

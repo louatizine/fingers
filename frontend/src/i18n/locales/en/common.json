@@ -207,6 +207,7 @@
     "getStarted": "Get started by adding your first employee",
     "confirmDeactivate": "Are you sure you want to deactivate this employee?",
     "workforceManagement": "Workforce Management",
+    "selected": "selected",
     "firstNamePlaceholder": "John",
     "lastNamePlaceholder": "Doe",
     "months": "Months",
@@ -243,6 +244,27 @@
     "status": {
       "active": "Active",
       "inactive": "Inactive"
+    },
+    "account": {
+      "hasAccount": "Has login",
+      "noAccount": "No login"
+    },
+    "createAccounts": {
+      "action": "Create Accounts",
+      "title": "Create Web Accounts",
+      "subtitle": "Enable login for selected employees",
+      "selectedEmployees": "Employees to activate",
+      "password": "Password",
+      "confirmPassword": "Confirm password",
+      "passwordHint": "The same temporary password will be set for all selected employees. They should change it after first login.",
+      "passwordMismatch": "Passwords do not match",
+      "noEligible": "No selected employees need an account",
+      "skippedCount": "{{count}} already have an account and will be skipped",
+      "submit": "Create Accounts",
+      "success": "{{count}} account(s) created successfully",
+      "skippedToast": "{{count}} employee(s) already had accounts",
+      "error": "Failed to create accounts",
+      "partialError": "Some accounts could not be created"
     },
     "departments": {
       "engineering": "Engineering",

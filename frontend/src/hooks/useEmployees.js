@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { userAPI, companyAPI } from '../services/api';
 import { useToast } from '../components/Toast';
 import { useConfirm } from '../components/ConfirmDialog';
@@ -26,6 +27,7 @@ function getInitialFormData(user) {
 
 export const useEmployees = () => {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const toast = useToast();
   const { confirm } = useConfirm();
 
@@ -43,6 +45,7 @@ export const useEmployees = () => {
   const [isDetailDrawerOpen, setIsDetailDrawerOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isCreateAccountsModalOpen, setIsCreateAccountsModalOpen] = useState(false);
   const [formData, setFormData] = useState(getInitialFormData(user));
 
   // Debounced search
@@ -203,6 +206,32 @@ export const useEmployees = () => {
     }
   }, [selectedEmployees, toast]);
 
+  const handleBulkCreateAccounts = useCallback(async ({ user_ids, password }) => {
+    try {
+      const response = await userAPI.createAccounts({ user_ids, password });
+      const { created = [], skipped = [], errors = [] } = response.data;
+
+      setSelectedEmployees(new Set());
+      await loadData();
+
+      if (created.length > 0) {
+        toast.success(
+          t('employees.createAccounts.success', { count: created.length }),
+        );
+      }
+      if (skipped.length > 0) {
+        toast.info(t('employees.createAccounts.skippedToast', { count: skipped.length }));
+      }
+      if (errors.length > 0) {
+        toast.error(errors[0].error || t('employees.createAccounts.partialError'));
+      }
+      return response.data;
+    } catch (err) {
+      toast.error(err.response?.data?.error || t('employees.createAccounts.error'));
+      throw err;
+    }
+  }, [loadData, toast, t]);
+
   const handleCreateEmployee = useCallback(async (data) => {
     try {
       await userAPI.createUser(data);
@@ -286,6 +315,7 @@ export const useEmployees = () => {
     isDetailDrawerOpen,
     selectedEmployee,
     isAddModalOpen,
+    isCreateAccountsModalOpen,
     formData,
     stats,
 
@@ -295,6 +325,7 @@ export const useEmployees = () => {
     setSelectedStatus,
     setSelectedEmployees,
     setIsAddModalOpen,
+    setIsCreateAccountsModalOpen,
     setFormData,
     setSelectedEmployee,
     setIsDetailDrawerOpen,
@@ -305,6 +336,7 @@ export const useEmployees = () => {
     handleSelectAll,
     handleBulkDeactivate,
     handleBulkExport,
+    handleBulkCreateAccounts,
     handleCreateEmployee,
     handleDeactivate,
     handleActivate,

@@ -204,6 +204,10 @@ function Attendance() {
   const [employees, setEmployees] = useState([]);
   const [summaryLoading, setSummaryLoading] = useState(false);
   const [statsLoading, setStatsLoading] = useState(false);
+  const [dailyAttendance, setDailyAttendance] = useState(null);
+  const [dailyLoading, setDailyLoading] = useState(false);
+  const [dailyDate, setDailyDate] = useState(getLocalToday());
+  const [dailySearch, setDailySearch] = useState('');
   const [syncLoading, setSyncLoading] = useState(false);
   const [syncStatus, setSyncStatus] = useState(null);
   const [syncInfo, setSyncInfo] = useState(null);
@@ -247,6 +251,9 @@ function Attendance() {
   useEffect(() => {
     if (activeTab === 'userStats') {
       fetchUserStats();
+    }
+    if (activeTab === 'daily') {
+      fetchDailyAttendance();
     }
   }, [activeTab]);
 
@@ -301,6 +308,23 @@ function Attendance() {
       }
     } catch (error) {
       console.error('Error fetching employees:', error);
+    }
+  };
+
+  const fetchDailyAttendance = async () => {
+    setDailyLoading(true);
+    try {
+      const response = await attendanceAPI.getDailyAttendance(dailyDate);
+      if (response.data.success) {
+        setDailyAttendance(response.data);
+      } else {
+        setDailyAttendance(null);
+      }
+    } catch (error) {
+      console.error('Error fetching daily attendance:', error);
+      setDailyAttendance(null);
+    } finally {
+      setDailyLoading(false);
     }
   };
 
@@ -750,6 +774,11 @@ const formatTimestamp = (timestamp) => {
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm px-6">
           <nav className="-mb-px flex space-x-8">
             <TabButton 
+              id="daily" 
+              label={t('attendance:tabs.logs')} 
+              icon={<CalendarIcon className="h-5 w-5" />} 
+            />
+            <TabButton 
               id="summary" 
               label={t('attendance:tabs.summary')} 
               icon={<ChartBarIcon className="h-5 w-5" />} 
@@ -763,7 +792,197 @@ const formatTimestamp = (timestamp) => {
         </div>
 
         {/* --- TAB CONTENT --- */}
-        {activeTab === 'summary' ? (
+        {activeTab === 'daily' ? (
+          /* --- DAILY VIEW TAB --- */
+          <div className="space-y-6">
+            {/* Date picker toolbar */}
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <CalendarIcon className="h-5 w-5 text-slate-400" />
+                  <h2 className="text-lg font-bold text-slate-800">{t('attendance:daily.title')}</h2>
+                </div>
+              </div>
+              <p className="text-sm text-slate-500 mb-4">{t('attendance:daily.subtitle')}</p>
+              <div className="flex flex-wrap items-end gap-4">
+                <div>
+                  <label className={`block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ${isRTL ? 'mr-1' : 'ml-1'}`}>
+                    {t('attendance:daily.selectDate')}
+                  </label>
+                  <div className="relative">
+                    <CalendarIcon className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 pointer-events-none`} />
+                    <input
+                      type="date"
+                      value={dailyDate}
+                      onChange={(e) => setDailyDate(e.target.value)}
+                      className={`${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500 transition-all font-medium`}
+                    />
+                  </div>
+                </div>
+                <button
+                  onClick={fetchDailyAttendance}
+                  disabled={dailyLoading}
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white text-sm font-bold rounded-xl hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-indigo-200/50 transition-all"
+                >
+                  {dailyLoading ? (
+                    <>
+                      <ArrowPathIcon className="h-4 w-4 animate-spin" />
+                      {t('attendance:loading')}
+                    </>
+                  ) : (
+                    <>
+                      <MagnifyingGlassIcon className="h-4 w-4" />
+                      {t('attendance:daily.load')}
+                    </>
+                  )}
+                </button>
+                <div className="flex-1 min-w-[200px]">
+                  <div className="relative">
+                    <MagnifyingGlassIcon className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 pointer-events-none`} />
+                    <input
+                      type="text"
+                      value={dailySearch}
+                      onChange={(e) => setDailySearch(e.target.value)}
+                      placeholder={t('attendance:daily.searchPlaceholder')}
+                      className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500 transition-all font-medium placeholder:text-slate-400`}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Summary cards */}
+            {dailyAttendance && (
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm text-center">
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t('attendance:userStats.totalEmployees')}</p>
+                  <p className="text-2xl font-black text-slate-800">{dailyAttendance.totals?.total_employees || 0}</p>
+                </div>
+                <div className="bg-white p-4 rounded-2xl border border-emerald-200 shadow-sm text-center">
+                  <p className="text-xs font-bold text-emerald-400 uppercase tracking-widest">{t('attendance:daily.present')}</p>
+                  <p className="text-2xl font-black text-emerald-600">{dailyAttendance.totals?.present || 0}</p>
+                </div>
+                <div className="bg-white p-4 rounded-2xl border border-red-200 shadow-sm text-center">
+                  <p className="text-xs font-bold text-red-400 uppercase tracking-widest">{t('attendance:daily.absent')}</p>
+                  <p className="text-2xl font-black text-red-600">{dailyAttendance.totals?.absent || 0}</p>
+                </div>
+                <div className="bg-white p-4 rounded-2xl border border-amber-200 shadow-sm text-center">
+                  <p className="text-xs font-bold text-amber-400 uppercase tracking-widest">{t('attendance:daily.partial')}</p>
+                  <p className="text-2xl font-black text-amber-600">{dailyAttendance.totals?.partial || 0}</p>
+                </div>
+                <div className="bg-white p-4 rounded-2xl border border-blue-200 shadow-sm text-center">
+                  <p className="text-xs font-bold text-blue-400 uppercase tracking-widest">{t('attendance:daily.totalHours')}</p>
+                  <p className="text-2xl font-black text-blue-600">{dailyAttendance.totals?.total_worked_hours || 0}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Table */}
+            {dailyLoading ? (
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8">
+                <div className="flex flex-col items-center justify-center">
+                  <div className="h-10 w-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+                  <p className="mt-4 text-slate-500 font-medium animate-pulse">{t('attendance:daily.loading')}</p>
+                </div>
+              </div>
+            ) : dailyAttendance ? (
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-slate-900">
+                    {dailyAttendance.date} ({dailyAttendance.day_of_week})
+                  </h3>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className={`w-full border-collapse ${isRTL ? 'text-right' : 'text-left'}`}>
+                    <thead>
+                      <tr className="bg-slate-50/50 border-b border-slate-100">
+                        <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('attendance:table.employee')}</th>
+                        <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('attendance:userStats.department')}</th>
+                        <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('attendance:table.checkIn')}</th>
+                        <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('attendance:table.checkOut')}</th>
+                        <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('attendance:table.workedHours')}</th>
+                        <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('attendance:table.status')}</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {(dailyAttendance.attendance || [])
+                        .filter((row) => {
+                          if (!dailySearch) return true;
+                          const q = dailySearch.toLowerCase();
+                          return (
+                            (row.first_name || '').toLowerCase().includes(q) ||
+                            (row.last_name || '').toLowerCase().includes(q) ||
+                            (row.department || '').toLowerCase().includes(q) ||
+                            (row.employee_id || '').toLowerCase().includes(q)
+                          );
+                        })
+                        .map((row) => {
+                          const status = row.status || 'no_data';
+                          return (
+                            <tr key={row.employee_id} className="group hover:bg-slate-50/30 transition-colors">
+                              <td className="px-6 py-4">
+                                <div>
+                                  <p className="text-sm font-semibold text-slate-700">{row.first_name} {row.last_name}</p>
+                                  <p className="text-xs text-slate-400">{row.employee_id}</p>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4">
+                                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700">
+                                  {row.department || 'N/A'}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4" dir="ltr">
+                                <div className="text-sm font-medium text-slate-800">
+                                  {formatTime(row.check_in) || 'N/A'}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4" dir="ltr">
+                                <div className="text-sm font-medium text-slate-800">
+                                  {formatTime(row.check_out) || 'N/A'}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4">
+                                <span className={`text-sm font-bold ${(row.total_worked_minutes || 0) > 0 ? 'text-emerald-600' : 'text-slate-500'}`}>
+                                  {row.worked_time_display || '00:00'}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4">
+                                <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold border ${
+                                  status === 'complete'
+                                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                    : status === 'partial'
+                                    ? 'bg-amber-50 text-amber-700 border-amber-200'
+                                    : status === 'no_data'
+                                    ? 'bg-red-50 text-red-700 border-red-200'
+                                    : 'bg-slate-50 text-slate-700 border-slate-200'
+                                }`}>
+                                  <div className={`h-2 w-2 rounded-full ${
+                                    status === 'complete' ? 'bg-emerald-500' :
+                                    status === 'partial' ? 'bg-amber-500' :
+                                    status === 'no_data' ? 'bg-red-500' :
+                                    'bg-slate-500'
+                                  }`}></div>
+                                  {t(`attendance:status.${status}`)}
+                                </span>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8">
+                <div className="text-center">
+                  <CalendarIcon className="h-16 w-16 mx-auto text-slate-300 mb-4" />
+                  <h3 className="text-lg font-semibold text-slate-900 mb-2">{t('attendance:daily.noData')}</h3>
+                  <p className="text-slate-500">{t('attendance:daily.noDataDesc')}</p>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : activeTab === 'summary' ? (
           /* --- ATTENDANCE SUMMARY TAB --- */
           <div className="space-y-6">
             {/* --- SUMMARY FILTERS TOOLBAR --- */}

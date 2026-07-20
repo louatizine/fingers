@@ -48,7 +48,8 @@ export const userAPI = {
   updateUser: (id, data) => apiClient.put(`/users/${id}`, data),
   deleteUser: (id) => apiClient.delete(`/users/${id}`),
   activateUser: (id) => apiClient.post(`/users/${id}/activate`),
-  deactivateUser: (id) => apiClient.delete(`/users/${id}`)
+  deactivateUser: (id) => apiClient.delete(`/users/${id}`),
+  createAccounts: (data) => apiClient.post('/users/create-accounts', data),
 }
 
 // Leave API
@@ -114,9 +115,16 @@ export const settingsAPI = {
   recalculateAllBalances: () => apiClient.post('/settings/recalculate-balances'),
   getEmployeeVacations: () => apiClient.get('/settings/employee-vacations'),
   calculateEmployeeBalance: (employeeId) => apiClient.get(`/settings/calculate-employee/${employeeId}`),
-  // Attendance settings
   getAttendanceSettings: () => apiClient.get('/settings/attendance'),
   updateAttendanceSettings: (data) => apiClient.put('/settings/attendance', data)
+}
+
+// Holidays API
+export const holidaysAPI = {
+  getReligiousHolidays: (year) => apiClient.get('/holidays/religious', { params: { year } }),
+  createReligiousHoliday: (data) => apiClient.post('/holidays/religious', data),
+  updateReligiousHoliday: (id, data) => apiClient.put(`/holidays/religious/${id}`, data),
+  deleteReligiousHoliday: (id) => apiClient.delete(`/holidays/religious/${id}`),
 }
 
 // Attendance API
@@ -125,8 +133,9 @@ export const attendanceAPI = {
   createAttendance: (data) => apiClient.post('/attendance', data),
   getLastAttendance: (employeeId) => apiClient.get(`/attendance/last/${employeeId}`),
   getDailySummary: (employeeId, date) => apiClient.get(`/attendance/daily-summary/${employeeId}`, { params: { date } }),
-  getAttendanceSummary: (employeeId, startDate, endDate) => 
+  getAttendanceSummary: (employeeId, startDate, endDate) =>
     apiClient.get('/attendance/summary', { params: { employee_id: employeeId, start_date: startDate, end_date: endDate } }),
+  getDailyAttendance: (date) => apiClient.get('/attendance/daily', { params: { date } }),
   exportAttendance: (params) => apiClient.get('/attendance/export', { params, responseType: 'blob' })
 }
 

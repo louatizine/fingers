@@ -14,7 +14,22 @@
   "allHolidays": "جميع العطل",
   "selectDay": "انقر على يوم مميّز لعرض التفاصيل.",
   "types": {
-    "Public": "عطلة رسمية"
+    "Public": "عطلة رسمية",
+    "religious": "عطلة دينية"
+  },
+  "legend": {
+    "public": "وطنية",
+    "religious": "دينية",
+    "both": "كلاهما"
+  },
+  "totalCount": "{{public}} وطنية · {{religious}} دينية",
+  "calendar": {
+    "title": "تقويم العطل",
+    "month": "شهر",
+    "week": "أسبوع",
+    "previous": "الفترة السابقة",
+    "next": "الفترة التالية",
+    "noHoliday": "لا عطلة"
   },
   "weekdays": {
     "short": ["أحد", "إثن", "ثلا", "أرب", "خمي", "جمع", "سبت"]
@@ -33,5 +48,63 @@
     "november": "نوفمبر",
     "december": "ديسمبر"
   },
-  "poweredBy": "البيانات من واجهة Nager.Date API"
+  "poweredBy": "البيانات من واجهة Nager.Date API",
+  "religious": {
+    "title": "تخطيط العطل الدينية",
+    "subtitle": "خطّط للأيام الدينية والقمرية بعد الإعلان الرسمي عن تواريخها",
+    "add": "إضافة عطلة",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "empty": "لا توجد عطل دينية مخططة لسنة {{year}} بعد.",
+    "readOnlyHint": "يمكن للمشرفين والمسؤولين فقط تخطيط العطل الدينية.",
+    "confirmDelete": "حذف هذه العطلة الدينية؟",
+    "saved": "تم حفظ العطلة الدينية",
+    "deleted": "تم حذف العطلة الدينية",
+    "failed": "تعذّر حفظ العطلة الدينية",
+    "loadFailed": "تعذّر تحميل العطل الدينية",
+    "days": "{{count}} يوم",
+    "days_plural": "{{count}} أيام",
+    "fields": {
+      "preset": "نوع العطلة",
+      "name": "الاسم (فرنسي/إنجليزي)",
+      "localName": "الاسم بالعربية",
+      "startDate": "تاريخ البداية",
+      "endDate": "تاريخ النهاية",
+      "notes": "ملاحظات (اختياري)"
+    },
+    "presets": {
+      "eid_fitr": {
+        "label": "عيد الفطر",
+        "name": "Eid al-Fitr",
+        "localName": "عيد الفطر"
+      },
+      "eid_adha": {
+        "label": "عيد الأضحى",
+        "name": "Eid al-Adha",
+        "localName": "عيد الأضحى"
+      },
+      "islamic_new_year": {
+        "label": "رأس السنة الهجرية",
+        "name": "Islamic New Year",
+        "localName": "رأس السنة الهجرية"
+      },
+      "mawlid": {
+        "label": "المولد النبوي",
+        "name": "Mawlid",
+        "localName": "المولد النبوي"
+      },
+      "ashura": {
+        "label": "عاشوراء",
+        "name": "Ashura",
+        "localName": "عاشوراء"
+      },
+      "custom": {
+        "label": "مخصص",
+        "name": "",
+        "localName": ""
+      }
+    }
+  }
 }

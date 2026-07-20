@@ -22,7 +22,11 @@ from services.daily_attendance_service import (
 
     build_date_filter,
 
+    get_active_employees,
+
     get_employee_summaries_in_range,
+
+    get_summaries_for_date,
 
     query_daily_summaries,
 
@@ -432,6 +436,75 @@ def get_attendance():
 
 
 
+
+
+@attendance_bp.route('/daily', methods=['GET'])
+def get_daily_attendance_all():
+    """Get attendance for all employees on a specific date."""
+    try:
+        date_str = request.args.get('date') or _default_end_date()
+        date_str = _parse_date_str(date_str)
+        date_obj = datetime.strptime(date_str, '%Y-%m-%d')
+
+        db = get_db()
+        employees = get_active_employees(db)
+        summaries_by_employee = get_summaries_for_date(db, date_str)
+
+        attendance_rows = []
+        present_count = 0
+        complete_count = 0
+        partial_count = 0
+        total_worked_hours = 0.0
+
+        for employee in employees:
+            employee_id = employee.get('employee_id')
+            if not employee_id:
+                continue
+
+            summary_doc = summaries_by_employee.get(employee_id)
+            if summary_doc:
+                row = _summary_doc_to_daily_row(summary_doc)
+            else:
+                row = _empty_day_row(employee_id, date_str)
+
+            row['first_name'] = employee.get('first_name', '')
+            row['last_name'] = employee.get('last_name', '')
+            row['department'] = employee.get('department', '')
+            row['position'] = employee.get('position', '')
+            attendance_rows.append(row)
+
+            if row.get('has_records'):
+                present_count += 1
+                total_worked_hours += row.get('worked_hours', 0) or 0
+
+            status = row.get('status')
+            if status == 'complete':
+                complete_count += 1
+            elif status == 'partial':
+                partial_count += 1
+
+        total_employees = len(attendance_rows)
+        absent_count = total_employees - present_count
+
+        return jsonify({
+            'success': True,
+            'date': date_str,
+            'day_of_week': date_obj.strftime('%a'),
+            'attendance': attendance_rows,
+            'totals': {
+                'total_employees': total_employees,
+                'present': present_count,
+                'absent': absent_count,
+                'complete': complete_count,
+                'partial': partial_count,
+                'no_data': absent_count,
+                'total_worked_hours': round(total_worked_hours, 2),
+            },
+        }), 200
+
+    except Exception as e:
+        logger.error(f'Error fetching daily attendance for all employees: {e}')
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 
 @attendance_bp.route('/daily-summary/<employee_id>', methods=['GET'])

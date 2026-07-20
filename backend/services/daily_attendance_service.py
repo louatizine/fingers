@@ -135,3 +135,29 @@ def get_employee_summaries_in_range(
         'date': {'$gte': start_date, '$lte': end_date},
     }).sort('date', 1)
     return {doc['date']: doc for doc in docs}
+
+
+def get_summaries_for_date(db, date_str: str) -> Dict[str, dict]:
+    """Return daily summaries keyed by employee_id for a single date."""
+    collection = db[DailyAttendanceModel.COLLECTION]
+    docs = collection.find({'date': date_str})
+    return {doc['employee_id']: doc for doc in docs}
+
+
+def get_active_employees(db) -> List[dict]:
+    """Return active employees sorted by name."""
+    users = list(db.users.find(
+        {'is_active': {'$ne': False}},
+        {
+            'employee_id': 1,
+            'first_name': 1,
+            'last_name': 1,
+            'department': 1,
+            'position': 1,
+        },
+    ))
+    users.sort(key=lambda u: (
+        (u.get('first_name') or '').lower(),
+        (u.get('last_name') or '').lower(),
+    ))
+    return users

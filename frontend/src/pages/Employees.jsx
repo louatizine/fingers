@@ -11,7 +11,8 @@ import {
   CalendarDaysIcon,
   IdentificationIcon,
   FunnelIcon,
-  ArrowUpTrayIcon
+  ArrowUpTrayIcon,
+  KeyIcon,
 } from '@heroicons/react/24/outline';
 
 // Hooks & API
@@ -28,6 +29,7 @@ import EmployeeDrawer from '../components/employees/EmployeeDrawer';
 import AddEmployeeModal from '../components/employees/AddEmployeeModal';
 import SortableHeader from '../components/employees/SortableHeader';
 import BulkActions from '../components/employees/BulkActions';
+import CreateAccountsModal from '../components/employees/CreateAccountsModal';
 
 const Employees = () => {
   const { t } = useTranslation();
@@ -50,6 +52,7 @@ const Employees = () => {
     isDetailDrawerOpen,
     selectedEmployee,
     isAddModalOpen,
+    isCreateAccountsModalOpen,
     formData,
     stats = { total: 0, active: 0, departments: 0, avgExperience: 0 },
     setSearchTerm,
@@ -57,12 +60,14 @@ const Employees = () => {
     setSelectedStatus,
     setSelectedEmployees,
     setIsAddModalOpen,
+    setIsCreateAccountsModalOpen,
     setFormData,
     handleSort,
     handleSelectEmployee,
     handleSelectAll,
     handleBulkDeactivate,
     handleBulkExport,
+    handleBulkCreateAccounts,
     handleCreateEmployee,
     handleDeactivate,
     handleActivate,
@@ -109,6 +114,30 @@ const Employees = () => {
     { label: t('employees.stats.departments'), value: stats.departments, icon: BuildingOfficeIcon, color: 'bg-amber-500' },
   ], [stats, t]);
 
+  const [accountModalEmployees, setAccountModalEmployees] = useState([]);
+
+  const handleOpenCreateAccounts = useCallback((specificEmployee = null) => {
+    const targets = specificEmployee
+      ? [specificEmployee]
+      : selectedEmployees.size > 0
+        ? filteredEmployees.filter((emp) => selectedEmployees.has(emp._id))
+        : filteredEmployees.filter((emp) => !emp.has_web_account);
+
+    const eligible = targets.filter((emp) => !emp.has_web_account);
+    if (eligible.length === 0) {
+      toast.info(t('employees.createAccounts.noEligible'));
+      return;
+    }
+
+    setAccountModalEmployees(targets);
+    setIsCreateAccountsModalOpen(true);
+  }, [filteredEmployees, selectedEmployees, setIsCreateAccountsModalOpen, toast, t]);
+
+  const employeesWithoutAccount = useMemo(
+    () => filteredEmployees.filter((emp) => !emp.has_web_account).length,
+    [filteredEmployees],
+  );
+
   if (hookLoading) return <div className="p-10"><SkeletonLoader /></div>;
 
   return (
@@ -129,6 +158,21 @@ const Employees = () => {
         <div className="flex items-center gap-3">
           <button className="p-2.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all border border-slate-200 bg-white">
             <ArrowUpTrayIcon className="h-5 w-5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => handleOpenCreateAccounts()}
+            disabled={employeesWithoutAccount === 0}
+            className="flex items-center gap-2 px-5 py-3 border-2 border-indigo-200 text-indigo-700 rounded-2xl font-bold hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-indigo-700"
+            title={employeesWithoutAccount === 0 ? t('employees.createAccounts.noEligible') : undefined}
+          >
+            <KeyIcon className="h-5 w-5 stroke-[2.5px]" />
+            {t('employees.createAccounts.action')}
+            {employeesWithoutAccount > 0 && (
+              <span className="ml-1 rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-black text-indigo-700">
+                {employeesWithoutAccount}
+              </span>
+            )}
           </button>
           <button
             onClick={() => setIsAddModalOpen(true)}
@@ -197,6 +241,18 @@ const Employees = () => {
             </button>
           </div>
         </div>
+
+        {selectedEmployees.size > 0 && (
+          <div className="px-6 pt-4">
+            <BulkActions
+              selectedCount={selectedEmployees.size}
+              onDeactivate={handleBulkDeactivate}
+              onExport={handleBulkExport}
+              onCreateAccounts={() => handleOpenCreateAccounts()}
+              onClearSelection={() => setSelectedEmployees(new Set())}
+            />
+          </div>
+        )}
 
         {/* 4. THE UNIFIED TABLE */}
         <div className="overflow-x-auto">
@@ -289,10 +345,23 @@ const Employees = () => {
                     )}
 
                     <td className="px-6 py-4 text-center">
-                      <span className={`inline-flex items-center px-3 py-1 rounded-lg text-xs font-bold ${emp.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
-                        <span className={`w-1.5 h-1.5 rounded-full mr-2 ${emp.is_active ? 'bg-emerald-500' : 'bg-slate-400'}`} />
-                        {emp.is_active ? t('employees.status.active') : t('employees.status.inactive')}
-                      </span>
+                      <div className="flex flex-col items-center gap-1.5">
+                        <span className={`inline-flex items-center px-3 py-1 rounded-lg text-xs font-bold ${emp.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+                          <span className={`w-1.5 h-1.5 rounded-full mr-2 ${emp.is_active ? 'bg-emerald-500' : 'bg-slate-400'}`} />
+                          {emp.is_active ? t('employees.status.active') : t('employees.status.inactive')}
+                        </span>
+                        {viewMode === 'directory' && (
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wide ${
+                            emp.has_web_account
+                              ? 'bg-blue-50 text-blue-700'
+                              : 'bg-amber-50 text-amber-700'
+                          }`}>
+                            {emp.has_web_account
+                              ? t('employees.account.hasAccount')
+                              : t('employees.account.noAccount')}
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-4 text-center">
                       <button 
@@ -317,6 +386,7 @@ const Employees = () => {
         employee={selectedEmployee}
         onDeactivate={handleDeactivate}
         onActivate={handleActivate}
+        onCreateAccount={handleOpenCreateAccounts}
       />
 
       <AddEmployeeModal
@@ -326,6 +396,16 @@ const Employees = () => {
         setFormData={setFormData}
         onSubmit={handleCreateEmployee}
         companies={companies}
+      />
+
+      <CreateAccountsModal
+        isOpen={isCreateAccountsModalOpen}
+        onClose={() => {
+          setIsCreateAccountsModalOpen(false);
+          setAccountModalEmployees([]);
+        }}
+        employees={accountModalEmployees}
+        onSubmit={handleBulkCreateAccounts}
       />
     </div>
   );

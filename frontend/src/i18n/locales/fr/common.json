@@ -200,6 +200,7 @@
     "getStarted": "Commencez par ajouter votre premier employé",
     "confirmDeactivate": "Êtes-vous sûr de vouloir désactiver cet employé ?",
     "workforceManagement": "Gestion de la Main-d'Œuvre",
+    "selected": "sélectionné(s)",
     "firstNamePlaceholder": "Jean",
     "lastNamePlaceholder": "Dupont",
     "months": "Mois",
@@ -236,6 +237,27 @@
     "status": {
       "active": "Actif",
       "inactive": "Inactif"
+    },
+    "account": {
+      "hasAccount": "Compte actif",
+      "noAccount": "Sans compte"
+    },
+    "createAccounts": {
+      "action": "Créer des comptes",
+      "title": "Créer des comptes web",
+      "subtitle": "Activer la connexion pour les employés sélectionnés",
+      "selectedEmployees": "Employés à activer",
+      "password": "Mot de passe",
+      "confirmPassword": "Confirmer le mot de passe",
+      "passwordHint": "Le même mot de passe temporaire sera défini pour tous les employés sélectionnés. Ils devront le changer après la première connexion.",
+      "passwordMismatch": "Les mots de passe ne correspondent pas",
+      "noEligible": "Aucun employé sélectionné n'a besoin d'un compte",
+      "skippedCount": "{{count}} ont déjà un compte et seront ignorés",
+      "submit": "Créer les comptes",
+      "success": "{{count}} compte(s) créé(s) avec succès",
+      "skippedToast": "{{count}} employé(s) avaient déjà un compte",
+      "error": "Échec de la création des comptes",
+      "partialError": "Certains comptes n'ont pas pu être créés"
     },
     "departments": {
       "engineering": "Ingénierie",

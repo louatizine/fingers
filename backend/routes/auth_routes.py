@@ -3,7 +3,7 @@ Authentication Routes
 """
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
-from models.user_model import find_user_by_email, verify_password, find_user_by_id
+from models.user_model import find_user_by_email, verify_password, find_user_by_id, has_web_account
 import logging
 
 logger = logging.getLogger(__name__)
@@ -33,6 +33,9 @@ def login():
         
         if not user.get('is_active', True):
             return jsonify({'error': 'Account is deactivated'}), 401
+
+        if not has_web_account(user):
+            return jsonify({'error': 'No web account. Contact your administrator.'}), 401
         
         # Verify password
         if not verify_password(user, password):
