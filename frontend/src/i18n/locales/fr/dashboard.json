@@ -69,5 +69,9 @@
   "companyLeaveStatus": "Aperçu du Statut des Congés de l'Entreprise",
   "salaryAdvanceRequests": "Demandes d'Avance sur Salaire",
   "advanceRequestOverview": "Aperçu des Demandes d'Avance",
-  "companyWideLeaveDistribution": "Répartition des Congés à l'Échelle de l'Entreprise"
+  "companyWideLeaveDistribution": "Répartition des Congés à l'Échelle de l'Entreprise",
+  "attendance_shortcut": "Présence",
+  "check_attendance": "Consulter les enregistrements de présence",
+  "attendance_shortcut_desc": "Accédez aux journaux quotidiens, résumés et statut de synchronisation depuis un seul endroit.",
+  "open_attendance": "Ouvrir la présence"
 }

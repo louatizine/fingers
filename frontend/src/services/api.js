@@ -135,7 +135,8 @@ export const attendanceAPI = {
   getDailySummary: (employeeId, date) => apiClient.get(`/attendance/daily-summary/${employeeId}`, { params: { date } }),
   getAttendanceSummary: (employeeId, startDate, endDate) =>
     apiClient.get('/attendance/summary', { params: { employee_id: employeeId, start_date: startDate, end_date: endDate } }),
-  getDailyAttendance: (date) => apiClient.get('/attendance/daily', { params: { date } }),
+  getDailyAttendance: (date, config = {}) =>
+    apiClient.get('/attendance/daily', { params: { date }, ...config }),
   exportAttendance: (params) => apiClient.get('/attendance/export', { params, responseType: 'blob' })
 }
 

@@ -3,6 +3,9 @@ Aggregate raw attendance events into daily worked-hours summaries.
 
 Events are paired sequentially per employee per day:
   1st → check-in, 2nd → check-out, 3rd → check-in, 4th → check-out, …
+
+Near-duplicate scans (accidental double fingerprints) are collapsed before pairing
+so a morning double-tap does not become a fake check-out.
 """
 
 from __future__ import annotations
@@ -18,7 +21,7 @@ logger = logging.getLogger(__name__)
 # Collapse double-taps on the terminal (seconds)
 BURST_PUNCH_SECONDS = 60
 # Pairs shorter than this are treated as accidental duplicate check-outs
-MIN_VALID_PAIR_MINUTES = 2
+MIN_VALID_PAIR_MINUTES = 20
 # Minimum gap (minutes) between lunch-out and evening-out to infer missing lunch return
 LUNCH_BREAK_MIN_MINUTES = 120
 # Hour (local) after which the last punch is treated as end-of-day check-out
@@ -41,6 +44,8 @@ class DailyWorkedSummary:
     unmatched_events: int
     check_in_at: Optional[datetime] = None
     check_out_at: Optional[datetime] = None
+    lunch_out_at: Optional[datetime] = None
+    afternoon_in_at: Optional[datetime] = None
     first_event_at: Optional[datetime] = None
     last_event_at: Optional[datetime] = None
     warnings: List[str] = field(default_factory=list)
@@ -109,33 +114,60 @@ def collapse_burst_punches(
     return collapsed
 
 
-def collapse_invalid_terminal_pair(
+def collapse_short_pairs(
     sorted_ts: Sequence[datetime],
     min_pair_minutes: int = MIN_VALID_PAIR_MINUTES,
-) -> List[datetime]:
-    """Drop trailing duplicate check-out that would form a near-zero final pair."""
+) -> Tuple[List[datetime], List[str]]:
+    """
+    Drop accidental duplicate punches that would form too-short in→out pairs.
+
+    Walks chronologically: if the next punch is within min_pair_minutes of the
+    current open punch, discard the later one and keep the open punch so it can
+    pair with a later real check-out.
+    """
+    warnings: List[str] = []
     ts = list(sorted_ts)
-    while len(ts) >= 2 and len(ts) % 2 == 0:
-        pair_minutes = int((ts[-1] - ts[-2]).total_seconds() // 60)
-        if pair_minutes < min_pair_minutes:
-            ts.pop()
-        else:
+    result: List[datetime] = []
+    i = 0
+    while i < len(ts):
+        if i + 1 >= len(ts):
+            result.append(ts[i])
             break
-    return ts
+
+        open_punch = ts[i]
+        candidate = ts[i + 1]
+        pair_minutes = (candidate - open_punch).total_seconds() / 60
+
+        if pair_minutes < min_pair_minutes:
+            warnings.append(
+                f'Dropped short duplicate punch at {candidate.strftime("%H:%M")} '
+                f'(within {min_pair_minutes} min of {open_punch.strftime("%H:%M")})'
+            )
+            # Keep open_punch; discard candidate; retry pairing open with next
+            del ts[i + 1]
+            continue
+
+        result.append(open_punch)
+        result.append(candidate)
+        i += 2
+
+    return result, warnings
 
 
-def normalize_day_timestamps(timestamps: Sequence[datetime]) -> List[datetime]:
-    """Sort, collapse burst punches, then drop invalid terminal micro-pairs."""
+def normalize_day_timestamps(
+    timestamps: Sequence[datetime],
+) -> Tuple[List[datetime], List[str]]:
+    """Sort, collapse burst punches, then drop short accidental pairs."""
     sorted_ts = sorted(timestamps)
     sorted_ts = collapse_burst_punches(sorted_ts)
-    sorted_ts = collapse_invalid_terminal_pair(sorted_ts)
-    return sorted_ts
+    sorted_ts, warnings = collapse_short_pairs(sorted_ts)
+    return sorted_ts, warnings
 
 
 def is_missing_lunch_return_pattern(timestamps: Sequence[datetime]) -> bool:
     """
-  True when three punches look like: check-in, lunch check-out, evening check-out
-  with no afternoon check-in (common when employees forget the return punch).
+    True when three punches look like: check-in, lunch check-out, evening check-out
+    with no afternoon check-in (common when employees forget the return punch).
     """
     if len(timestamps) != 3:
         return False
@@ -146,26 +178,45 @@ def is_missing_lunch_return_pattern(timestamps: Sequence[datetime]) -> bool:
     return lunch_gap_minutes >= LUNCH_BREAK_MIN_MINUTES and evening_out.hour >= END_OF_DAY_HOUR
 
 
+def lunch_break_times(
+    sorted_ts: Sequence[datetime],
+) -> Tuple[Optional[datetime], Optional[datetime]]:
+    """
+    Lunch departure is the 2nd punch and afternoon return is the 3rd
+    when the day includes a mid-day break.
+
+    A two-punch day is morning arrival and end of day, so both stay empty.
+    Three punches that match the missing-return pattern keep lunch departure
+    and leave afternoon return empty.
+    """
+    if len(sorted_ts) < 3:
+        return None, None
+    if is_missing_lunch_return_pattern(sorted_ts):
+        return sorted_ts[1], None
+    return sorted_ts[1], sorted_ts[2]
+
+
 def calculate_daily_worked_minutes(
     timestamps: Sequence[datetime],
     *,
     employee_id: str = '',
     date: str = '',
-) -> Tuple[int, int, int, Optional[datetime], Optional[datetime], List[str]]:
+) -> Tuple[int, int, int, Optional[datetime], Optional[datetime], Optional[datetime], Optional[datetime], Optional[datetime], Optional[datetime], List[str]]:
     """
     Pair events sequentially and sum valid in→out durations.
 
     Returns:
         total_minutes, pair_count, unmatched_events, check_in_at, check_out_at,
-        first_event, last_event, warnings
+        lunch_out_at, afternoon_in_at, first_event, last_event, warnings
     """
     warnings: List[str] = []
     raw_sorted = sorted(timestamps)
 
     if not raw_sorted:
-        return 0, 0, 0, None, None, None, None, warnings
+        return 0, 0, 0, None, None, None, None, None, None, warnings
 
-    sorted_ts = normalize_day_timestamps(raw_sorted)
+    sorted_ts, normalize_warnings = normalize_day_timestamps(raw_sorted)
+    warnings.extend(normalize_warnings)
 
     if is_missing_lunch_return_pattern(sorted_ts):
         morning_in, lunch_out, evening_out = sorted_ts
@@ -187,6 +238,8 @@ def calculate_daily_worked_minutes(
             0,
             morning_in,
             evening_out,
+            lunch_out,
+            None,
             raw_sorted[0],
             raw_sorted[-1],
             warnings,
@@ -195,7 +248,7 @@ def calculate_daily_worked_minutes(
     if len(sorted_ts) % 2 != 0:
         warnings.append(
             f'Odd number of events ({len(sorted_ts)}) for {employee_id} on {date}; '
-            'last event ignored'
+            'awaiting check-out'
         )
         logger.warning(
             'Odd attendance event count for %s on %s (%s events)',
@@ -206,14 +259,24 @@ def calculate_daily_worked_minutes(
 
     total_minutes = 0
     pair_count = 0
+    last_valid_check_out: Optional[datetime] = None
     i = 0
     while i + 1 < len(sorted_ts):
         check_in = sorted_ts[i]
         check_out = sorted_ts[i + 1]
         if check_out > check_in:
             delta_minutes = int((check_out - check_in).total_seconds() // 60)
-            total_minutes += delta_minutes
-            pair_count += 1
+            if delta_minutes < MIN_VALID_PAIR_MINUTES:
+                # Safety net: never count micro-pairs as worked time
+                warnings.append(
+                    f'Skipped micro-pair for {employee_id} on {date}: '
+                    f'{check_in.strftime("%H:%M")} → {check_out.strftime("%H:%M")} '
+                    f'({delta_minutes} min)'
+                )
+            else:
+                total_minutes += delta_minutes
+                pair_count += 1
+                last_valid_check_out = check_out
         else:
             warnings.append(
                 f'Invalid pair for {employee_id} on {date}: '
@@ -230,13 +293,21 @@ def calculate_daily_worked_minutes(
 
     unmatched = len(sorted_ts) % 2
     check_in_at = sorted_ts[0]
-    check_out_at = sorted_ts[-1] if pair_count > 0 else None
+    lunch_out_at, afternoon_in_at = lunch_break_times(sorted_ts)
+    # End of day is the last finished pair. When the employee has already
+    # returned from lunch and has not punched out again, that pair is only
+    # the lunch departure, so check-out stays empty.
+    check_out_at = last_valid_check_out
+    if afternoon_in_at is not None and check_out_at == lunch_out_at:
+        check_out_at = None
     return (
         total_minutes,
         pair_count,
         unmatched,
         check_in_at,
         check_out_at,
+        lunch_out_at,
+        afternoon_in_at,
         raw_sorted[0],
         raw_sorted[-1],
         warnings,
@@ -248,12 +319,21 @@ def build_daily_summary(
     date: str,
     timestamps: Sequence[datetime],
 ) -> DailyWorkedSummary:
-    total_minutes, pair_count, unmatched, check_in_at, check_out_at, first_evt, last_evt, warnings = (
-        calculate_daily_worked_minutes(
-            timestamps,
-            employee_id=employee_id,
-            date=date,
-        )
+    (
+        total_minutes,
+        pair_count,
+        unmatched,
+        check_in_at,
+        check_out_at,
+        lunch_out_at,
+        afternoon_in_at,
+        first_evt,
+        last_evt,
+        warnings,
+    ) = calculate_daily_worked_minutes(
+        timestamps,
+        employee_id=employee_id,
+        date=date,
     )
     return DailyWorkedSummary(
         employee_id=employee_id,
@@ -264,6 +344,8 @@ def build_daily_summary(
         unmatched_events=unmatched,
         check_in_at=check_in_at,
         check_out_at=check_out_at,
+        lunch_out_at=lunch_out_at,
+        afternoon_in_at=afternoon_in_at,
         first_event_at=first_evt,
         last_event_at=last_evt,
         warnings=warnings,

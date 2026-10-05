@@ -29,7 +29,7 @@ python app.py
 ```
 
 ✅ Backend running on http://localhost:5559  
-✅ **Auto-sync** pulls employees + attendance from the ZKTeco device every 5 minutes (configurable via `ZK_SYNC_INTERVAL_MINUTES`)
+✅ **Auto-sync** pulls employees + attendance from the ZKTeco device at **08:00, 08:30, 09:00** (configurable via `ZK_SYNC_TIMES`)
 
 ---
 
@@ -53,11 +53,12 @@ npm run dev
 | `ZK_DEVICE_IP` | Device IP on your LAN |
 | `ZK_DEVICE_PORT` | Usually `4370` |
 | `ZK_SYNC_ENABLED` | `true` to enable background sync |
-| `ZK_SYNC_INTERVAL_MINUTES` | How often to sync (default `5`) |
+| `ZK_SYNC_TIMES` | Local sync times, e.g. `08:00,08:30,09:00` |
+| `ATTENDANCE_TIMEZONE` | Timezone for those times (default `Africa/Algiers`) |
 
-**Manual sync:** Attendance page → **Sync from Device** (admin only)
+**Manual sync:** Attendance page → **Sync from Device** (admin/supervisor, anytime)
 
-Auto-sync also runs in the background when `ZK_SYNC_ENABLED=true`.
+Auto-sync runs at the scheduled times when `ZK_SYNC_ENABLED=true`.
 
 ### Enrolling fingerprints (without desktop app)
 
@@ -72,7 +73,7 @@ Enroll employees on the **ZKTeco device** using ZKTeco official software or the 
 
 1. Login to the web app (http://localhost:5173)
 2. Ensure the ZKTeco device is reachable from the server (`ZK_DEVICE_IP`)
-3. Wait for auto-sync (~10s after backend start, then every N minutes) or click **Sync Device** on Attendance
+3. Wait for the next scheduled auto-sync (08:00 / 08:30 / 09:00) or click **Sync from Device** on Attendance anytime
 4. View attendance logs, summaries, and exports
 
 ---
@@ -97,6 +98,6 @@ Enroll employees on the **ZKTeco device** using ZKTeco official software or the 
 
 ## Next Steps
 
-1. Adjust `ZK_SYNC_INTERVAL_MINUTES` for your needs (e.g. `1` for near-real-time)
+1. Adjust `ZK_SYNC_TIMES` if needed (e.g. add `17:00,17:30` for evening check-outs)
 2. Configure production MongoDB and deploy backend where it can reach the device LAN
 3. Review security settings and admin accounts

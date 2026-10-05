@@ -14,7 +14,7 @@
   "show": "Show",
   "note": {
     "title": "Note:",
-    "description": "Enroll employees on the ZKTeco fingerprint terminal (device screen or ZKTeco software). The backend automatically syncs enrolled users and attendance every few minutes — no desktop app required."
+    "description": "Enroll employees on the ZKTeco fingerprint terminal (device screen or ZKTeco software). The backend automatically syncs enrolled users and attendance at scheduled morning times — admins can also sync anytime from the Attendance page."
   },
   "table": {
     "userIdentity": "User Identity",

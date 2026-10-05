@@ -1,22 +1,22 @@
+# Portainer stack — rebuild images, push to registry, then redeploy this stack in Portainer.
 services:
   backend:
     image: 192.168.100.19:5000/hr-backend:latest
     restart: unless-stopped
-    # Use host network so the container can reach the fingerprint device on your LAN
-    # (Docker bridge often causes Broken pipe / timeout to 192.168.x.x devices).
-    # Requires MONGO_URI to use the server IP/hostname, not "mongo" or "localhost".
     network_mode: host
     environment:
       SECRET_KEY: ${SECRET_KEY:-change-me-production-secret}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:-change-me-production-jwt-secret}
+      ATTENDANCE_API_KEY: ${ATTENDANCE_API_KEY:-}
       MONGO_URI: ${MONGO_URI}
-      FRONTEND_URL: ${FRONTEND_URL:-http://192.168.100.19}
+      FRONTEND_URL: ${FRONTEND_URL:-http://192.168.100.19:9093}
       ZK_SYNC_ENABLED: ${ZK_SYNC_ENABLED:-true}
       ZK_DEVICE_IP: ${ZK_DEVICE_IP:-192.168.100.5}
       ZK_DEVICE_PORT: ${ZK_DEVICE_PORT:-4370}
       ZK_DEVICE_PASSWORD: ${ZK_DEVICE_PASSWORD:-0}
       ZK_DEVICE_NAME: ${ZK_DEVICE_NAME:-ZKTeco K80}
-      ZK_SYNC_INTERVAL_MINUTES: ${ZK_SYNC_INTERVAL_MINUTES:-5}
+      ZK_SYNC_TIMES: ${ZK_SYNC_TIMES:-08:00,08:30,09:00}
+      ZK_SYNC_MIN_DATE: ${ZK_SYNC_MIN_DATE:-2022-01-01}
       ZK_DEVICE_TIMEOUT: ${ZK_DEVICE_TIMEOUT:-15}
       ZK_DEVICE_MAX_RETRIES: ${ZK_DEVICE_MAX_RETRIES:-5}
       ATTENDANCE_TIMEZONE: ${ATTENDANCE_TIMEZONE:-Africa/Algiers}
@@ -39,5 +39,10 @@ services:
     depends_on:
       backend:
         condition: service_healthy
+    environment:
+      # Backend runs with host network; API is on the Docker host port 5559
+      NGINX_API_UPSTREAM: ${NGINX_API_UPSTREAM:-http://host.docker.internal:5559}
     ports:
       - "9093:80"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

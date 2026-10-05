@@ -20,13 +20,14 @@ services:
     environment:
       SECRET_KEY: ${SECRET_KEY:-change-me-local-secret}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:-change-me-local-jwt-secret}
+      ATTENDANCE_API_KEY: ${ATTENDANCE_API_KEY:-}
       MONGO_URI: mongodb://mongo:27017/hr_management_db
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:9093}
       ZK_SYNC_ENABLED: ${ZK_SYNC_ENABLED:-true}
       ZK_DEVICE_IP: ${ZK_DEVICE_IP:-192.168.100.5}
       ZK_DEVICE_PORT: ${ZK_DEVICE_PORT:-4370}
       ZK_DEVICE_NAME: ${ZK_DEVICE_NAME:-ZKTeco K80}
-      ZK_SYNC_INTERVAL_MINUTES: ${ZK_SYNC_INTERVAL_MINUTES:-5}
+      ZK_SYNC_TIMES: ${ZK_SYNC_TIMES:-08:00,08:30,09:00}
       ZK_DEVICE_TIMEOUT: ${ZK_DEVICE_TIMEOUT:-15}
       ZK_DEVICE_MAX_RETRIES: ${ZK_DEVICE_MAX_RETRIES:-5}
       ATTENDANCE_TIMEZONE: ${ATTENDANCE_TIMEZONE:-Africa/Algiers}
@@ -54,6 +55,8 @@ services:
       args:
         VITE_API_URL: /api
     restart: unless-stopped
+    environment:
+      NGINX_API_UPSTREAM: http://backend:5559
     depends_on:
       backend:
         condition: service_healthy

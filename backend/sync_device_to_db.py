@@ -99,6 +99,7 @@ class DeviceToDBSyncer:
         self._attendance_tz = ZoneInfo(
             os.getenv('ATTENDANCE_TIMEZONE', 'Africa/Algiers')
         )
+        self._device_user_cache: Dict[str, Dict] = {}
     
     def connect_to_database(self) -> bool:
         """Connect to MongoDB database."""
@@ -325,6 +326,55 @@ class DeviceToDBSyncer:
         except Exception as e:
             logger.error(f"Error updating user: {e}")
     
+    def _load_device_user_cache(self) -> None:
+        """Preload users so device punch resolution avoids per-event DB queries."""
+        self._device_user_cache = {}
+        if self.db is None:
+            return
+
+        users = list(self.db.users.find({}))
+        for user in users:
+            device_user_id = str(user.get('device_user_id', '')).strip()
+            if device_user_id:
+                self._device_user_cache[device_user_id] = user
+
+            biometric_id = user.get('biometric_id')
+            if biometric_id is not None:
+                self._device_user_cache.setdefault(str(biometric_id), user)
+
+            employee_id = user.get('employee_id')
+            if employee_id:
+                self._device_user_cache.setdefault(str(employee_id), user)
+                upper = str(employee_id).upper()
+                if upper.startswith('EMP'):
+                    numeric = upper.removeprefix('EMP')
+                    if numeric.isdigit():
+                        self._device_user_cache.setdefault(numeric, user)
+                        self._device_user_cache.setdefault(str(int(numeric)), user)
+
+        logger.info('Loaded %s device user lookup keys for attendance sync', len(self._device_user_cache))
+
+    def _resolve_user_from_cache(self, device_user_id: str) -> Dict:
+        """Resolve a device punch user_id using the in-memory cache."""
+        device_user_id = str(device_user_id).strip()
+        if not device_user_id:
+            return None
+
+        user = self._device_user_cache.get(device_user_id)
+        if user:
+            return user
+
+        user = find_user_for_device_user_id(self.db, device_user_id)
+        if user:
+            self._device_user_cache[device_user_id] = user
+            linked_id = str(user.get('device_user_id', '')).strip()
+            if linked_id:
+                self._device_user_cache.setdefault(linked_id, user)
+            employee_id = user.get('employee_id')
+            if employee_id:
+                self._device_user_cache.setdefault(str(employee_id), user)
+        return user
+
     def sync_attendance(self, limit: int = None, clear_after_sync: bool = False) -> bool:
         """
         Sync attendance from device into daily worked-hours summaries.
@@ -334,6 +384,8 @@ class DeviceToDBSyncer:
         logger.info("=" * 80)
         logger.info("SYNCING ATTENDANCE → DAILY WORKED-HOURS SUMMARIES")
         logger.info("=" * 80)
+
+        self._load_device_user_cache()
 
         device_logs = self.device_manager.get_attendance_logs()
         self.stats['attendance']['total_on_device'] = len(device_logs)
@@ -357,7 +409,14 @@ class DeviceToDBSyncer:
             logger.info("No attendance events to aggregate after filtering")
             return True
 
+        logger.info(
+            'Aggregating %s events (%s from device, %s legacy) into daily summaries...',
+            len(events),
+            len(device_events),
+            len(legacy_events),
+        )
         summaries = aggregate_events_to_daily_summaries(events, self._attendance_tz)
+        logger.info('Built %s daily summaries, saving to database...', len(summaries))
         self.stats['attendance']['daily_summaries'] = len(summaries)
 
         upsert_stats = upsert_daily_summaries(
@@ -389,8 +448,12 @@ class DeviceToDBSyncer:
     def _collect_device_events(self, device_logs: List[Dict]) -> List[AttendanceEvent]:
         """Map device punches to employee events (timestamps only)."""
         events: List[AttendanceEvent] = []
+        total_logs = len(device_logs)
 
-        for device_log in device_logs:
+        for index, device_log in enumerate(device_logs, start=1):
+            if index == 1 or index % 5000 == 0 or index == total_logs:
+                logger.info('Processing device events %s/%s...', index, total_logs)
+
             try:
                 timestamp = normalize_device_timestamp(device_log.get('timestamp', ''))
             except Exception:
@@ -404,7 +467,7 @@ class DeviceToDBSyncer:
                     continue
 
             device_user_id = device_log.get('user_id', '')
-            user = self._find_user_by_device_id(device_user_id)
+            user = self._resolve_user_from_cache(device_user_id)
             if not user:
                 logger.warning(
                     "User not found for device_user_id: %s — skipping event",
@@ -424,6 +487,11 @@ class DeviceToDBSyncer:
         if self.db is None:
             return events
 
+        legacy_count = self.db.attendance.estimated_document_count()
+        if legacy_count == 0:
+            return events
+
+        logger.info('Loading %s legacy attendance events from database...', legacy_count)
         for doc in self.db.attendance.find({}, {'employee_id': 1, 'timestamp': 1}):
             employee_id = doc.get('employee_id')
             timestamp = doc.get('timestamp')

@@ -23,7 +23,16 @@ class DailyAttendanceModel:
         result = dict(data)
         if '_id' in result:
             result['_id'] = str(result['_id'])
-        for field in ('check_in_at', 'check_out_at', 'first_event_at', 'last_event_at', 'updated_at', 'created_at'):
+        for field in (
+            'check_in_at',
+            'check_out_at',
+            'lunch_out_at',
+            'afternoon_in_at',
+            'first_event_at',
+            'last_event_at',
+            'updated_at',
+            'created_at',
+        ):
             if field in result and result[field] is not None:
                 result[field] = format_timestamp_for_api(result[field])
         return result
@@ -47,6 +56,8 @@ class DailyAttendanceModel:
             'unmatched_events': summary.unmatched_events,
             'check_in_at': summary.check_in_at,
             'check_out_at': summary.check_out_at,
+            'lunch_out_at': summary.lunch_out_at,
+            'afternoon_in_at': summary.afternoon_in_at,
             'first_event_at': summary.first_event_at,
             'last_event_at': summary.last_event_at,
             'device_id': device_id,
@@ -60,6 +71,12 @@ class DailyAttendanceModel:
         pair_count = doc.get('pair_count', 0)
         check_in = doc.get('check_in_at') or doc.get('first_event_at')
         check_out = doc.get('check_out_at') if pair_count > 0 else None
+        lunch_out = doc.get('lunch_out_at')
+        afternoon_in = doc.get('afternoon_in_at')
+        # Older summaries stored lunch departure as check-out when the
+        # afternoon return had no end-of-day punch yet.
+        if afternoon_in and lunch_out and check_out == lunch_out:
+            check_out = None
         has_records = doc.get('event_count', 0) > 0
         return {
             'employee_id': doc.get('employee_id'),
@@ -75,6 +92,10 @@ class DailyAttendanceModel:
             'check_out_at': format_timestamp_for_api(check_out) if check_out else None,
             'check_in': format_timestamp_for_api(check_in) if check_in else None,
             'check_out': format_timestamp_for_api(check_out) if check_out else None,
+            'lunch_out_at': format_timestamp_for_api(lunch_out) if lunch_out else None,
+            'afternoon_in_at': format_timestamp_for_api(afternoon_in) if afternoon_in else None,
+            'lunch_out': format_timestamp_for_api(lunch_out) if lunch_out else None,
+            'afternoon_in': format_timestamp_for_api(afternoon_in) if afternoon_in else None,
             'first_event_at': format_timestamp_for_api(doc['first_event_at'])
             if doc.get('first_event_at')
             else None,

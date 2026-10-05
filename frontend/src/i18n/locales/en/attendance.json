@@ -13,10 +13,11 @@
     "completed": "Device sync completed successfully! Refreshing data...",
     "failed": "Sync failed",
     "timeout": "Sync is taking longer than expected",
-    "hint": "Missing older records? Use Sync from Device to import up to 6 months of history from the terminal.",
+    "hint": "Missing older records? Use Sync from Device anytime to import attendance from the fingerprint terminal.",
     "lastSync": "Last device sync: {{time}}",
-    "neverSynced": "No recent device sync",
-    "pendingToday": "Today's punch has not been imported from the fingerprint device yet. Auto-sync runs every {{minutes}} minutes, or ask an admin to click \"Sync from Device\"."
+    "neverSynced": "Waiting for the next automatic morning sync",
+    "pendingToday": "Today's attendance has not been imported yet. Auto-sync runs at {{schedule}}. An admin can also click \"Sync from Device\" anytime.",
+    "scheduleHint": "Automatic device sync: {{schedule}}"
   },
   "stats": {
     "today": "Today (page)",
@@ -30,11 +31,16 @@
     "last6Months": "Last 6 months",
     "last30Days": "Last 30 days",
     "thisMonth": "This month",
-    "yearToDate": "Year to date"
+    "yearToDate": "Year to date",
+    "since2022": "Since 2022"
   },
   "userStats": {
     "title": "Employee Attendance Statistics",
+    "subtitle": "Compare worked hours and device activity across all employees",
     "refresh": "Refresh",
+    "searchPlaceholder": "Search by name, ID, or department...",
+    "showingCount": "Showing {{count}} of {{total}} employees",
+    "noMatches": "No employees match your search",
     "employee": "Employee",
     "department": "Department",
     "daysWithRecords": "Days Worked",
@@ -58,7 +64,39 @@
   "loading": "Loading attendance...",
   "tryAdjustFilters": "Try a wider date range or sync from the fingerprint device to import historical data.",
   "errors": {
-    "loadFailed": "Failed to load attendance records. Please try again."
+    "loadFailed": "Failed to load attendance records. Please try again.",
+    "unknown": "Unknown error"
+  },
+  "formats": {
+    "emptyTime": "—",
+    "hoursValue": "{{value}} h"
+  },
+  "weekdays": {
+    "Mon": "Monday",
+    "Tue": "Tuesday",
+    "Wed": "Wednesday",
+    "Thu": "Thursday",
+    "Fri": "Friday",
+    "Sat": "Saturday",
+    "Sun": "Sunday"
+  },
+  "exportCsv": {
+    "employee": "Employee",
+    "period": "Period",
+    "date": "Date",
+    "day": "Day",
+    "checkIn": "Check-in",
+    "lunchOut": "Lunch departure",
+    "afternoonIn": "Afternoon return",
+    "checkOut": "Check-out",
+    "workedHours": "Worked Hours",
+    "status": "Status",
+    "records": "Records",
+    "totalDays": "Total Days",
+    "daysWithRecords": "Days with Records",
+    "completeDays": "Complete Days",
+    "absentDays": "Absent Days",
+    "totalWorkedHours": "Total Worked Hours"
   },
   "filters": {
     "title": "Filters",
@@ -74,7 +112,7 @@
     "selectEmployee": "Select an employee",
     "searchEmployee": "Search by name...",
     "placeholder_employee": "Enter employee ID",
-    "defaultRangeHint": "Showing the last 6 months by default. Use quick ranges or pick custom dates.",
+    "defaultRangeHint": "Showing data since 2022 by default. Use quick ranges or pick custom dates.",
     "activeRange": "{{start}} → {{end}}"
   },
   "table": {
@@ -85,6 +123,8 @@
     "date": "Date",
     "day": "Day",
     "checkIn": "Check In",
+    "lunchOut": "Lunch departure",
+    "afternoonIn": "Afternoon return",
     "checkOut": "Check Out",
     "status": "Status",
     "device": "Device",
@@ -109,7 +149,14 @@
     "totalHours": "Total Hours",
     "dailyAttendance": "Daily Attendance",
     "detailedView": "Detailed Table",
-    "noRecordsPeriod": "No attendance records found for this period"
+    "noRecordsPeriod": "No attendance records found for this period",
+    "searchPlaceholder": "Search by date or weekday...",
+    "filterAll": "All days",
+    "filterComplete": "Complete",
+    "filterPartial": "Partial",
+    "filterNoData": "No data",
+    "showingCount": "Showing {{count}} of {{total}} days",
+    "noMatches": "No days match your search or filter"
   },
   "status": {
     "complete": "Complete",
@@ -138,6 +185,15 @@
     "complete": "Complete",
     "partial": "Partial",
     "totalHours": "Total Hours",
-    "searchPlaceholder": "Search by name or department..."
+    "searchPlaceholder": "Search by name or department...",
+    "goToToday": "Today",
+    "previousDay": "Previous day",
+    "nextDay": "Next day",
+    "lastUpdated": "Last updated {{time}}",
+    "filterAll": "All",
+    "filterPresent": "Present",
+    "filterAbsent": "Absent",
+    "showingCount": "Showing {{count}} of {{total}} employees",
+    "noMatches": "No employees match your search or filter"
   }
 }

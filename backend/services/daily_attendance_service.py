@@ -60,6 +60,8 @@ def upsert_daily_summaries(
             'unmatched_events',
             'check_in_at',
             'check_out_at',
+            'lunch_out_at',
+            'afternoon_in_at',
             'first_event_at',
             'last_event_at',
         )

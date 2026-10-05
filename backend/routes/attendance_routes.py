@@ -33,6 +33,7 @@ from services.daily_attendance_service import (
 )
 
 from services.zk_attendance_utils import format_timestamp_for_api
+from utils.auth_utils import attendance_read_access
 
 
 
@@ -148,6 +149,10 @@ def _empty_day_row(employee_id: str, date_str: str) -> dict:
 
         'check_out': None,
 
+        'lunch_out': None,
+
+        'afternoon_in': None,
+
         'has_records': False,
 
         'is_complete': False,
@@ -189,7 +194,7 @@ def create_attendance_deprecated():
 
 
 @attendance_bp.route('/last/<employee_id>', methods=['GET'])
-
+@attendance_read_access
 def get_last_attendance(employee_id):
 
     """Return the most recent daily summary for an employee."""
@@ -243,7 +248,7 @@ def get_last_attendance(employee_id):
 
 
 @attendance_bp.route('/employee/<employee_id>', methods=['GET'])
-
+@attendance_read_access
 def get_employee_attendance(employee_id):
 
     """Get daily summaries for a specific employee on a given date."""
@@ -303,7 +308,7 @@ def get_employee_attendance(employee_id):
 
 
 @attendance_bp.route('', methods=['GET'])
-
+@attendance_read_access
 def get_attendance():
 
     """
@@ -439,6 +444,7 @@ def get_attendance():
 
 
 @attendance_bp.route('/daily', methods=['GET'])
+@attendance_read_access
 def get_daily_attendance_all():
     """Get attendance for all employees on a specific date."""
     try:
@@ -508,7 +514,7 @@ def get_daily_attendance_all():
 
 
 @attendance_bp.route('/daily-summary/<employee_id>', methods=['GET'])
-
+@attendance_read_access
 def get_daily_summary(employee_id):
 
     """Get worked-hours summary for one employee on one date."""
@@ -562,7 +568,7 @@ def get_daily_summary(employee_id):
 
 
 @attendance_bp.route('/export', methods=['GET'])
-
+@attendance_read_access
 def export_attendance():
 
     """Export daily worked-hours summaries to CSV."""
@@ -674,7 +680,7 @@ def export_attendance():
 
 
 @attendance_bp.route('/summary', methods=['GET'])
-
+@attendance_read_access
 def get_attendance_summary():
 
     """
@@ -820,7 +826,7 @@ def get_attendance_summary():
 
 
 @attendance_bp.route('/user-stats', methods=['GET'])
-
+@attendance_read_access
 def get_user_attendance_stats():
 
     """Aggregate worked-hours statistics per employee."""

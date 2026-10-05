@@ -57,6 +57,8 @@ def get_sync_info():
             'last_sync': sync_status.get('last_sync'),
             'auto_sync_enabled': sync_status.get('auto_sync_enabled', False),
             'sync_interval_minutes': sync_status.get('sync_interval_minutes'),
+            'sync_times': sync_status.get('sync_times') or [],
+            'sync_schedule_label': sync_status.get('sync_schedule_label'),
             'last_success': last_result.get('success'),
             'last_error': sync_status.get('error') or last_result.get('error'),
         },

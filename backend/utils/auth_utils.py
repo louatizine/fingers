@@ -1,10 +1,42 @@
 """
 Authentication Utilities
 """
-from flask_jwt_extended import get_jwt_identity
-from models.user_model import find_user_by_id
+import hmac
 from functools import wraps
-from flask import jsonify
+
+from flask import jsonify, request
+from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request
+from flask_jwt_extended.exceptions import JWTExtendedException
+
+from config import Config
+from models.user_model import find_user_by_id
+
+
+def _attendance_api_key_matches() -> bool:
+    """True when X-API-Key matches the configured read-only attendance key."""
+    expected = (Config.ATTENDANCE_API_KEY or '').strip()
+    provided = (request.headers.get('X-API-Key') or '').strip()
+    if not expected or not provided:
+        return False
+    return hmac.compare_digest(provided, expected)
+
+
+def attendance_read_access(fn):
+    """Allow a logged-in app user (Bearer JWT) or the Power Apps API key."""
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        if _attendance_api_key_matches():
+            return fn(*args, **kwargs)
+        try:
+            verify_jwt_in_request()
+        except JWTExtendedException:
+            return jsonify({
+                'success': False,
+                'error': 'Authentication required',
+            }), 401
+        return fn(*args, **kwargs)
+
+    return wrapper
 
 def admin_required(fn):
     """Decorator to require admin role"""

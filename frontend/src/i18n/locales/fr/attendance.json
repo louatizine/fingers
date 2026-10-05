@@ -13,10 +13,11 @@
     "completed": "Synchronisation de l'appareil terminée avec succès! Actualisation des données...",
     "failed": "Échec de la synchronisation",
     "timeout": "La synchronisation prend plus de temps que prévu",
-    "hint": "Des enregistrements manquants? Synchronisez depuis l'appareil pour importer jusqu'à 6 mois d'historique.",
+    "hint": "Des enregistrements manquants ? Utilisez « Synchroniser depuis l'Appareil » à tout moment pour importer les pointages depuis le terminal.",
     "lastSync": "Dernière synchronisation : {{time}}",
-    "neverSynced": "Aucune synchronisation récente",
-    "pendingToday": "Votre pointage du jour n'est pas encore importé depuis l'appareil. La synchronisation automatique s'exécute toutes les {{minutes}} minutes, ou demandez à un administrateur de cliquer sur « Synchroniser depuis l'Appareil »."
+    "neverSynced": "En attente de la prochaine synchronisation automatique du matin",
+    "pendingToday": "Le pointage du jour n'est pas encore importé. La synchronisation automatique s'exécute à {{schedule}}. Un administrateur peut aussi cliquer sur « Synchroniser depuis l'Appareil » à tout moment.",
+    "scheduleHint": "Synchronisation automatique : {{schedule}}"
   },
   "stats": {
     "today": "Aujourd'hui (page)",
@@ -30,11 +31,16 @@
     "last6Months": "6 derniers mois",
     "last30Days": "30 derniers jours",
     "thisMonth": "Ce mois-ci",
-    "yearToDate": "Depuis janvier"
+    "yearToDate": "Depuis janvier",
+    "since2022": "Depuis 2022"
   },
   "userStats": {
     "title": "Statistiques de Présence des Employés",
+    "subtitle": "Comparez les heures travaillées et l'activité du dispositif pour tous les employés",
     "refresh": "Actualiser",
+    "searchPlaceholder": "Rechercher par nom, ID ou département...",
+    "showingCount": "{{count}} employés affichés sur {{total}}",
+    "noMatches": "Aucun employé ne correspond à votre recherche",
     "employee": "Employé",
     "department": "Département",
     "daysWithRecords": "Jours travaillés",
@@ -58,7 +64,39 @@
   "loading": "Chargement des présences...",
   "tryAdjustFilters": "Essayez une période plus large ou synchronisez depuis l'appareil biométrique.",
   "errors": {
-    "loadFailed": "Échec du chargement des présences. Veuillez réessayer."
+    "loadFailed": "Échec du chargement des présences. Veuillez réessayer.",
+    "unknown": "Erreur inconnue"
+  },
+  "formats": {
+    "emptyTime": "—",
+    "hoursValue": "{{value}} h"
+  },
+  "weekdays": {
+    "Mon": "Lundi",
+    "Tue": "Mardi",
+    "Wed": "Mercredi",
+    "Thu": "Jeudi",
+    "Fri": "Vendredi",
+    "Sat": "Samedi",
+    "Sun": "Dimanche"
+  },
+  "exportCsv": {
+    "employee": "Employé",
+    "period": "Période",
+    "date": "Date",
+    "day": "Jour",
+    "checkIn": "Entrée",
+    "lunchOut": "Sortie déjeuner",
+    "afternoonIn": "Retour après-midi",
+    "checkOut": "Sortie",
+    "workedHours": "Heures travaillées",
+    "status": "Statut",
+    "records": "Enregistrements",
+    "totalDays": "Jours totaux",
+    "daysWithRecords": "Jours avec enregistrements",
+    "completeDays": "Jours complets",
+    "absentDays": "Jours absents",
+    "totalWorkedHours": "Total heures travaillées"
   },
   "filters": {
     "title": "Filtres",
@@ -74,7 +112,7 @@
     "selectEmployee": "Sélectionner un employé",
     "searchEmployee": "Rechercher par nom...",
     "placeholder_employee": "Entrez l'ID de l'employé",
-    "defaultRangeHint": "Les 6 derniers mois sont affichés par défaut. Utilisez les périodes rapides ou choisissez des dates.",
+    "defaultRangeHint": "Les données depuis 2022 sont affichées par défaut. Utilisez les périodes rapides ou choisissez des dates.",
     "activeRange": "{{start}} → {{end}}"
   },
   "table": {
@@ -85,6 +123,8 @@
     "date": "Date",
     "day": "Jour",
     "checkIn": "Entrée",
+    "lunchOut": "Sortie déjeuner",
+    "afternoonIn": "Retour après-midi",
     "checkOut": "Sortie",
     "status": "Statut",
     "device": "Appareil",
@@ -109,7 +149,14 @@
     "totalHours": "Heures totales",
     "dailyAttendance": "Présence quotidienne",
     "detailedView": "Vue détaillée",
-    "noRecordsPeriod": "Aucun enregistrement pour cette période"
+    "noRecordsPeriod": "Aucun enregistrement pour cette période",
+    "searchPlaceholder": "Rechercher par date ou jour...",
+    "filterAll": "Tous les jours",
+    "filterComplete": "Complets",
+    "filterPartial": "Partiels",
+    "filterNoData": "Sans données",
+    "showingCount": "{{count}} jours affichés sur {{total}}",
+    "noMatches": "Aucun jour ne correspond à votre recherche ou filtre"
   },
   "status": {
     "complete": "Complet",
@@ -138,6 +185,15 @@
     "complete": "Complet",
     "partial": "Partiel",
     "totalHours": "Heures Totales",
-    "searchPlaceholder": "Rechercher par nom ou département..."
+    "searchPlaceholder": "Rechercher par nom ou département...",
+    "goToToday": "Aujourd'hui",
+    "previousDay": "Jour précédent",
+    "nextDay": "Jour suivant",
+    "lastUpdated": "Dernière mise à jour {{time}}",
+    "filterAll": "Tous",
+    "filterPresent": "Présents",
+    "filterAbsent": "Absents",
+    "showingCount": "{{count}} sur {{total}} employés affichés",
+    "noMatches": "Aucun employé ne correspond à votre recherche ou filtre"
   }
 }

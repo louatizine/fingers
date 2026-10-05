@@ -69,5 +69,9 @@
   "companyLeaveStatus": "نظرة عامة على حالة الإجازات في الشركة",
   "salaryAdvanceRequests": "طلبات السلف المالية",
   "advanceRequestOverview": "نظرة عامة على طلبات السلف",
-  "companyWideLeaveDistribution": "توزيع الإجازات على مستوى الشركة"
+  "companyWideLeaveDistribution": "توزيع الإجازات على مستوى الشركة",
+  "attendance_shortcut": "الحضور",
+  "check_attendance": "عرض سجلات الحضور",
+  "attendance_shortcut_desc": "افتح السجلات اليومية والملخصات وحالة مزامنة الجهاز من مكان واحد.",
+  "open_attendance": "فتح الحضور"
 }

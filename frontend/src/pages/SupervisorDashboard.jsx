@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
+import { Link } from 'react-router-dom'
 import { dashboardAPI } from '../services/api'
 
 import {
@@ -8,7 +9,8 @@ import {
   CurrencyDollarIcon,
   ClockIcon,
   UserGroupIcon,
-  BriefcaseIcon
+  BriefcaseIcon,
+  ChevronRightIcon
 } from '@heroicons/react/24/outline'
 
 import StatCard from '../components/StatCard'
@@ -96,6 +98,34 @@ export default function SupervisorDashboard() {
           color="purple"
         />
       </div>
+
+      <Link
+        to="/attendance"
+        className="group block rounded-[2rem] border border-indigo-100 bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-white shadow-lg shadow-indigo-200/40 transition-all hover:scale-[1.01] hover:shadow-xl hover:shadow-indigo-200/50"
+      >
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-start gap-4">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm">
+              <ClockIcon className="h-7 w-7" />
+            </div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.28em] text-white/70">
+                {t('dashboard:attendance_shortcut', 'Attendance')}
+              </p>
+              <h2 className="mt-1 text-2xl font-black tracking-tight">
+                {t('dashboard:check_attendance', 'Check attendance records')}
+              </h2>
+              <p className="mt-2 max-w-2xl text-sm text-white/80">
+                {t('dashboard:attendance_shortcut_desc')}
+              </p>
+            </div>
+          </div>
+          <div className="inline-flex items-center gap-2 self-start rounded-2xl bg-white/15 px-4 py-3 text-sm font-bold backdrop-blur-sm transition-all group-hover:bg-white/20">
+            {t('dashboard:open_attendance')}
+            <ChevronRightIcon className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          </div>
+        </div>
+      </Link>
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

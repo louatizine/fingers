@@ -14,7 +14,7 @@
   "show": "Afficher",
   "note": {
     "title": "Remarque :",
-    "description": "Inscrivez les employés sur le terminal ZKTeco (écran de l'appareil ou logiciel ZKTeco). Le backend synchronise automatiquement les utilisateurs et les présences toutes les quelques minutes — aucune application de bureau requise."
+    "description": "Inscrivez les employés sur le terminal ZKTeco (écran de l'appareil ou logiciel ZKTeco). Le backend synchronise automatiquement les utilisateurs et les présences aux horaires du matin — les administrateurs peuvent aussi synchroniser à tout moment depuis la page Présences."
   },
   "table": {
     "userIdentity": "Identité de l'utilisateur",

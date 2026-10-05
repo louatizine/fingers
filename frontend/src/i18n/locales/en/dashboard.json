@@ -69,5 +69,9 @@
   "companyLeaveStatus": "Company Leave Status Overview",
   "salaryAdvanceRequests": "Salary Advance Requests",
   "advanceRequestOverview": "Advance Request Overview",
-  "companyWideLeaveDistribution": "Company-wide Leave Distribution"
+  "companyWideLeaveDistribution": "Company-wide Leave Distribution",
+  "attendance_shortcut": "Attendance",
+  "check_attendance": "Check attendance records",
+  "attendance_shortcut_desc": "Open daily logs, summaries, and device sync status from one place.",
+  "open_attendance": "Open Attendance"
 }

@@ -1,0 +1,537 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "HR Attendance",
+    "description": "Read-only attendance summaries, the same data as the Attendance page. Before import: set host to your API hostname (add :5559 if the API is not on port 443), set schemes to https when you have a certificate, and create the API key connection with header X-API-Key. If the server is only on the LAN, turn on Connect via on-premises data gateway. The key is the ATTENDANCE_API_KEY value on the backend. It can only call these GET operations.",
+    "version": "1.0.0"
+  },
+  "host": "your-api-host.example.com",
+  "basePath": "/api",
+  "schemes": ["https"],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "X-API-Key"
+    }
+  },
+  "security": [
+    {
+      "api_key": []
+    }
+  ],
+  "paths": {
+    "/attendance/daily": {
+      "get": {
+        "operationId": "GetDailyAttendance",
+        "summary": "All employees for one day",
+        "description": "Same board as the Attendance page: every active employee, including people with no punches.",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "query",
+            "type": "string",
+            "format": "date",
+            "required": false,
+            "description": "Calendar day, YYYY-MM-DD. Defaults to today in the attendance timezone."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Daily board",
+            "schema": {
+              "$ref": "#/definitions/DailyBoard"
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/attendance": {
+      "get": {
+        "operationId": "ListAttendanceSummaries",
+        "summary": "Worked-hours history",
+        "description": "Stored daily summaries. Days with no punches are omitted.",
+        "parameters": [
+          {
+            "name": "employee_id",
+            "in": "query",
+            "type": "string",
+            "required": false
+          },
+          {
+            "name": "start_date",
+            "in": "query",
+            "type": "string",
+            "format": "date",
+            "required": false
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "type": "string",
+            "format": "date",
+            "required": false
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "type": "integer",
+            "format": "int32",
+            "required": false,
+            "default": 1
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "type": "integer",
+            "format": "int32",
+            "required": false,
+            "default": 50
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paged summaries",
+            "schema": {
+              "$ref": "#/definitions/SummaryList"
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/attendance/summary": {
+      "get": {
+        "operationId": "GetEmployeeRangeSummary",
+        "summary": "One employee across a date range",
+        "description": "Includes empty days so absences stay visible.",
+        "parameters": [
+          {
+            "name": "employee_id",
+            "in": "query",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "start_date",
+            "in": "query",
+            "type": "string",
+            "format": "date",
+            "required": true
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "type": "string",
+            "format": "date",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Range summary",
+            "schema": {
+              "$ref": "#/definitions/RangeSummary"
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/attendance/daily-summary/{employee_id}": {
+      "get": {
+        "operationId": "GetEmployeeDay",
+        "summary": "One employee on one day",
+        "parameters": [
+          {
+            "name": "employee_id",
+            "in": "path",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "type": "string",
+            "format": "date",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Day row",
+            "schema": {
+              "$ref": "#/definitions/EmployeeDayResponse"
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/attendance/last/{employee_id}": {
+      "get": {
+        "operationId": "GetLastAttendance",
+        "summary": "Most recent summary for one employee",
+        "parameters": [
+          {
+            "name": "employee_id",
+            "in": "path",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Latest summary, or data null when none exist",
+            "schema": {
+              "$ref": "#/definitions/LastAttendanceResponse"
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/attendance/employee/{employee_id}": {
+      "get": {
+        "operationId": "GetEmployeeAttendance",
+        "summary": "Summaries for one employee on one date",
+        "parameters": [
+          {
+            "name": "employee_id",
+            "in": "path",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "type": "string",
+            "format": "date",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Matching summaries",
+            "schema": {
+              "$ref": "#/definitions/EmployeeDateResponse"
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/attendance/user-stats": {
+      "get": {
+        "operationId": "GetUserAttendanceStats",
+        "summary": "Worked-hours totals per employee",
+        "parameters": [
+          {
+            "name": "start_date",
+            "in": "query",
+            "type": "string",
+            "format": "date",
+            "required": false
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "type": "string",
+            "format": "date",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Per-employee totals",
+            "schema": {
+              "$ref": "#/definitions/UserStatsResponse"
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/attendance/export": {
+      "get": {
+        "operationId": "ExportAttendanceCsv",
+        "summary": "Download worked-hours CSV",
+        "produces": ["text/csv"],
+        "parameters": [
+          {
+            "name": "employee_id",
+            "in": "query",
+            "type": "string",
+            "required": false
+          },
+          {
+            "name": "start_date",
+            "in": "query",
+            "type": "string",
+            "format": "date",
+            "required": false
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "type": "string",
+            "format": "date",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "CSV file",
+            "schema": {
+              "type": "file"
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "ErrorResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "error": {
+          "type": "string"
+        }
+      }
+    },
+    "AttendanceRow": {
+      "type": "object",
+      "properties": {
+        "employee_id": { "type": "string" },
+        "first_name": { "type": "string" },
+        "last_name": { "type": "string" },
+        "department": { "type": "string" },
+        "position": { "type": "string" },
+        "date": { "type": "string" },
+        "day_of_week": { "type": "string" },
+        "status": {
+          "type": "string",
+          "description": "complete, partial, incomplete, or no_data"
+        },
+        "worked_time_display": { "type": "string" },
+        "worked_hours": { "type": "number", "format": "double" },
+        "total_worked_hours": { "type": "number", "format": "double" },
+        "total_worked_minutes": { "type": "integer", "format": "int32" },
+        "event_count": { "type": "integer", "format": "int32" },
+        "pair_count": { "type": "integer", "format": "int32" },
+        "unmatched_events": { "type": "integer", "format": "int32" },
+        "total_records": { "type": "integer", "format": "int32" },
+        "check_in": { "type": "string" },
+        "check_out": { "type": "string" },
+        "lunch_out": { "type": "string", "description": "Lunch departure (2nd punch)" },
+        "afternoon_in": { "type": "string", "description": "Afternoon return (3rd punch)" },
+        "check_in_at": { "type": "string" },
+        "check_out_at": { "type": "string" },
+        "lunch_out_at": { "type": "string" },
+        "afternoon_in_at": { "type": "string" },
+        "first_event_at": { "type": "string" },
+        "last_event_at": { "type": "string" },
+        "has_records": { "type": "boolean" },
+        "is_complete": { "type": "boolean" },
+        "in_progress": { "type": "boolean" },
+        "device_id": { "type": "string" }
+      }
+    },
+    "DailyTotals": {
+      "type": "object",
+      "properties": {
+        "total_employees": { "type": "integer", "format": "int32" },
+        "present": { "type": "integer", "format": "int32" },
+        "absent": { "type": "integer", "format": "int32" },
+        "complete": { "type": "integer", "format": "int32" },
+        "partial": { "type": "integer", "format": "int32" },
+        "no_data": { "type": "integer", "format": "int32" },
+        "total_worked_hours": { "type": "number", "format": "double" }
+      }
+    },
+    "DailyBoard": {
+      "type": "object",
+      "properties": {
+        "success": { "type": "boolean" },
+        "date": { "type": "string" },
+        "day_of_week": { "type": "string" },
+        "attendance": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/AttendanceRow" }
+        },
+        "totals": { "$ref": "#/definitions/DailyTotals" }
+      }
+    },
+    "Pagination": {
+      "type": "object",
+      "properties": {
+        "page": { "type": "integer", "format": "int32" },
+        "limit": { "type": "integer", "format": "int32" },
+        "total": { "type": "integer", "format": "int32" },
+        "pages": { "type": "integer", "format": "int32" }
+      }
+    },
+    "PeriodStats": {
+      "type": "object",
+      "properties": {
+        "total_days": { "type": "integer", "format": "int32" },
+        "total_worked_hours": { "type": "number", "format": "double" },
+        "employees_with_records": { "type": "integer", "format": "int32" },
+        "start_date": { "type": "string" },
+        "end_date": { "type": "string" }
+      }
+    },
+    "SummaryList": {
+      "type": "object",
+      "properties": {
+        "success": { "type": "boolean" },
+        "data": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/AttendanceRow" }
+        },
+        "pagination": { "$ref": "#/definitions/Pagination" },
+        "period_stats": { "$ref": "#/definitions/PeriodStats" }
+      }
+    },
+    "RangeTotals": {
+      "type": "object",
+      "properties": {
+        "worked_hours": { "type": "number", "format": "double" },
+        "complete_days": { "type": "integer", "format": "int32" },
+        "days_with_records": { "type": "integer", "format": "int32" },
+        "total_days": { "type": "integer", "format": "int32" },
+        "absent_days": { "type": "integer", "format": "int32" },
+        "total_records": { "type": "integer", "format": "int32" }
+      }
+    },
+    "RangeSummaryData": {
+      "type": "object",
+      "properties": {
+        "employee_id": { "type": "string" },
+        "start_date": { "type": "string" },
+        "end_date": { "type": "string" },
+        "daily_summaries": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/AttendanceRow" }
+        },
+        "totals": { "$ref": "#/definitions/RangeTotals" }
+      }
+    },
+    "RangeSummary": {
+      "type": "object",
+      "properties": {
+        "success": { "type": "boolean" },
+        "data": { "$ref": "#/definitions/RangeSummaryData" }
+      }
+    },
+    "EmployeeDayResponse": {
+      "type": "object",
+      "properties": {
+        "success": { "type": "boolean" },
+        "data": { "$ref": "#/definitions/AttendanceRow" }
+      }
+    },
+    "LastAttendanceResponse": {
+      "type": "object",
+      "properties": {
+        "success": { "type": "boolean" },
+        "data": { "$ref": "#/definitions/AttendanceRow" },
+        "message": { "type": "string" }
+      }
+    },
+    "EmployeeDateResponse": {
+      "type": "object",
+      "properties": {
+        "success": { "type": "boolean" },
+        "date": { "type": "string" },
+        "employee_id": { "type": "string" },
+        "summaries": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/AttendanceRow" }
+        },
+        "count": { "type": "integer", "format": "int32" }
+      }
+    },
+    "UserStat": {
+      "type": "object",
+      "properties": {
+        "employee_id": { "type": "string" },
+        "first_name": { "type": "string" },
+        "last_name": { "type": "string" },
+        "department": { "type": "string" },
+        "position": { "type": "string" },
+        "days_with_records": { "type": "integer", "format": "int32" },
+        "total_worked_hours": { "type": "number", "format": "double" },
+        "total_worked_minutes": { "type": "integer", "format": "int32" },
+        "total_events": { "type": "integer", "format": "int32" },
+        "first_date": { "type": "string" },
+        "last_date": { "type": "string" }
+      }
+    },
+    "DateFilters": {
+      "type": "object",
+      "properties": {
+        "start_date": { "type": "string" },
+        "end_date": { "type": "string" }
+      }
+    },
+    "UserStatsResponse": {
+      "type": "object",
+      "properties": {
+        "success": { "type": "boolean" },
+        "user_stats": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/UserStat" }
+        },
+        "filters": { "$ref": "#/definitions/DateFilters" }
+      }
+    }
+  }
+}

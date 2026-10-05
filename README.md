@@ -302,10 +302,11 @@ ZK_DEVICE_IP=192.168.100.5
 ZK_DEVICE_PORT=4370
 ZK_DEVICE_NAME=ZKTeco K80
 ZK_SYNC_ENABLED=true
-ZK_SYNC_INTERVAL_MINUTES=5
+ZK_SYNC_TIMES=08:00,08:30,09:00
+ATTENDANCE_TIMEZONE=Africa/Algiers
 ```
 
-The backend auto-syncs employees and attendance on startup and every N minutes. Admins can also trigger sync from the **Attendance** page. See `QUICK_START.md` for details.
+The backend auto-syncs employees and attendance at the scheduled local times above. Admins/supervisors can also trigger **Sync from Device** anytime from the **Attendance** page. See `QUICK_START.md` for details.
 
 ## 🔑 Default Credentials
 
@@ -583,14 +584,35 @@ For issues and questions:
 - [ ] Employee self-service portal enhancements
 
 ---
-** build and push 
-- cd "c:\Users\ZineeddineLouati\OneDrive - dynamix-services.com\Bureau\Employees_Managements"
-- $REGISTRY = "192.168.100.19:5000"
 
-- docker login $REGISTRY
-docker build -t 192.168.100.19:5000/hr-backend:latest ./backend
-docker build -t 192.168.100.19:5000/hr-frontend:latest ./frontend
-docker push 192.168.100.19:5000/hr-backend:latest
-docker push 192.168.100.19:5000/hr-frontend:latest
+## Deploy to Portainer (production)
+
+The app is deployed as a **Portainer stack** using `docker-compose.portainer.yml`. Nginx runs **inside** the `hr-frontend` container — you do not need a separate nginx service.
+
+### 1. Build and push images
+
+```powershell
+cd "c:\Users\ZineeddineLouati\OneDrive - dynamix-services.com\Bureau\Employees_Managements"
+$REGISTRY = "192.168.100.19:5000"
+
+docker login $REGISTRY
+docker build -t $REGISTRY/hr-backend:latest ./backend
+docker build -t $REGISTRY/hr-frontend:latest ./frontend
+docker push $REGISTRY/hr-backend:latest
+docker push $REGISTRY/hr-frontend:latest
+```
+
+### 2. Update the Portainer stack
+
+1. Open Portainer → **Stacks** → your HR stack (or create one from `docker-compose.portainer.yml`).
+2. Set environment variables (at minimum `MONGO_URI`; optionally `ZK_DEVICE_IP`, `ZK_SYNC_MIN_DATE`, etc.).
+3. Click **Pull and redeploy** (or **Update the stack**) so Portainer pulls the latest images and recreates containers.
+4. Open the app at `http://192.168.100.19:9093` and hard-refresh once (`Ctrl+Shift+R`) after a frontend update.
+
+### Portainer networking notes
+
+- **Backend** uses `network_mode: host` so it can reach the ZKTeco device on your LAN.
+- **Frontend** proxies `/api/` to the host via `NGINX_API_UPSTREAM=http://host.docker.internal:5559` (configured in the stack file).
+- MongoDB must be reachable from the host using the IP/hostname in `MONGO_URI` (not `mongo`).
 
 **Key Technologies:** React 18 • Flask 3.0 • MongoDB • pyzk • i18next • Tailwind CSS • ZKTeco

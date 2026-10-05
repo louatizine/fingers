@@ -24,6 +24,8 @@ sync_status: Dict[str, Any] = {
     'error': None,
     'auto_sync_enabled': False,
     'sync_interval_minutes': None,
+    'sync_times': None,
+    'sync_schedule_label': None,
 }
 
 
