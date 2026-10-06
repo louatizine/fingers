@@ -9,8 +9,33 @@ from services.daily_attendance_aggregator import (
     DailyWorkedSummary,
     minutes_to_decimal_hours,
     minutes_to_display,
+    punch_slot,
 )
 from services.zk_attendance_utils import format_timestamp_for_api
+
+
+def _place_saved_punches(check_in, lunch_out, afternoon_in, check_out):
+    """Move a saved punch into the column that matches its clock time."""
+    slots = {
+        'check_in': check_in,
+        'lunch_out': lunch_out,
+        'afternoon_in': afternoon_in,
+        'check_out': check_out,
+    }
+    for name in ('check_in', 'lunch_out', 'afternoon_in', 'check_out'):
+        value = slots[name]
+        if not isinstance(value, datetime):
+            continue
+        target = punch_slot(value)
+        if target != name and not slots[target]:
+            slots[target] = value
+            slots[name] = None
+    return (
+        slots['check_in'],
+        slots['lunch_out'],
+        slots['afternoon_in'],
+        slots['check_out'],
+    )
 
 
 class DailyAttendanceModel:
@@ -69,10 +94,16 @@ class DailyAttendanceModel:
     def summary_to_response(doc: dict) -> dict:
         """API-friendly dict from a stored summary document."""
         pair_count = doc.get('pair_count', 0)
-        check_in = doc.get('check_in_at') or doc.get('first_event_at')
-        check_out = doc.get('check_out_at') if pair_count > 0 else None
+        check_in = doc.get('check_in_at')
+        check_out = doc.get('check_out_at')
         lunch_out = doc.get('lunch_out_at')
         afternoon_in = doc.get('afternoon_in_at')
+        check_in, lunch_out, afternoon_in, check_out = _place_saved_punches(
+            check_in,
+            lunch_out,
+            afternoon_in,
+            check_out,
+        )
         # Older summaries stored lunch departure as check-out when the
         # afternoon return had no end-of-day punch yet.
         if afternoon_in and lunch_out and check_out == lunch_out:

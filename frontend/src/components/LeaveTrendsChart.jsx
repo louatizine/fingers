@@ -1,4 +1,5 @@
 import { AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
+import { BRAND } from '../config/brand'
 
 export default function LeaveTrendsChart() {
   const leaveTrendData = [
@@ -30,8 +31,8 @@ export default function LeaveTrendsChart() {
             <Area 
               type="monotone" 
               dataKey="leaves" 
-              stroke="#0078d4" 
-              fill="#deecf9"
+              stroke={BRAND.violet}
+              fill={BRAND.violetSoft}
               strokeWidth={2}
             />
           </AreaChart>

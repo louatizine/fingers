@@ -13,7 +13,7 @@ export default function UpcomingTimeOffCard() {
         <h3 className="text-lg font-semibold text-gray-900">
           Congés à Venir
         </h3>
-        <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+        <button className="text-sm text-primary hover:text-primary-600 font-medium">
           Ajouter un congé
         </button>
       </div>

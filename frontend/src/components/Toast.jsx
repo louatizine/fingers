@@ -103,9 +103,9 @@ const Toast = ({ toast, onClose }) => {
       bg: 'bg-slate-900/95', // Chic dark mode for info
       border: 'border-slate-800',
       icon: InformationCircleIcon,
-      iconColor: 'text-indigo-400',
+      iconColor: 'text-primary-300',
       title: 'Notification',
-      accent: 'bg-indigo-500',
+      accent: 'bg-primary-400',
       text: 'text-slate-300',
       titleText: 'text-white'
     }

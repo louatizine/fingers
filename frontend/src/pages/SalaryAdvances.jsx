@@ -206,7 +206,7 @@ export default function SalaryAdvances() {
   if (loading) {
     return (
       <div className="flex flex-col justify-center items-center h-96">
-        <ArrowPathIcon className="h-10 w-10 text-blue-500 animate-spin opacity-20" />
+        <ArrowPathIcon className="h-10 w-10 text-primary animate-spin opacity-20" />
         <p className="mt-4 text-sm font-medium text-slate-400 tracking-wide">{t('salaryAdvances.loading')}</p>
       </div>
     )
@@ -231,7 +231,7 @@ export default function SalaryAdvances() {
               onClick={() => setShowModal(true)}
               className="relative group overflow-hidden bg-slate-900 text-white px-6 py-3 rounded-2xl font-bold text-sm shadow-2xl transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <PlusIcon className="h-5 w-5 z-10" />
               <span className="z-10">{t('salaryAdvances.newRequest')}</span>
             </button>
@@ -253,7 +253,7 @@ export default function SalaryAdvances() {
               <button
                 key={val}
                 onClick={() => { setItemsPerPage(val); setCurrentPage(1); }}
-                className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${itemsPerPage === val ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
+                className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${itemsPerPage === val ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
               >
                 {val}
               </button>
@@ -304,8 +304,8 @@ export default function SalaryAdvances() {
 
                   <td className="px-8 py-5">
                     <div className="flex items-center gap-2">
-                      <div className="h-8 w-8 rounded-full bg-blue-50 flex items-center justify-center">
-                        <BanknotesIcon className="h-4 w-4 text-blue-600" />
+                      <div className="h-8 w-8 rounded-full bg-primary-50 flex items-center justify-center">
+                        <BanknotesIcon className="h-4 w-4 text-primary" />
                       </div>
                       <span className="font-black text-slate-900">
                         {item.amount}{' '}
@@ -363,7 +363,7 @@ export default function SalaryAdvances() {
                   onClick={() => handlePageChange(n)}
                   className={`h-10 w-10 rounded-lg font-semibold text-sm transition-all ${
                     currentPage === n
-                      ? 'bg-blue-600 text-white shadow-md'
+                      ? 'bg-primary text-white shadow-md'
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                   }`}
                 >
@@ -450,7 +450,7 @@ export default function SalaryAdvances() {
                         <input
                           type="number"
                           required
-                          className="w-full bg-slate-50 border-0 rounded-2xl pl-12 pr-4 py-4 text-sm font-bold focus:ring-4 focus:ring-blue-100 transition-all"
+                          className="w-full bg-slate-50 border-0 rounded-2xl pl-12 pr-4 py-4 text-sm font-bold focus:ring-4 focus:ring-primary-100 transition-all"
                           value={formData.amount}
                           onChange={e => setFormData({ ...formData, amount: e.target.value })}
                         />
@@ -464,7 +464,7 @@ export default function SalaryAdvances() {
 
                       <textarea
                         required
-                        className="w-full bg-slate-50 border-0 rounded-2xl p-4 text-sm font-medium focus:ring-4 focus:ring-blue-100 transition-all placeholder:text-slate-300"
+                        className="w-full bg-slate-50 border-0 rounded-2xl p-4 text-sm font-medium focus:ring-4 focus:ring-primary-100 transition-all placeholder:text-slate-300"
                         rows={4}
                         value={formData.reason}
                         onChange={e => setFormData({ ...formData, reason: e.target.value })}
@@ -487,7 +487,7 @@ export default function SalaryAdvances() {
                   type="submit"
                   disabled={actionLoading}
                   className={`flex-[2] px-6 py-4 rounded-2xl font-black text-sm text-white shadow-xl transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50 ${
-                    showRejectModal ? 'bg-rose-600 shadow-rose-200' : 'bg-blue-600 shadow-blue-200'
+                    showRejectModal ? 'bg-rose-600 shadow-rose-200' : 'bg-primary shadow-primary-200'
                   }`}
                 >
                   {showRejectModal ? t('salaryAdvances.rejectModal.confirmButton') : t('common.submit')}

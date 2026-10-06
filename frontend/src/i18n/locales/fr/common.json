@@ -413,6 +413,17 @@
         "balance": "Solde"
       }
     },
+    "employeeBalances": {
+      "title": "Soldes de Congés des Employés",
+      "subtitle": "Solde de congés actuel de chaque employé",
+      "name": "Nom de l'employé",
+      "hireDate": "Date d'embauche",
+      "monthsService": "Mois de service",
+      "earned": "Jours acquis",
+      "used": "Jours utilisés",
+      "balance": "Solde",
+      "noRecords": "Aucun dossier d'employé trouvé"
+    },
     "language": {
       "title": "Préférences de Langue",
       "subtitle": "Sélectionnez la langue du système",

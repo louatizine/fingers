@@ -83,7 +83,7 @@ export default function AttendanceSummary() {
               value={employeeId}
               onChange={(e) => setEmployeeId(e.target.value)}
               placeholder={t('attendance.enterEmployeeId')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none"
             />
           </div>
 
@@ -95,7 +95,7 @@ export default function AttendanceSummary() {
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none"
             />
           </div>
 
@@ -107,7 +107,7 @@ export default function AttendanceSummary() {
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none"
             />
           </div>
         </div>
@@ -116,7 +116,7 @@ export default function AttendanceSummary() {
           <button
             onClick={fetchSummary}
             disabled={loading}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Loading...' : 'View Summary'}
           </button>
@@ -134,15 +134,15 @@ export default function AttendanceSummary() {
         <>
           {/* Totals Card */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg p-6 text-white">
+            <div className="bg-gradient-to-br from-primary to-primary rounded-lg shadow-lg p-6 text-white">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-blue-100 text-sm">{t('attendance.totalWorkedHours')}</p>
+                  <p className="text-primary-100 text-sm">{t('attendance.totalWorkedHours')}</p>
                   <p className="text-3xl font-bold mt-1">
                     {summary.totals.worked_hours.toFixed(2)}h
                   </p>
                 </div>
-                <ClockIcon className="h-12 w-12 text-blue-200" />
+                <ClockIcon className="h-12 w-12 text-primary-200" />
               </div>
             </div>
 
@@ -158,7 +158,7 @@ export default function AttendanceSummary() {
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-lg p-6 text-white">
+            <div className="bg-gradient-to-br from-purple-500 to-brand-blue rounded-lg shadow-lg p-6 text-white">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-purple-100 text-sm">{t('attendance.totalDays')}</p>
@@ -236,7 +236,7 @@ export default function AttendanceSummary() {
                           {day.lunch_break_hours ? `${day.lunch_break_hours.toFixed(2)}h` : '0h'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
+                          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-primary-100 text-primary-700">
                             {day.worked_hours ? `${day.worked_hours.toFixed(2)}h` : '0h'}
                           </span>
                         </td>

@@ -4,8 +4,9 @@ import {
   PieChart, Pie, Cell, ResponsiveContainer, Tooltip,
   RadialBarChart, RadialBar 
 } from 'recharts';
+import { CHART_COLORS } from '../config/brand';
 
-const COLORS = ['#4f46e5', '#10b981', '#f59e0b', '#6366f1', '#94a3b8'];
+const COLORS = CHART_COLORS;
 
 /**
  * STYLE A: THE GLASS DONUT
@@ -75,11 +76,11 @@ export function RequestsRadialChart({ title, subtitle, data = [] }) {
 
   return (
     <div className="bg-slate-900 rounded-[2.5rem] p-8 shadow-2xl flex flex-col h-full text-white overflow-hidden relative">
-      <div className="absolute -top-24 -right-24 w-64 h-64 bg-indigo-500/10 blur-[100px] rounded-full" />
+      <div className="absolute -top-24 -right-24 w-64 h-64 bg-brand-yellow/10 blur-[100px] rounded-full" />
       
       <div className={`mb-6 relative z-10 ${isRTL ? 'text-right' : 'text-left'}`}>
         <h3 className="text-xl font-black tracking-tight leading-none">{title}</h3>
-        <p className="text-[10px] font-black text-indigo-400 mt-2 uppercase tracking-[0.2em]">{subtitle || 'Usage Metrics'}</p>
+        <p className="text-[10px] font-black text-brand-yellow mt-2 uppercase tracking-[0.2em]">{subtitle || 'Usage Metrics'}</p>
       </div>
 
       <div className="flex-1 flex flex-col lg:flex-row items-center relative z-10">

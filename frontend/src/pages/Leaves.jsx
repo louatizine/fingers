@@ -202,7 +202,7 @@ export default function Leaves() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-96">
-        <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
         <p className="mt-4 text-slate-400 font-bold text-xs uppercase tracking-widest">{t('leaves.loading')}</p>
       </div>
     );
@@ -221,7 +221,7 @@ export default function Leaves() {
         {user.role === 'employee' && (
           <button
             onClick={() => setShowModal(true)}
-            className={`inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-semibold rounded-xl shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-95 transition-all duration-200 ${isRTL ? 'flex-row-reverse' : ''}`}
+            className={`inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary to-primary-600 text-white text-sm font-semibold rounded-xl shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 active:scale-95 transition-all duration-200 ${isRTL ? 'flex-row-reverse' : ''}`}
           >
             <PlusIcon className="h-5 w-5" aria-hidden="true" />
             <span>{t('leaves.new_request')}</span>
@@ -237,9 +237,9 @@ export default function Leaves() {
               label: t('leaves.annual_leave'),
               val: vacationBalance,
               icon: '🏖️',
-              bgColor: 'bg-gradient-to-br from-blue-50 to-blue-100/30',
-              textColor: 'text-blue-700',
-              borderColor: 'border-blue-200'
+              bgColor: 'bg-gradient-to-br from-primary-50 to-primary-100/30',
+              textColor: 'text-primary-600',
+              borderColor: 'border-primary-200'
             },
             {
               label: t('leaves.sick_leave'),
@@ -302,7 +302,7 @@ export default function Leaves() {
                   {user.role !== 'employee' && (
                     <td className="px-6 py-4">
                       <div className="font-semibold text-slate-900">{leave.user_name}</div>
-                      <div className="text-xs font-medium text-blue-500 uppercase mt-0.5">
+                      <div className="text-xs font-medium text-primary uppercase mt-0.5">
                         Bal: {leave.user_vacation_balance?.toFixed(1)}
                       </div>
                     </td>
@@ -359,7 +359,7 @@ export default function Leaves() {
               <button
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage(prev => prev - 1)}
-                className="p-2 rounded-lg bg-white border border-slate-300 text-slate-600 hover:bg-slate-50 hover:border-blue-300 hover:text-blue-600 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                className="p-2 rounded-lg bg-white border border-slate-300 text-slate-600 hover:bg-slate-50 hover:border-primary-300 hover:text-primary disabled:opacity-30 disabled:cursor-not-allowed transition-all"
               >
                 <ChevronLeftIcon className="h-4 w-4" />
               </button>
@@ -370,7 +370,7 @@ export default function Leaves() {
                   onClick={() => setCurrentPage(i + 1)}
                   className={`h-9 w-9 rounded-lg font-semibold text-sm transition-all ${
                     currentPage === i + 1
-                      ? 'bg-blue-600 text-white shadow-sm'
+                      ? 'bg-primary text-white shadow-sm'
                       : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-300'
                   }`}
                 >
@@ -381,7 +381,7 @@ export default function Leaves() {
               <button
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage(prev => prev + 1)}
-                className="p-2 rounded-lg bg-white border border-slate-300 text-slate-600 hover:bg-slate-50 hover:border-blue-300 hover:text-blue-600 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                className="p-2 rounded-lg bg-white border border-slate-300 text-slate-600 hover:bg-slate-50 hover:border-primary-300 hover:text-primary disabled:opacity-30 disabled:cursor-not-allowed transition-all"
               >
                 <ChevronRightIcon className="h-4 w-4" />
               </button>
@@ -428,7 +428,7 @@ export default function Leaves() {
                         <input
                           type="date"
                           required
-                          className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                          className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-sm font-medium focus:ring-2 focus:ring-primary focus:border-primary outline-none"
                           value={formData.start_date}
                           onChange={e => setFormData({ ...formData, start_date: e.target.value })}
                         />
@@ -438,7 +438,7 @@ export default function Leaves() {
                         <input
                           type="date"
                           required
-                          className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                          className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-sm font-medium focus:ring-2 focus:ring-primary focus:border-primary outline-none"
                           value={formData.end_date}
                           onChange={e => setFormData({ ...formData, end_date: e.target.value })}
                         />
@@ -448,7 +448,7 @@ export default function Leaves() {
                     <div className="space-y-1">
                       <label className="text-xs font-semibold uppercase text-slate-500">{t('leaves.modal.leaveType')}</label>
                       <select
-                        className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none appearance-none"
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-sm font-medium focus:ring-2 focus:ring-primary focus:border-primary outline-none appearance-none"
                         value={formData.leave_type}
                         onChange={e => setFormData({ ...formData, leave_type: e.target.value })}
                       >
@@ -463,7 +463,7 @@ export default function Leaves() {
                       <textarea
                         rows={3}
                         required
-                        className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-sm font-medium focus:ring-2 focus:ring-primary focus:border-primary outline-none resize-none"
                         value={formData.reason}
                         onChange={e => setFormData({ ...formData, reason: e.target.value })}
                         placeholder={t('leaves.modal.reasonPlaceholder')}
@@ -499,7 +499,7 @@ export default function Leaves() {
                   className={`flex-1 py-3 rounded-xl font-semibold text-sm text-white transition-all hover:shadow-md ${
                     showRejectModal
                       ? 'bg-rose-600 hover:bg-rose-700 focus:ring-rose-500'
-                      : 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500'
+                      : 'bg-primary hover:bg-primary-600 focus:ring-primary'
                   } focus:outline-none focus:ring-2 focus:ring-offset-2`}
                 >
                   {showModal ? t('leaves.modal.submitButton') : t('actions.reject')}

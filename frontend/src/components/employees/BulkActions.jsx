@@ -25,7 +25,7 @@ const BulkActions = ({ selectedCount, onDeactivate, onExport, onCreateAccounts, 
       <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
         <button
           onClick={onCreateAccounts}
-          className="inline-flex items-center px-4 py-2 border-2 border-indigo-200 text-[10px] font-black uppercase tracking-widest rounded-item text-indigo-700 hover:bg-indigo-600 hover:text-white transition-all duration-200"
+          className="inline-flex items-center px-4 py-2 border-2 border-primary-200 text-[10px] font-black uppercase tracking-widest rounded-item text-primary-600 hover:bg-primary hover:text-white transition-all duration-200"
         >
           <KeyIcon className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'} stroke-[2.5px]`} />
           {t('employees.createAccounts.action')}

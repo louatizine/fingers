@@ -8,7 +8,7 @@ import './i18n/index.js' // Initialize i18n
 function AppLoading() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#f3f2f1]">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0078d4]" />
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#3B2176]" />
     </div>
   )
 }

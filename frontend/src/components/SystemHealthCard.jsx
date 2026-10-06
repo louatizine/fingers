@@ -19,7 +19,7 @@ export default function SystemHealthCard() {
               <span className="text-sm font-medium text-gray-600">{metric.label}</span>
               <span className={`text-xs px-2 py-1 rounded-full ${
                 metric.color === 'green' ? 'bg-green-100 text-green-700' :
-                metric.color === 'blue' ? 'bg-blue-100 text-blue-700' :
+                metric.color === 'blue' ? 'bg-primary-100 text-primary-600' :
                 'bg-yellow-100 text-yellow-700'
               }`}>
                 {metric.status}

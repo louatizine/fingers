@@ -211,7 +211,7 @@ export default function Settings() {
       className={`
         flex items-center gap-3 py-4 px-1 border-b-2 font-semibold text-sm transition-all duration-200
         ${activeTab === id 
-          ? 'border-indigo-600 text-indigo-600' 
+          ? 'border-primary text-primary' 
           : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
         }
       `}
@@ -223,9 +223,9 @@ export default function Settings() {
 
   const StatCard = ({ icon: Icon, label, value, color = 'indigo', unit = '' }) => {
     const colorClasses = {
-      indigo: { bg: 'bg-indigo-50', text: 'text-indigo-600' },
-      emerald: { bg: 'bg-emerald-50', text: 'text-emerald-600' },
-      blue: { bg: 'bg-blue-50', text: 'text-blue-600' }
+      indigo: { bg: 'bg-primary-50', text: 'text-primary' },
+      emerald: { bg: 'bg-[#E7F6EA]', text: 'text-brand-green' },
+      blue: { bg: 'bg-[#E7EEF8]', text: 'text-brand-blue' }
     }
     const colors = colorClasses[color] || colorClasses.indigo
     
@@ -248,8 +248,8 @@ export default function Settings() {
     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
       <div className="px-6 py-5 border-b border-slate-100">
         <div className="flex items-center">
-          <div className={`h-10 w-10 rounded-xl bg-indigo-50 flex items-center justify-center mr-4`}>
-            <Icon className="h-5 w-5 text-indigo-600" />
+          <div className={`h-10 w-10 rounded-xl bg-primary-50 flex items-center justify-center mr-4`}>
+            <Icon className="h-5 w-5 text-primary" />
           </div>
           <div>
             <h3 className="text-lg font-semibold text-slate-900">{title}</h3>
@@ -270,7 +270,7 @@ export default function Settings() {
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <div className="p-3 bg-indigo-600 rounded-2xl shadow-lg shadow-indigo-200">
+              <div className="p-3 bg-primary rounded-2xl shadow-lg shadow-primary-200">
                 <Cog6ToothIcon className="h-7 w-7 text-white" />
               </div>
               <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
@@ -344,7 +344,7 @@ export default function Settings() {
                         name="language"
                         value={settings.language}
                         onChange={handleSettingsChange}
-                        className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 transition-all placeholder:text-slate-400 font-medium`}
+                        className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-primary-400 transition-all placeholder:text-slate-400 font-medium`}
                       >
                         <option value="english">English</option>
                         <option value="arabic">العربية</option>
@@ -365,7 +365,7 @@ export default function Settings() {
                       step="0.5"
                       min="0"
                       max="30"
-                      className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 transition-all placeholder:text-slate-400 font-medium"
+                      className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-primary-400 transition-all placeholder:text-slate-400 font-medium"
                     />
                     <p className="text-xs text-slate-400 mt-2 font-medium">
                       {t('settings.holiday.daysPerMonthHint')}
@@ -384,7 +384,7 @@ export default function Settings() {
                       onChange={handleSettingsChange}
                       min="0"
                       max="12"
-                      className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 transition-all placeholder:text-slate-400 font-medium"
+                      className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-primary-400 transition-all placeholder:text-slate-400 font-medium"
                     />
                   </div>
 
@@ -400,20 +400,20 @@ export default function Settings() {
                       onChange={handleSettingsChange}
                       min="1"
                       max="365"
-                      className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 transition-all placeholder:text-slate-400 font-medium"
+                      className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-primary-400 transition-all placeholder:text-slate-400 font-medium"
                     />
                   </div>
                 </div>
 
                 {/* Checkbox Options */}
-                <div className="flex items-center p-4 bg-blue-50 rounded-xl border border-blue-100">
+                <div className="flex items-center p-4 bg-primary-50 rounded-xl border border-primary-100">
                   <input
                     type="checkbox"
                     id="includeWeekends"
                     name="includeWeekends"
                     checked={settings.includeWeekends}
                     onChange={handleSettingsChange}
-                    className="h-5 w-5 text-indigo-600 focus:ring-indigo-500 rounded"
+                    className="h-5 w-5 text-primary focus:ring-primary-400 rounded"
                   />
                   <label htmlFor="includeWeekends" className={`text-sm font-medium text-slate-700 ${isRTL ? 'mr-3' : 'ml-3'}`}>
                     {t('settings.includeWeekends')}
@@ -450,7 +450,7 @@ export default function Settings() {
                     <button
                       type="submit"
                       disabled={loading || recalculating}
-                      className="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white text-sm font-bold rounded-xl hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                      className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-white text-sm font-bold rounded-xl hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:ring-offset-2"
                     >
                       {recalculating ? (
                         <>
@@ -491,7 +491,7 @@ export default function Settings() {
                         name="checkInStart"
                         value={attendanceSettings.checkInStart}
                         onChange={handleAttendanceSettingsChange}
-                        className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 transition-all placeholder:text-slate-400 font-medium`}
+                        className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-primary-400 transition-all placeholder:text-slate-400 font-medium`}
                       />
                     </div>
                   </div>
@@ -508,7 +508,7 @@ export default function Settings() {
                         name="checkOutEnd"
                         value={attendanceSettings.checkOutEnd}
                         onChange={handleAttendanceSettingsChange}
-                        className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 transition-all placeholder:text-slate-400 font-medium`}
+                        className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-primary-400 transition-all placeholder:text-slate-400 font-medium`}
                       />
                     </div>
                   </div>
@@ -523,7 +523,7 @@ export default function Settings() {
                       name="lunchBreakStart"
                       value={attendanceSettings.lunchBreakStart}
                       onChange={handleAttendanceSettingsChange}
-                      className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 transition-all placeholder:text-slate-400 font-medium"
+                      className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-primary-400 transition-all placeholder:text-slate-400 font-medium"
                     />
                   </div>
 
@@ -537,7 +537,7 @@ export default function Settings() {
                       name="lunchBreakEnd"
                       value={attendanceSettings.lunchBreakEnd}
                       onChange={handleAttendanceSettingsChange}
-                      className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 transition-all placeholder:text-slate-400 font-medium"
+                      className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-primary-400 transition-all placeholder:text-slate-400 font-medium"
                     />
                   </div>
                 </div>
@@ -555,7 +555,7 @@ export default function Settings() {
                         onClick={() => handleWorkingDayToggle(day)}
                         className={`px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${
                           attendanceSettings.workingDays.includes(day)
-                            ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200'
+                            ? 'bg-primary text-white shadow-lg shadow-primary-200'
                             : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                         }`}
                       >
@@ -580,7 +580,7 @@ export default function Settings() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white text-sm font-bold rounded-xl hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                    className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-white text-sm font-bold rounded-xl hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:ring-offset-2"
                   >
                     {loading ? (
                       <>

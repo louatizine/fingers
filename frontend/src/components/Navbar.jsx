@@ -172,15 +172,15 @@ export default function Navbar() {
   const getNotificationColor = (type) => {
     switch(type) {
       case 'leave_request':
-        return 'from-blue-500/20 to-blue-500/5'
+        return 'from-primary/20 to-primary/5'
       case 'leave_status':
         return 'from-emerald-500/20 to-emerald-500/5'
       case 'salary_advance':
         return 'from-amber-500/20 to-amber-500/5'
       case 'salary_advance_status':
-        return 'from-purple-500/20 to-purple-500/5'
+        return 'from-purple-500/20 to-brand-blue/5'
       case 'project_assignment':
-        return 'from-indigo-500/20 to-indigo-500/5'
+        return 'from-primary-400/20 to-primary-400/5'
       default:
         return 'from-slate-500/20 to-slate-500/5'
     }
@@ -188,11 +188,11 @@ export default function Navbar() {
 
   const getNotificationBorder = (type) => {
     switch(type) {
-      case 'leave_request': return 'border-l-blue-500'
+      case 'leave_request': return 'border-l-primary'
       case 'leave_status': return 'border-l-emerald-500'
       case 'salary_advance': return 'border-l-amber-500'
       case 'salary_advance_status': return 'border-l-purple-500'
-      case 'project_assignment': return 'border-l-indigo-500'
+      case 'project_assignment': return 'border-l-primary-400'
       default: return 'border-l-slate-500'
     }
   }
@@ -310,7 +310,7 @@ export default function Navbar() {
                 {today}
               </span>
               <h1 className="text-lg font-light text-slate-900 dark:text-white/90 tracking-tight">
-                Welcome back, <span className="font-medium bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">{user?.first_name}</span>
+                Welcome back, <span className="font-medium bg-gradient-to-r from-primary to-brand-blue bg-clip-text text-transparent">{user?.first_name}</span>
               </h1>
             </div>
           </div>
@@ -324,7 +324,7 @@ export default function Navbar() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search..."
-                className="w-full bg-white/50 dark:bg-white/5 border border-white/50 dark:border-white/10 rounded-xl py-3 pl-12 pr-4 text-sm outline-none transition-all placeholder:text-slate-400/60 focus:ring-2 focus:ring-blue-500/30"
+                className="w-full bg-white/50 dark:bg-white/5 border border-white/50 dark:border-white/10 rounded-xl py-3 pl-12 pr-4 text-sm outline-none transition-all placeholder:text-slate-400/60 focus:ring-2 focus:ring-primary/30"
               />
             </div>
           </div>
@@ -360,7 +360,7 @@ export default function Navbar() {
                     onClick={() => setShowNotifications(!showNotifications)}
                     className="relative h-12 w-12 flex items-center justify-center rounded-xl bg-white/50 dark:bg-white/5 border border-white/50 dark:border-white/10 hover:scale-105 transition-all duration-300"
                   >
-                    <BellIcon className={`h-5 w-5 ${open ? 'text-blue-500' : 'text-slate-600 dark:text-slate-400'} transition-colors duration-300`} />
+                    <BellIcon className={`h-5 w-5 ${open ? 'text-primary' : 'text-slate-600 dark:text-slate-400'} transition-colors duration-300`} />
                     {unreadCount > 0 && (
                       <span className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center rounded-full bg-gradient-to-r from-red-500 to-pink-500 text-[10px] font-bold text-white border-2 border-white dark:border-slate-900 shadow-lg">
                         {unreadCount > 9 ? '9+' : unreadCount}
@@ -395,7 +395,7 @@ export default function Navbar() {
                           {unreadCount > 0 && (
                             <button
                               onClick={markAllAsRead}
-                              className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+                              className="text-sm font-medium text-primary dark:text-primary-400 hover:text-primary-600 dark:hover:text-primary-300 transition-colors"
                             >
                               {t('notifications.markAllAsRead')}
                             </button>
@@ -407,7 +407,7 @@ export default function Navbar() {
                       <div className="overflow-y-auto max-h-[480px]">
                         {isLoading ? (
                           <div className="p-8 text-center">
-                            <div className="inline-block animate-spin rounded-full h-8 w-8 border-2 border-slate-300 dark:border-slate-600 border-t-blue-500"></div>
+                            <div className="inline-block animate-spin rounded-full h-8 w-8 border-2 border-slate-300 dark:border-slate-600 border-t-primary"></div>
                             <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
                               {t('notifications.loading')}
                             </p>
@@ -462,7 +462,7 @@ export default function Navbar() {
             <Menu as="div" className="relative">
               <Menu.Button className="flex items-center gap-3 px-1 py-1 rounded-2xl bg-gradient-to-r from-white/80 to-white/40 dark:from-white/10 dark:to-white/5 backdrop-blur-sm border border-white/50 dark:border-white/10 hover:scale-105 transition-all duration-300">
                 <div className="relative">
-                  <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-500 p-0.5">
+                  <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-brand-blue p-0.5">
                     <div className="h-full w-full rounded-xl bg-white dark:bg-slate-900 flex items-center justify-center text-sm font-bold text-slate-900 dark:text-white">
                       {user?.first_name?.[0]?.toUpperCase()}
                     </div>
@@ -493,7 +493,7 @@ export default function Navbar() {
                   {/* User Info */}
                   <div className="p-6 border-b border-white/20 dark:border-white/10">
                     <div className="flex items-center gap-3">
-                      <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-500 to-purple-500 p-0.5">
+                      <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-primary to-brand-blue p-0.5">
                         <div className="h-full w-full rounded-xl bg-white dark:bg-slate-900 flex items-center justify-center text-lg font-bold">
                           {user?.first_name?.[0]?.toUpperCase()}
                         </div>
@@ -517,7 +517,7 @@ export default function Navbar() {
                           to="/profile"
                           className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-all duration-300 ${
                             active 
-                              ? 'bg-gradient-to-r from-blue-500/10 to-purple-500/10 text-blue-600 dark:text-blue-400' 
+                              ? 'bg-gradient-to-r from-primary/10 to-brand-blue/10 text-primary dark:text-primary-400' 
                               : 'text-slate-700 dark:text-slate-300'
                           }`}
                         >

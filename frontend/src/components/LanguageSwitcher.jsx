@@ -11,7 +11,7 @@ const languages = [
     flagAlt: 'French flag',
     dir: 'ltr'
   },
-  {
+/*   {
     code: 'en',
     name: 'English',
     flag: 'https://flagcdn.com/gb.svg',
@@ -24,7 +24,7 @@ const languages = [
     flag: 'https://flagcdn.com/sa.svg',
     flagAlt: 'Saudi Arabian flag',
     dir: 'rtl'
-  },
+  }, */
 ]
 
 export default function LanguageSwitcher() {

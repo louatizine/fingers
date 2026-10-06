@@ -11,7 +11,7 @@ export default function RecentActivityCard({ recentLeaves }) {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-semibold text-gray-900">{t('dashboard.recentActivity')}</h3>
-        <button className="text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors">
+        <button className="text-sm text-primary hover:text-primary-700 font-medium transition-colors">
           {t('common.viewAll')}
         </button>
       </div>
@@ -25,7 +25,7 @@ export default function RecentActivityCard({ recentLeaves }) {
           >
             <div className="flex justify-between items-start mb-2">
               <div>
-                <p className="font-medium text-gray-900 group-hover:text-blue-700 transition-colors">
+                <p className="font-medium text-gray-900 group-hover:text-primary-600 transition-colors">
                   {leave.leave_type}
                 </p>
                 <p className="text-xs text-gray-500 mt-0.5">

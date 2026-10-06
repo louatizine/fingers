@@ -14,6 +14,7 @@ import {
   UserCircleIcon,
   ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';
+import dynLogo from '../assets/dynlogo.jpg';
 
 // ============================================
 // Small UI Helpers
@@ -24,8 +25,8 @@ const cn = (...classes) => classes.filter(Boolean).join(' ');
 const GlassCard = ({ children, className }) => (
   <div
     className={cn(
-      'relative overflow-hidden rounded-2xl border border-black/5 bg-white/80 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.06)]',
-      'transition-all duration-300 hover:shadow-[0_10px_40px_rgba(0,0,0,0.10)]',
+      'relative overflow-hidden rounded-2xl border border-white/80 bg-white/85 backdrop-blur-xl shadow-[0_8px_30px_rgba(59,33,118,0.08)]',
+      'transition-all duration-300 hover:shadow-[0_12px_36px_rgba(59,33,118,0.13)]',
       className
     )}
   >
@@ -42,9 +43,9 @@ const SoftBadge = ({ children }) => (
 const PrimaryBtn = ({ className, ...props }) => (
   <button
     className={cn(
-      'inline-flex items-center justify-center gap-2 rounded-xl bg-[#0078d4] px-4 py-2 text-sm font-semibold text-white',
-      'shadow-[0_10px_20px_rgba(0,120,212,0.25)] transition-all duration-200',
-      'hover:bg-[#0562b2] hover:shadow-[0_12px_26px_rgba(0,120,212,0.33)] active:scale-[0.98]',
+      'inline-flex items-center justify-center gap-2 rounded-xl bg-[#3B2176] px-4 py-2 text-sm font-semibold text-white',
+      'shadow-[0_10px_20px_rgba(59,33,118,0.22)] transition-all duration-200',
+      'hover:bg-[#2F1A5E] hover:shadow-[0_12px_26px_rgba(59,33,118,0.30)] active:scale-[0.98]',
       'disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:shadow-none',
       className
     )}
@@ -55,8 +56,8 @@ const PrimaryBtn = ({ className, ...props }) => (
 const SecondaryBtn = ({ className, ...props }) => (
   <button
     className={cn(
-      'inline-flex items-center justify-center gap-2 rounded-xl border border-black/10 bg-white px-4 py-2 text-sm font-semibold text-[#323130]',
-      'transition-all hover:bg-black/[0.03] active:scale-[0.98]',
+      'inline-flex items-center justify-center gap-2 rounded-xl border border-[#E4D8F2] bg-white px-4 py-2 text-sm font-semibold text-[#323130]',
+      'transition-all hover:border-[#D0BBE8] hover:bg-[#F5F0FB] active:scale-[0.98]',
       className
     )}
     {...props}
@@ -77,7 +78,7 @@ const GhostDangerBtn = ({ className, ...props }) => (
 const Avatar = ({ initials, className, isActive = true }) => (
   <div
     className={cn(
-      'grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-[#deecf9] to-white text-[#0078d4]',
+      'grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-[#E8DDF5] to-white text-[#3B2176]',
       'text-xs font-bold ring-1 ring-black/5 relative',
       !isActive && 'opacity-60 grayscale',
       className
@@ -157,12 +158,12 @@ const ProjectCard = ({ project, userRole, users, onRemoveUser, onAssignSubmit })
       {/* Accent strip */}
       <div
         className={cn(
-          'absolute inset-y-0 w-1 bg-gradient-to-b from-[#0078d4] via-[#4aa3ff] to-[#002050]',
+          'absolute inset-y-0 w-1 bg-gradient-to-b from-[#3B2176] via-[#6A94C8] to-[#190E32]',
           isRTL ? 'right-0' : 'left-0'
         )}
       />
 
-      <div className={cn('p-6', isRTL ? 'pr-7' : 'pl-7')}>
+      <div className={cn('p-4', isRTL ? 'pr-5' : 'pl-5')}>
         {/* Header */}
         <div className={cn('flex items-start justify-between gap-4', isRTL && 'flex-row-reverse')}>
           <div className="min-w-0">
@@ -170,8 +171,8 @@ const ProjectCard = ({ project, userRole, users, onRemoveUser, onAssignSubmit })
               {project.name}
             </h3>
 
-            <div className={cn('mt-2 flex items-center gap-2 text-xs text-[#6b7280]', isRTL && 'flex-row-reverse')}>
-              <span className="inline-flex items-center gap-2 rounded-full bg-black/[0.03] px-3 py-1 ring-1 ring-black/5">
+            <div className={cn('mt-1.5 flex items-center gap-2 text-xs text-[#6b7280]', isRTL && 'flex-row-reverse')}>
+              <span className="inline-flex items-center gap-2 rounded-full bg-[#F5F0FB] px-3 py-1 text-[#3B2176] ring-1 ring-[#E4D8F2]">
                 <BriefcaseIcon className="h-4 w-4" />
                 <span>
                   {assignedUsers.length} {t('projects.members')}
@@ -184,7 +185,7 @@ const ProjectCard = ({ project, userRole, users, onRemoveUser, onAssignSubmit })
         </div>
 
         {/* Avatars - Show active users first */}
-        <div className={cn('mt-5 flex items-center justify-between', isRTL && 'flex-row-reverse')}>
+        <div className={cn('mt-4 flex items-center justify-between', isRTL && 'flex-row-reverse')}>
           <div className={cn('flex items-center', isRTL ? 'space-x-reverse -space-x-2' : '-space-x-2')}>
             {assignedUsers
               .filter(user => user.status !== 'deactivated' && user.is_active !== false)
@@ -226,7 +227,7 @@ const ProjectCard = ({ project, userRole, users, onRemoveUser, onAssignSubmit })
         </div>
 
         {/* Description */}
-        <div className="mt-5 rounded-2xl border border-black/5 bg-gradient-to-b from-white to-[#f8fafc] p-4">
+        <div className="mt-4 rounded-xl border border-[#E4D8F2] bg-gradient-to-b from-white to-[#F8F7FC] p-3">
           <div className={cn('mb-2 flex items-center justify-between', isRTL && 'flex-row-reverse')}>
             <span className="text-xs font-semibold text-[#6b7280]">
               {t('projects.description')}
@@ -235,7 +236,7 @@ const ProjectCard = ({ project, userRole, users, onRemoveUser, onAssignSubmit })
             {canExpand && (
               <button
                 onClick={() => setExpanded(!expanded)}
-                className="text-xs font-semibold text-[#0078d4] hover:underline"
+                className="text-xs font-semibold text-[#3B2176] hover:underline"
               >
                 {expanded ? t('common.seeLess') : t('common.seeMore')}
               </button>
@@ -248,7 +249,7 @@ const ProjectCard = ({ project, userRole, users, onRemoveUser, onAssignSubmit })
         </div>
 
         {/* Members list */}
-        <div className="mt-5 space-y-2">
+        <div className="mt-4 space-y-2">
           <div className="max-h-44 space-y-1 overflow-y-auto pr-1 custom-scrollbar">
             {assignedUsers.map(user => {
               const isUserActive = !(user.status === 'deactivated' || user.is_active === false);
@@ -302,13 +303,13 @@ const ProjectCard = ({ project, userRole, users, onRemoveUser, onAssignSubmit })
 
           {/* Assign - Only show active users */}
           {userRole !== 'employee' && (
-            <div className="pt-3">
+            <div className="pt-2">
               {!showAssign ? (
                 <button
                   onClick={() => setShowAssign(true)}
                   className={cn(
                     'w-full rounded-2xl border border-dashed border-black/15 bg-white px-4 py-2 text-sm font-semibold text-[#374151]',
-                    'transition-all hover:border-[#0078d4] hover:bg-[#0078d4]/[0.04] hover:text-[#0078d4]'
+                    'transition-all hover:border-[#3B2176] hover:bg-[#3B2176]/[0.04] hover:text-[#3B2176]'
                   )}
                 >
                   <span className={cn('inline-flex items-center justify-center gap-2', isRTL && 'flex-row-reverse')}>
@@ -324,7 +325,7 @@ const ProjectCard = ({ project, userRole, users, onRemoveUser, onAssignSubmit })
                       onChange={e => setAssignUserId(e.target.value)}
                       className={cn(
                         'w-full appearance-none rounded-2xl border border-black/10 bg-white px-4 py-2 text-sm text-[#111827]',
-                        'focus:border-[#0078d4] focus:outline-none focus:ring-2 focus:ring-[#0078d4]/30',
+                        'focus:border-[#3B2176] focus:outline-none focus:ring-2 focus:ring-[#3B2176]/30',
                         isRTL ? 'text-right' : 'text-left'
                       )}
                       required
@@ -359,7 +360,12 @@ const ProjectCard = ({ project, userRole, users, onRemoveUser, onAssignSubmit })
                       {assignLoading ? '...' : t('projects.form.assign')}
                     </PrimaryBtn>
 
-                    <SecondaryBtn type="button" onClick={() => setShowAssign(false)}>
+                    <SecondaryBtn
+                      type="button"
+                      onClick={() => setShowAssign(false)}
+                      aria-label={t('common.cancel')}
+                      title={t('common.cancel')}
+                    >
                       <XMarkIcon className="h-5 w-5" />
                     </SecondaryBtn>
                   </div>
@@ -406,8 +412,8 @@ const AddProjectForm = ({ onAdd, users, onCancel }) => {
   const employees = users.filter(u => u.role === 'employee');
 
   return (
-    <GlassCard className="mb-8">
-      <div className="relative overflow-hidden rounded-t-2xl border-b border-black/5 bg-gradient-to-r from-[#002050] via-[#003b8e] to-[#0078d4] px-6 py-4">
+    <GlassCard className="mb-5">
+      <div className="relative overflow-hidden rounded-t-2xl border-b border-black/5 bg-gradient-to-r from-[#190E32] via-[#241448] to-[#3B2176] px-5 py-3.5">
         <div className={cn('flex items-center justify-between', isRTL && 'flex-row-reverse')}>
           <h2 className={cn('text-lg font-semibold text-white', isRTL && 'flex-row-reverse')}>
             <span className={cn('inline-flex items-center gap-2', isRTL && 'flex-row-reverse')}>
@@ -417,19 +423,22 @@ const AddProjectForm = ({ onAdd, users, onCancel }) => {
           </h2>
 
           <button
+            type="button"
             onClick={onCancel}
-            className="rounded-xl p-2 text-white/80 transition-all hover:bg-white/10 hover:text-white"
+            aria-label={t('common.cancel')}
+            title={t('common.cancel')}
+            className="relative z-10 rounded-xl p-2 text-white/80 transition-all hover:bg-white/10 hover:text-white"
           >
             <XMarkIcon className="h-5 w-5" />
           </button>
         </div>
 
-        <div className="absolute -bottom-10 -right-10 h-44 w-44 rounded-full bg-white/10 blur-2xl" />
+        <div className="pointer-events-none absolute -bottom-10 -right-10 h-44 w-44 rounded-full bg-white/10 blur-2xl" />
       </div>
 
-      <form onSubmit={submit} className="space-y-6 p-6">
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <div className="space-y-4">
+      <form onSubmit={submit} className="space-y-5 p-5">
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+          <div className="space-y-3">
             <div>
               <label className="mb-1.5 block text-xs font-semibold text-[#374151]">
                 {t('projects.form.projectName')} *
@@ -438,7 +447,7 @@ const AddProjectForm = ({ onAdd, users, onCancel }) => {
                 type="text"
                 value={name}
                 onChange={e => setName(e.target.value)}
-                className="w-full rounded-2xl border border-black/10 bg-white px-4 py-2 text-sm text-[#111827] focus:border-[#0078d4] focus:outline-none focus:ring-2 focus:ring-[#0078d4]/30"
+                className="w-full rounded-2xl border border-black/10 bg-white px-4 py-2 text-sm text-[#111827] focus:border-[#3B2176] focus:outline-none focus:ring-2 focus:ring-[#3B2176]/30"
                 placeholder={t('projects.form.projectNamePlaceholder')}
                 required
               />
@@ -451,8 +460,8 @@ const AddProjectForm = ({ onAdd, users, onCancel }) => {
               <textarea
                 value={description}
                 onChange={e => setDescription(e.target.value)}
-                rows="5"
-                className="w-full resize-none rounded-2xl border border-black/10 bg-white px-4 py-2 text-sm text-[#111827] focus:border-[#0078d4] focus:outline-none focus:ring-2 focus:ring-[#0078d4]/30"
+                rows="4"
+                className="w-full resize-none rounded-2xl border border-black/10 bg-white px-4 py-2 text-sm text-[#111827] focus:border-[#3B2176] focus:outline-none focus:ring-2 focus:ring-[#3B2176]/30"
                 placeholder={t('projects.form.projectDescriptionPlaceholder')}
               />
             </div>
@@ -468,7 +477,7 @@ const AddProjectForm = ({ onAdd, users, onCancel }) => {
                 multiple
                 value={assignedUsers}
                 onChange={e => setAssignedUsers([...e.target.selectedOptions].map(o => o.value))}
-                className="h-[240px] w-full rounded-2xl border border-black/10 bg-white px-3 py-2 text-sm text-[#111827] focus:border-[#0078d4] focus:outline-none focus:ring-2 focus:ring-[#0078d4]/30"
+                className="h-[210px] w-full rounded-2xl border border-black/10 bg-white px-3 py-2 text-sm text-[#111827] focus:border-[#3B2176] focus:outline-none focus:ring-2 focus:ring-[#3B2176]/30"
               >
                 {employees.map(u => (
                   <option 
@@ -485,7 +494,7 @@ const AddProjectForm = ({ onAdd, users, onCancel }) => {
                 ))}
               </select>
 
-              <div className="absolute bottom-3 right-3 rounded-full bg-[#0078d4] px-3 py-1 text-xs font-semibold text-white shadow-md">
+              <div className="absolute bottom-3 right-3 rounded-full bg-[#3B2176] px-3 py-1 text-xs font-semibold text-white shadow-md">
                 {assignedUsers.length} {t('projects.form.selected')}
               </div>
             </div>
@@ -619,37 +628,52 @@ const Projects = () => {
     return (
       <div className="min-h-screen bg-gradient-to-b from-white to-[#f3f4f6]">
         <div className="mx-auto flex min-h-screen max-w-6xl flex-col items-center justify-center px-6">
-          <div className="h-12 w-12 animate-spin rounded-full border-4 border-[#0078d4] border-t-transparent" />
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-[#3B2176] border-t-transparent" />
           <p className="mt-4 text-sm font-medium text-[#6b7280]">{t('common.loading')}</p>
         </div>
       </div>
     );
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_right,_rgba(74,106,173,0.12),_transparent_32%),linear-gradient(135deg,_#f8f7fc_0%,_#f4f6fb_52%,_#f9fafb_100%)] px-3 py-4 md:px-5 md:py-5">
+      <div className="mx-auto max-w-[1600px] space-y-5 animate-in fade-in duration-700">
       {/* Page Header */}
-      <GlassCard className="p-6">
-        <div className={cn('flex flex-col justify-between gap-4 md:flex-row md:items-center', isRTL && 'md:flex-row-reverse')}>
-          <div>
-            <h1 className="text-2xl font-bold text-[#111827]">
-              {utilisateur.role === 'employee' ? t('projects.myProjects') : t('projects.title')}
-            </h1>
-            <p className="mt-1 text-sm text-[#6b7280]">
-              {utilisateur.role === 'employee' ? t('projects.subtitleEmployee') : t('projects.subtitle')}
-            </p>
+      <div className="relative overflow-hidden rounded-[1.5rem] bg-gradient-to-br from-primary-900 via-primary-700 to-brand-blue px-5 py-5 text-white shadow-xl shadow-primary-900/15 md:px-7 md:py-6">
+        <div className="absolute -right-16 -top-20 h-64 w-64 rounded-full border border-white/10" />
+        <div className="absolute right-16 -bottom-28 h-56 w-56 rounded-full border border-white/10" />
+        <div className={cn('relative flex flex-col justify-between gap-4 md:flex-row md:items-center', isRTL && 'md:flex-row-reverse')}>
+          <div className={cn('flex items-start gap-4', isRTL && 'flex-row-reverse')}>
+  {/*           <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white p-1.5 shadow-lg shadow-black/15">
+              <img src={dynLogo} alt="Dynamix Services" className="h-full w-full object-contain" />
+            </div> */}
+            <div>
+              <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.2em] text-primary-100">
+                {t('projects.status.active')}
+              </span>
+              <h1 className="text-2xl font-black tracking-tight md:text-3xl">
+                {utilisateur.role === 'employee' ? t('projects.myProjects') : t('projects.title')}
+              </h1>
+              <p className="mt-1 text-sm text-white/70">
+                {utilisateur.role === 'employee' ? t('projects.subtitleEmployee') : t('projects.subtitle')}
+              </p>
+            </div>
           </div>
 
           {utilisateur.role !== 'employee' && (
             <PrimaryBtn
+              type="button"
               onClick={() => setAfficherFormulaire(!afficherFormulaire)}
-              className={cn(isRTL && 'flex-row-reverse')}
+              className={cn(
+                '!rounded-2xl !border-2 !border-white/80 !bg-white !px-5 !py-3 !font-black !text-primary !shadow-xl !shadow-black/20 !ring-4 !ring-white/10 hover:-translate-y-0.5 hover:!bg-primary-50 hover:!text-primary',
+                isRTL && 'flex-row-reverse'
+              )}
             >
               {afficherFormulaire ? <XMarkIcon className="h-5 w-5" /> : <PlusIcon className="h-5 w-5" />}
               {afficherFormulaire ? t('projects.hideForm') : t('projects.newProject')}
             </PrimaryBtn>
           )}
         </div>
-      </GlassCard>
+      </div>
 
       {/* Create Form */}
       {afficherFormulaire && (
@@ -668,7 +692,7 @@ const Projects = () => {
           <p className="mt-1 text-sm text-[#6b7280]">{t('projects.emptyState.noProjectsSubtitle')}</p>
         </GlassCard>
       ) : (
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+        <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
           {projets.map(project => (
             <ProjectCard
               key={project._id}
@@ -681,6 +705,7 @@ const Projects = () => {
           ))}
         </div>
       )}
+      </div>
     </div>
   );
 };

@@ -15,7 +15,7 @@ export default function NotFound() {
         <div className="mt-6">
           <Link
             to="/dashboard"
-            className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-sm text-white bg-primary hover:bg-primary-hover transition-colors"
+            className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-sm text-white bg-primary hover:bg-primary-600 transition-colors"
           >
             {t('notFound.goBackDashboard')}
           </Link>

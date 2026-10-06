@@ -68,7 +68,7 @@ function DailySummary() {
             value={employeeId}
             onChange={(e) => setEmployeeId(e.target.value)}
             placeholder={t('attendance.enterEmployeeId')}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
           />
         </div>
 
@@ -80,7 +80,7 @@ function DailySummary() {
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
           />
         </div>
 
@@ -88,7 +88,7 @@ function DailySummary() {
           <button
             onClick={fetchDailySummary}
             disabled={loading}
-            className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+            className="w-full px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-600 disabled:opacity-50"
           >
             {loading ? 'Loading...' : 'Get Summary'}
           </button>
@@ -105,9 +105,9 @@ function DailySummary() {
       {/* Summary Display */}
       {summary && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-blue-50 rounded-lg p-4">
-            <div className="text-sm text-blue-600 font-medium mb-1">{t('attendance.checkIn')}</div>
-            <div className="text-2xl font-bold text-blue-900">
+          <div className="bg-primary-50 rounded-lg p-4">
+            <div className="text-sm text-primary font-medium mb-1">{t('attendance.checkIn')}</div>
+            <div className="text-2xl font-bold text-primary-800">
               {formatTime(summary.check_in)}
             </div>
           </div>

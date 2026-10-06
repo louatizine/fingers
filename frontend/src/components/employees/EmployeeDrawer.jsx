@@ -103,7 +103,7 @@ const EmployeeDrawer = ({
                     </span>
                     <span className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-full ${
                       employee.has_web_account
-                        ? 'bg-blue-50 text-blue-700 border border-blue-100'
+                        ? 'bg-primary-50 text-primary-600 border border-primary-100'
                         : 'bg-amber-50 text-amber-700 border border-amber-100'
                     }`}>
                       {employee.has_web_account
@@ -185,7 +185,7 @@ const EmployeeDrawer = ({
                   <button
                     type="button"
                     onClick={() => onCreateAccount(employee)}
-                    className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-8 py-3 rounded-item text-xs font-black uppercase tracking-widest border-2 border-indigo-200 text-indigo-700 hover:bg-indigo-600 hover:text-white transition-all"
+                    className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-8 py-3 rounded-item text-xs font-black uppercase tracking-widest border-2 border-primary-200 text-primary-600 hover:bg-primary hover:text-white transition-all"
                   >
                     <KeyIcon className="h-4 w-4 stroke-[2.5px]" />
                     {t('employees.createAccounts.action')}

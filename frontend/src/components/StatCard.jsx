@@ -1,11 +1,11 @@
 import React from 'react'
 
 const colorMap = {
-  blue: 'bg-blue-50 text-blue-700 ring-blue-200',
-  green: 'bg-green-50 text-green-700 ring-green-200',
-  yellow: 'bg-yellow-50 text-yellow-700 ring-yellow-200',
-  purple: 'bg-purple-50 text-purple-700 ring-purple-200',
-  red: 'bg-red-50 text-red-700 ring-red-200'
+  blue: 'bg-[#E7EEF8] text-brand-blue ring-[#C5D4EC]',
+  green: 'bg-[#E7F6EA] text-brand-green ring-[#B7E4BD]',
+  yellow: 'bg-[#FDF6D4] text-[#8A6800] ring-[#F6E48A]',
+  purple: 'bg-primary-50 text-primary ring-primary-200',
+  red: 'bg-[#FDE8EB] text-brand-red ring-[#F5C2C8]'
 }
 
 export default function StatCard({ title, value, subtitle, icon: Icon, color = 'blue' }) {

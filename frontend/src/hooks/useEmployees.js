@@ -349,10 +349,10 @@ export const useEmployees = () => {
 // Helper functions
 export const getEmploymentTypeBadge = (type) => {
   const types = {
-    full_time: { label: 'Full Time', color: 'bg-green-100 text-green-800' },
-    part_time: { label: 'Part Time', color: 'bg-blue-100 text-blue-800' },
-    contract: { label: 'Contract', color: 'bg-purple-100 text-purple-800' },
-    intern: { label: 'Intern', color: 'bg-yellow-100 text-yellow-800' }
+    full_time: { label: 'Full Time', color: 'bg-[#E7F6EA] text-brand-green' },
+    part_time: { label: 'Part Time', color: 'bg-[#E7EEF8] text-brand-blue' },
+    contract: { label: 'Contract', color: 'bg-primary-100 text-primary' },
+    intern: { label: 'Intern', color: 'bg-[#FDF6D4] text-[#8A6800]' }
   };
   return types[type] || { label: 'Full Time', color: 'bg-green-100 text-green-800' };
 };
@@ -363,13 +363,13 @@ export const getInitials = (firstName, lastName) => {
 
 export const getDepartmentColor = (department) => {
   const colors = {
-    'Engineering': 'bg-blue-500',
-    'Sales': 'bg-green-500',
-    'Marketing': 'bg-purple-500',
-    'Human Resource': 'bg-pink-500',
-    'Finance': 'bg-yellow-500',
-    'Operations': 'bg-indigo-500',
-    'Management': 'bg-red-500'
+    'Engineering': 'bg-brand-blue',
+    'Sales': 'bg-brand-green',
+    'Marketing': 'bg-primary',
+    'Human Resource': 'bg-primary-400',
+    'Finance': 'bg-brand-yellow',
+    'Operations': 'bg-[#6A94C8]',
+    'Management': 'bg-brand-red'
   };
   return colors[department] || 'bg-gray-500';
 };

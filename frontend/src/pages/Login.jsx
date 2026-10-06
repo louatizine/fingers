@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useTranslation } from 'react-i18next'
+import dynLogo from '../assets/dynlogo.jpg'
 import { 
   UserIcon,
   KeyIcon,
@@ -52,29 +53,23 @@ export default function Login() {
   }, [])
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-slate-100 p-4 font-sans">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-indigo-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse delay-1000" />
-      </div>
+    <div className="min-h-screen flex items-center justify-center bg-[#F7F5FB] p-4 font-sans">
 
       <div className="w-full max-w-md relative z-10">
         {/* Premium Header */}
         <div className="text-center mb-10 transform transition-all duration-700 hover:scale-105">
           <div className="inline-flex flex-col items-center">
-            {/* Logo Container with Glow Effect */}
-            <div className="relative mb-4">
-              <div className="absolute -inset-4 bg-gradient-to-r from-blue-500/20 to-indigo-600/20 blur-xl rounded-full animate-pulse" />
-              <h1 className="relative text-5xl font-black tracking-tight bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 bg-clip-text text-transparent">
-                HR DYNAMIX
-              </h1>
+            {/* Company lockup */}
+            <div className="relative mb-4 rounded-2xl bg-white p-3 shadow-lg shadow-primary/10">
+              <img
+                src={dynLogo}
+                alt="Dynamix Services"
+                className="h-auto w-[min(82vw,320px)] rounded-xl object-contain"
+              />
             </div>
-            {/* Add line under logo */}
-            <div className="h-1 w-20 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full mb-2" />
             {/* Tagline */}
             <div className="flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-slate-200 shadow-sm mt-4">
-              <ShieldCheckIcon className="h-4 w-4 text-emerald-500" />
+              <ShieldCheckIcon className="h-4 w-4 text-primary" />
               <p className="text-xs font-semibold text-slate-600">
                 Workforce Management Platform
               </p>
@@ -83,11 +78,11 @@ export default function Login() {
         </div>
 
         {/* Glass Card */}
-        <div className={`bg-white/90 backdrop-blur-sm rounded-2xl shadow-2xl shadow-blue-500/10 border border-white/50 overflow-hidden transition-all duration-300 ${shake ? 'animate-shake' : ''}`}>
+        <div className={`bg-white/90 backdrop-blur-sm rounded-2xl shadow-2xl shadow-primary/10 border border-white/50 overflow-hidden transition-all duration-300 ${shake ? 'animate-shake' : ''}`}>
           
           {/* Card Header with Gradient */}
           <div className="relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-800" />
+            <div className="absolute inset-0 bg-primary" />
             {/* Animated background elements */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16 animate-ping" />
             
@@ -96,7 +91,7 @@ export default function Login() {
                 <h2 className="text-2xl font-bold text-white mb-2 tracking-tight">
                   {t('login.welcomeBack')}
                 </h2>
-                <p className="text-blue-100/90 font-medium">
+                <p className="text-primary-100/90 font-medium">
                   {t('login.pleaseSignIn')}
                 </p>
               </div>
@@ -130,12 +125,12 @@ export default function Login() {
                   {t('login.userId')}
                 </label>
                 <div className="relative group">
-                  <UserIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+                  <UserIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-primary transition-colors" />
                   <input
                     type="text"
                     value={userId}
                     onChange={(e) => setUserId(e.target.value)}
-                    className="w-full pl-11 pr-4 py-3.5 bg-white border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all"
+                    className="w-full pl-11 pr-4 py-3.5 bg-white border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
                     placeholder={t('login.userIdPlaceholder')}
                     required
                     disabled={loading}
@@ -156,7 +151,7 @@ export default function Login() {
                   </label>
                   <button
                     type="button"
-                    className="text-xs font-medium text-blue-600 hover:text-blue-800 transition-colors"
+                    className="text-xs font-medium text-primary hover:text-primary-700 transition-colors"
                     onClick={() => {
                       setUserId('admin@hrmanagement.com')
                       setPassword('admin123')
@@ -166,12 +161,12 @@ export default function Login() {
                   </button>
                 </div>
                 <div className="relative group">
-                  <KeyIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+                  <KeyIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-primary transition-colors" />
                   <input
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-11 pr-12 py-3.5 bg-white border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all"
+                    className="w-full pl-11 pr-12 py-3.5 bg-white border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
                     placeholder={t('login.passwordPlaceholder')}
                     required
                     disabled={loading}
@@ -194,7 +189,7 @@ export default function Login() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full relative group flex items-center justify-center gap-3 py-4 bg-gradient-to-r from-blue-600 to-indigo-700 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-indigo-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed overflow-hidden"
+                className="w-full relative group flex items-center justify-center gap-3 py-4 bg-primary text-white font-semibold rounded-xl hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed overflow-hidden"
               >
                 {/* Shimmer Effect */}
                 <div className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent" />

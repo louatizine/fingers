@@ -130,7 +130,7 @@ function FingerprintManagement() {
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <div className="p-3 bg-indigo-600 rounded-2xl shadow-lg shadow-indigo-200">
+              <div className="p-3 bg-primary rounded-2xl shadow-lg shadow-primary-200">
                 <FingerPrintIcon className="h-7 w-7 text-white" />
               </div>
               <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
@@ -174,7 +174,7 @@ function FingerprintManagement() {
               placeholder={t('fingerprint:filters.searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className={`w-full ${isRTL ? 'pr-12 pl-4' : 'pl-12 pr-4'} py-3 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400 font-medium`}
+              className={`w-full ${isRTL ? 'pr-12 pl-4' : 'pl-12 pr-4'} py-3 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-primary transition-all placeholder:text-slate-400 font-medium`}
             />
           </div>
           
@@ -185,7 +185,7 @@ function FingerprintManagement() {
               <select
                 value={itemsPerPage}
                 onChange={(e) => { setItemsPerPage(Number(e.target.value)); setCurrentPage(1); }}
-                className="bg-transparent border-none p-0 focus:ring-0 text-indigo-600 font-bold cursor-pointer"
+                className="bg-transparent border-none p-0 focus:ring-0 text-primary font-bold cursor-pointer"
               >
                 {[5, 10, 20, 50].map(val => <option key={val} value={val}>{val}</option>)}
               </select>
@@ -212,8 +212,8 @@ function FingerprintManagement() {
                     <td colSpan="5" className="py-20 text-center">
                       <div className="flex flex-col items-center">
                         <div className="relative flex items-center justify-center">
-                          <div className="absolute animate-ping h-8 w-8 rounded-full bg-indigo-400 opacity-20"></div>
-                          <div className="h-10 w-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+                          <div className="absolute animate-ping h-8 w-8 rounded-full bg-primary-300 opacity-20"></div>
+                          <div className="h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
                         </div>
                         <p className="mt-4 text-slate-500 font-medium animate-pulse">{t('fingerprint:loading')}</p>
                       </div>
@@ -242,10 +242,10 @@ function FingerprintManagement() {
                   const hasFingerprint = !!user.fingerprint_template_id;
                   
                   return (
-                  <tr key={user.employee_id} className="group hover:bg-indigo-50/30 transition-colors">
+                  <tr key={user.employee_id} className="group hover:bg-primary-50/30 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-4">
-                        <div className="relative h-11 w-11 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-indigo-600 font-bold shadow-sm group-hover:from-indigo-100 group-hover:to-indigo-200 transition-all">
+                        <div className="relative h-11 w-11 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-primary font-bold shadow-sm group-hover:from-primary-100 group-hover:to-primary-200 transition-all">
                           {fullName.charAt(0) || 'U'}
                           {hasFingerprint ? (
                             <div className="absolute -bottom-1 -right-1 h-4 w-4 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
@@ -341,7 +341,7 @@ function FingerprintManagement() {
                   onClick={() => handlePageChange(num)}
                   className={`h-9 w-9 rounded-lg text-sm font-semibold transition-all ${
                     currentPage === num
-                      ? 'bg-blue-600 text-white shadow-md'
+                      ? 'bg-primary text-white shadow-md'
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                   }`}
                 >

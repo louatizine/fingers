@@ -24,14 +24,14 @@ const EmployeeTableRow = memo(({
           type="checkbox"
           checked={isSelected}
           onChange={() => onSelect(employee._id)}
-          className="h-4 w-4 text-[#0078d4] border-slate-300 rounded focus:ring-[#0078d4] cursor-pointer"
+          className="h-4 w-4 text-[#3B2176] border-slate-300 rounded focus:ring-[#3B2176] cursor-pointer"
         />
       </td>
 
       {/* Employee Identity - The truncate Fix */}
       <td className="px-4 py-4 min-w-0 overflow-hidden">
         <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''} min-w-0`}>
-          <div className="h-10 w-10 rounded-xl bg-[#002050] text-white flex items-center justify-center flex-shrink-0 font-bold text-xs shadow-sm">
+          <div className="h-10 w-10 rounded-xl bg-[#190E32] text-white flex items-center justify-center flex-shrink-0 font-bold text-xs shadow-sm">
             {getInitials(employee.first_name, employee.last_name)}
           </div>
 
@@ -79,7 +79,7 @@ const EmployeeTableRow = memo(({
       <td className={`px-4 py-4 text-center space-x-3 ${isRTL ? 'space-x-reverse' : ''}`}>
         <button
           onClick={() => onViewDetails(employee)}
-          className="text-xs font-bold text-[#0078d4] hover:underline"
+          className="text-xs font-bold text-[#3B2176] hover:underline"
         >
           {t('common.view')}
         </button>

@@ -10,7 +10,7 @@ body {
   font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: linear-gradient(135deg, #F8F9FA 0%, #E9ECEF 50%, #F8F9FA 100%);
+  background: linear-gradient(135deg, #F7F5FB 0%, #F4F6FA 50%, #F7F5FB 100%);
   background-attachment: fixed;
   color: #212529;
   letter-spacing: -0.01em;
@@ -22,10 +22,15 @@ code {
 
 /* Modern Theme Variables */
 :root {
-  --primary: #0078D4;
-  --primary-light: #00BCF2;
-  --accent-purple: #8B5CF6;
-  --accent-pink: #EC4899;
+  --primary: #3B2176;
+  --primary-light: #4A6AAD;
+  --brand-violet: #3B2176;
+  --brand-blue: #4A6AAD;
+  --brand-green: #22B135;
+  --brand-red: #D10424;
+  --brand-yellow: #F1CA15;
+  --accent-purple: #3B2176;
+  --accent-blue: #4A6AAD;
   --glass-bg: rgba(255, 255, 255, 0.7);
   --glass-border: rgba(255, 255, 255, 0.3);
 }
@@ -124,12 +129,12 @@ code {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #0078D4;
+  background: #3B2176;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #00BCF2;
+  background: #4A6AAD;
 }
 
 /* Page Container Utility */

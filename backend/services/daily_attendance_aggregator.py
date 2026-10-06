@@ -1,11 +1,13 @@
 """
 Aggregate raw attendance events into daily worked-hours summaries.
 
-Events are paired sequentially per employee per day:
-  1st → check-in, 2nd → check-out, 3rd → check-in, 4th → check-out, …
-
-Near-duplicate scans (accidental double fingerprints) are collapsed before pairing
-so a morning double-tap does not become a fake check-out.
+Work runs 08:15–12:45, then again 14:00–17:30.
+Each punch is placed by local time. A punch up to 10 minutes late
+still stays in that column:
+  before 10:40 → check-in
+  10:40–13:32  → lunch departure
+  13:32–15:55  → afternoon return
+  15:55 on    → check-out
 """
 
 from __future__ import annotations
@@ -26,6 +28,25 @@ MIN_VALID_PAIR_MINUTES = 20
 LUNCH_BREAK_MIN_MINUTES = 120
 # Hour (local) after which the last punch is treated as end-of-day check-out
 END_OF_DAY_HOUR = 16
+# Scheduled punch times, then a 10-minute lateness margin on each column boundary
+LATE_GRACE_MINUTES = 10
+CHECK_IN_AT_MINUTES = 8 * 60 + 15
+LUNCH_OUT_AT_MINUTES = 12 * 60 + 45
+AFTERNOON_IN_AT_MINUTES = 14 * 60
+CHECK_OUT_AT_MINUTES = 17 * 60 + 30
+
+
+def _slot_end_minutes(earlier: int, later: int) -> int:
+    """Halfway to the next punch, plus the lateness margin."""
+    return (earlier + later) // 2 + LATE_GRACE_MINUTES
+
+
+CHECK_IN_UNTIL_MINUTES = _slot_end_minutes(CHECK_IN_AT_MINUTES, LUNCH_OUT_AT_MINUTES)
+LUNCH_OUT_UNTIL_MINUTES = _slot_end_minutes(LUNCH_OUT_AT_MINUTES, AFTERNOON_IN_AT_MINUTES)
+AFTERNOON_IN_UNTIL_MINUTES = _slot_end_minutes(AFTERNOON_IN_AT_MINUTES, CHECK_OUT_AT_MINUTES)
+# Fixed lunch break removed from a span that covers it: 12:45–14:00
+BREAK_START_MINUTES = 12 * 60 + 45
+BREAK_END_MINUTES = 14 * 60
 
 
 @dataclass(frozen=True)
@@ -178,6 +199,70 @@ def is_missing_lunch_return_pattern(timestamps: Sequence[datetime]) -> bool:
     return lunch_gap_minutes >= LUNCH_BREAK_MIN_MINUTES and evening_out.hour >= END_OF_DAY_HOUR
 
 
+def punch_slot(timestamp: datetime) -> str:
+    """Map one punch to its appointment column using local wall-clock time."""
+    minutes = timestamp.hour * 60 + timestamp.minute
+    if minutes < CHECK_IN_UNTIL_MINUTES:
+        return 'check_in'
+    if minutes < LUNCH_OUT_UNTIL_MINUTES:
+        return 'lunch_out'
+    if minutes < AFTERNOON_IN_UNTIL_MINUTES:
+        return 'afternoon_in'
+    return 'check_out'
+
+
+def assign_punch_slots(
+    sorted_ts: Sequence[datetime],
+) -> Tuple[Optional[datetime], Optional[datetime], Optional[datetime], Optional[datetime]]:
+    """
+    Place punches into check-in, lunch departure, afternoon return, and check-out.
+
+    Several punches in one window keep the earliest arrival or return, and the
+    latest lunch departure or check-out.
+    """
+    grouped: Dict[str, List[datetime]] = {
+        'check_in': [],
+        'lunch_out': [],
+        'afternoon_in': [],
+        'check_out': [],
+    }
+    for timestamp in sorted_ts:
+        grouped[punch_slot(timestamp)].append(timestamp)
+
+    check_in = grouped['check_in'][0] if grouped['check_in'] else None
+    lunch_out = grouped['lunch_out'][-1] if grouped['lunch_out'] else None
+    afternoon_in = grouped['afternoon_in'][0] if grouped['afternoon_in'] else None
+    check_out = grouped['check_out'][-1] if grouped['check_out'] else None
+    return check_in, lunch_out, afternoon_in, check_out
+
+
+def _minutes_between(start: Optional[datetime], end: Optional[datetime]) -> int:
+    if not start or not end or end <= start:
+        return 0
+    delta = int((end - start).total_seconds() // 60)
+    if delta < MIN_VALID_PAIR_MINUTES:
+        return 0
+    return delta
+
+
+def break_overlap_minutes(start: Optional[datetime], end: Optional[datetime]) -> int:
+    """Minutes of 12:45–14:00 that fall inside a worked interval."""
+    if not start or not end or end <= start:
+        return 0
+    start_m = start.hour * 60 + start.minute
+    end_m = end.hour * 60 + end.minute
+    overlap = min(end_m, BREAK_END_MINUTES) - max(start_m, BREAK_START_MINUTES)
+    return max(0, overlap)
+
+
+def _net_worked_minutes(start: Optional[datetime], end: Optional[datetime]) -> int:
+    """Worked minutes in an interval after removing the standard lunch break."""
+    gross = _minutes_between(start, end)
+    if gross <= 0:
+        return 0
+    return max(0, gross - break_overlap_minutes(start, end))
+
+
 def lunch_break_times(
     sorted_ts: Sequence[datetime],
 ) -> Tuple[Optional[datetime], Optional[datetime]]:
@@ -218,88 +303,41 @@ def calculate_daily_worked_minutes(
     sorted_ts, normalize_warnings = normalize_day_timestamps(raw_sorted)
     warnings.extend(normalize_warnings)
 
-    if is_missing_lunch_return_pattern(sorted_ts):
-        morning_in, lunch_out, evening_out = sorted_ts
-        total_minutes = int((evening_out - morning_in).total_seconds() // 60)
-        warnings.append(
-            f'Missing lunch return punch for {employee_id} on {date}; '
-            f'counted full-day span ({morning_in.strftime("%H:%M")} → '
-            f'{evening_out.strftime("%H:%M")})'
-        )
-        logger.info(
-            'Missing lunch return for %s on %s — full-day span %s min',
-            employee_id,
-            date,
-            total_minutes,
-        )
-        return (
-            total_minutes,
-            2,
-            0,
-            morning_in,
-            evening_out,
-            lunch_out,
-            None,
-            raw_sorted[0],
-            raw_sorted[-1],
-            warnings,
-        )
+    check_in_at, lunch_out_at, afternoon_in_at, check_out_at = assign_punch_slots(sorted_ts)
+    morning_minutes = _net_worked_minutes(check_in_at, lunch_out_at)
+    afternoon_minutes = _net_worked_minutes(afternoon_in_at, check_out_at)
 
-    if len(sorted_ts) % 2 != 0:
-        warnings.append(
-            f'Odd number of events ({len(sorted_ts)}) for {employee_id} on {date}; '
-            'awaiting check-out'
-        )
-        logger.warning(
-            'Odd attendance event count for %s on %s (%s events)',
-            employee_id,
-            date,
-            len(sorted_ts),
-        )
-
-    total_minutes = 0
-    pair_count = 0
-    last_valid_check_out: Optional[datetime] = None
-    i = 0
-    while i + 1 < len(sorted_ts):
-        check_in = sorted_ts[i]
-        check_out = sorted_ts[i + 1]
-        if check_out > check_in:
-            delta_minutes = int((check_out - check_in).total_seconds() // 60)
-            if delta_minutes < MIN_VALID_PAIR_MINUTES:
-                # Safety net: never count micro-pairs as worked time
-                warnings.append(
-                    f'Skipped micro-pair for {employee_id} on {date}: '
-                    f'{check_in.strftime("%H:%M")} → {check_out.strftime("%H:%M")} '
-                    f'({delta_minutes} min)'
-                )
-            else:
-                total_minutes += delta_minutes
-                pair_count += 1
-                last_valid_check_out = check_out
-        else:
+    if lunch_out_at and afternoon_in_at:
+        total_minutes = morning_minutes + afternoon_minutes
+        pair_count = (1 if morning_minutes else 0) + (1 if afternoon_minutes else 0)
+    elif check_in_at and check_out_at:
+        total_minutes = _net_worked_minutes(check_in_at, check_out_at)
+        pair_count = 1 if total_minutes else 0
+        removed = break_overlap_minutes(check_in_at, check_out_at)
+        if removed:
             warnings.append(
-                f'Invalid pair for {employee_id} on {date}: '
-                f'{check_in.isoformat()} → {check_out.isoformat()}'
+                f'Removed {removed} min lunch break (12:45–14:00) for {employee_id} on {date}'
             )
-            logger.warning(
-                'Invalid attendance pair for %s on %s: %s not after %s',
-                employee_id,
-                date,
-                check_out,
-                check_in,
-            )
-        i += 2
+    elif morning_minutes:
+        total_minutes = morning_minutes
+        pair_count = 1
+    elif afternoon_minutes:
+        total_minutes = afternoon_minutes
+        pair_count = 1
+    else:
+        total_minutes = 0
+        pair_count = 0
 
-    unmatched = len(sorted_ts) % 2
-    check_in_at = sorted_ts[0]
-    lunch_out_at, afternoon_in_at = lunch_break_times(sorted_ts)
-    # End of day is the last finished pair. When the employee has already
-    # returned from lunch and has not punched out again, that pair is only
-    # the lunch departure, so check-out stays empty.
-    check_out_at = last_valid_check_out
-    if afternoon_in_at is not None and check_out_at == lunch_out_at:
-        check_out_at = None
+    unmatched = 0
+    if check_in_at and not lunch_out_at and not check_out_at:
+        unmatched += 1
+    if afternoon_in_at and not check_out_at:
+        unmatched += 1
+    if check_out_at and not check_in_at and not afternoon_in_at:
+        unmatched += 1
+    if lunch_out_at and not check_in_at and not afternoon_in_at and not check_out_at:
+        unmatched += 1
+
     return (
         total_minutes,
         pair_count,

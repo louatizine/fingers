@@ -66,7 +66,7 @@ export default function CreateAccountsModal({
         <div className="relative w-full max-w-lg rounded-2xl border border-slate-200 bg-white shadow-2xl">
           <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
             <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-100 text-primary">
                 <KeyIcon className="h-5 w-5" />
               </div>
               <div>
@@ -119,7 +119,7 @@ export default function CreateAccountsModal({
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                  className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-100"
                   placeholder="••••••••"
                 />
                 {errors.password && <p className="mt-1 text-xs text-rose-600">{errors.password}</p>}
@@ -132,7 +132,7 @@ export default function CreateAccountsModal({
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                  className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-100"
                   placeholder="••••••••"
                 />
                 {errors.confirmPassword && <p className="mt-1 text-xs text-rose-600">{errors.confirmPassword}</p>}
@@ -153,7 +153,7 @@ export default function CreateAccountsModal({
               <button
                 type="submit"
                 disabled={submitting || eligible.length === 0}
-                className="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
+                className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-600 disabled:opacity-50"
               >
                 {submitting ? t('common.creating') : t('employees.createAccounts.submit')}
               </button>

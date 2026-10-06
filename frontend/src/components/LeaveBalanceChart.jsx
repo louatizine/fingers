@@ -1,17 +1,9 @@
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import { useTranslation } from 'react-i18next'
+import { CHART_COLORS } from '../config/brand'
 
 const COLOR_PALETTE = {
-  dataViz: [
-    '#0078d4', // Blue
-    '#00b7c3', // Teal
-    '#107c10', // Soft Green  
-    '#8a8886', // Gray
-    '#5c2d91', // Purple
-    '#ffb900', // Yellow
-    '#a4262c', // Red
-    '#004578'  // Dark Blue
-  ]
+  dataViz: CHART_COLORS
 }
 
 export default function LeaveBalanceChart({ leaveBalance }) {
@@ -54,7 +46,7 @@ export default function LeaveBalanceChart({ leaveBalance }) {
           </p>
         </div>
 
-        <select className="text-sm border border-[#8a8886] rounded-sm px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-[#0078d4] focus:border-[#0078d4] text-[#323130]">
+        <select className="text-sm border border-[#8a8886] rounded-sm px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-[#323130]">
           <option>{t('common.thisYear')}</option>
           <option>{t('common.previousYear')}</option>
         </select>

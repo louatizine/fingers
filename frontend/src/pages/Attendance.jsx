@@ -30,6 +30,7 @@ import {
   ExclamationTriangleIcon,
   QuestionMarkCircleIcon
 } from '@heroicons/react/24/outline';
+import dynLogo from '../assets/dynlogo.jpg';
 
 const formatDateInput = (date) => {
   const year = date.getFullYear();
@@ -167,7 +168,7 @@ function DatePresetBar({ activePreset, onSelect, t }) {
           onClick={() => onSelect(preset.id)}
           className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
             activePreset === preset.id
-              ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200'
+              ? 'bg-primary text-white shadow-md shadow-primary-200'
               : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
           }`}
         >
@@ -198,7 +199,7 @@ function EmployeeSelect({
         value={value}
         onChange={onChange}
         required={required}
-        className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500 transition-all font-medium appearance-none cursor-pointer`}
+        className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-primary transition-all font-medium appearance-none cursor-pointer`}
       >
         {allowAll && <option value="">{t('attendance:filters.allEmployees')}</option>}
         {!allowAll && <option value="">{t('attendance:filters.selectEmployee')}</option>}
@@ -831,10 +832,10 @@ const formatTimestamp = (timestamp) => {
       type="button"
       onClick={() => handleTabChange(id)}
       className={`
-        flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200
+        flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all duration-200
         ${activeTab === id
-          ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200'
-          : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
+          ? 'bg-primary text-white shadow-md shadow-primary-200'
+          : 'text-slate-500 hover:bg-primary-50 hover:text-primary'
         }
       `}
     >
@@ -872,9 +873,9 @@ const formatTimestamp = (timestamp) => {
       <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold border ${
         isCheckIn 
           ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
-          : 'bg-blue-50 text-blue-700 border-blue-200'
+          : 'bg-primary-50 text-primary-600 border-primary-200'
       }`}>
-        <div className={`h-2 w-2 rounded-full ${isCheckIn ? 'bg-emerald-500' : 'bg-blue-500'}`}></div>
+        <div className={`h-2 w-2 rounded-full ${isCheckIn ? 'bg-emerald-500' : 'bg-primary'}`}></div>
         {isCheckIn ? t('attendance:filters.checkIn') : t('attendance:filters.checkOut')}
       </div>
     );
@@ -882,16 +883,17 @@ const formatTimestamp = (timestamp) => {
 
   const StatCard = ({ icon: Icon, label, value, color = 'indigo' }) => {
     const colorClasses = {
-      indigo: { bg: 'bg-indigo-50', text: 'text-indigo-600' },
-      emerald: { bg: 'bg-emerald-50', text: 'text-emerald-600' },
-      blue: { bg: 'bg-blue-50', text: 'text-blue-600' }
+      indigo: { bg: 'bg-primary-50', text: 'text-primary' },
+      emerald: { bg: 'bg-[#E7F6EA]', text: 'text-brand-green' },
+      blue: { bg: 'bg-[#E7EEF8]', text: 'text-brand-blue' }
     };
     const colors = colorClasses[color] || colorClasses.indigo;
     
     return (
-      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-        <div className="flex items-center gap-4">
-          <div className={`h-12 w-12 rounded-xl ${colors.bg} flex items-center justify-center`}>
+      <div className="group relative overflow-hidden rounded-2xl border border-white/80 bg-white/85 p-4 shadow-lg shadow-slate-200/35 backdrop-blur transition-all hover:-translate-y-0.5 hover:shadow-xl">
+        <div className="absolute -right-5 -top-5 h-20 w-20 rounded-full bg-primary/[0.04] transition-transform group-hover:scale-125" />
+        <div className="relative flex items-center gap-4">
+          <div className={`h-11 w-11 rounded-xl ${colors.bg} flex items-center justify-center`}>
             <Icon className={`h-6 w-6 ${colors.text}`} />
           </div>
           <div>
@@ -904,37 +906,45 @@ const formatTimestamp = (timestamp) => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_right,_rgba(74,106,173,0.12),_transparent_32%),linear-gradient(135deg,_#f8f7fc_0%,_#f4f6fb_52%,_#f9fafb_100%)] px-3 py-4 md:px-5 md:py-5">
+      <div className="mx-auto max-w-[1600px] space-y-5 pb-8 animate-in fade-in duration-700">
       
       {/* --- HEADER SECTION --- */}
-      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-3 bg-indigo-600 rounded-2xl shadow-lg shadow-indigo-200">
-                <ClockIcon className="h-7 w-7 text-white" />
+      <header className="relative overflow-hidden rounded-[1.5rem] bg-gradient-to-br from-primary-900 via-primary-700 to-brand-blue px-5 py-5 text-white shadow-xl shadow-primary-900/15 md:px-7 md:py-6">
+        <div className="absolute -right-16 -top-20 h-64 w-64 rounded-full border border-white/10" />
+        <div className="absolute right-16 -bottom-28 h-56 w-56 rounded-full border border-white/10" />
+        <div className="relative flex flex-col justify-between gap-4 md:flex-row md:items-center">
+          <div className="flex items-start gap-4">
+{/*             <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white p-1.5 shadow-lg shadow-black/15">
+              <img src={dynLogo} alt="Dynamix Services" className="h-full w-full object-contain" />
+            </div> */}
+            <div>
+              <div className="mb-1.5 flex items-center gap-2">
+                <ClockIcon className="h-4 w-4 text-primary-100" />
+                <span className="text-xs font-bold uppercase tracking-[0.2em] text-primary-100">
+                  {t('attendance:tabs.logs')}
+                </span>
               </div>
-              <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
+              <h1 className="text-2xl font-black tracking-tight md:text-3xl">
                 {t('attendance:title')}
               </h1>
-            </div>
-            <p className={`text-slate-500 font-medium ${isRTL ? 'mr-1' : 'ml-1'}`}>
-              {t('attendance:subtitle')}
-            </p>
+              <p className="mt-1 text-sm text-white/70">{t('attendance:subtitle')}</p>
             {syncInfo?.last_sync ? (
-              <p className={`text-xs text-slate-400 mt-1 ${isRTL ? 'mr-1' : 'ml-1'}`}>
+              <p className="mt-1 text-xs text-white/55">
                 {t('attendance:sync.lastSync', { time: formatSyncTime(syncInfo.last_sync) })}
               </p>
             ) : syncInfo?.sync_schedule_label ? (
-              <p className={`text-xs text-slate-400 mt-1 ${isRTL ? 'mr-1' : 'ml-1'}`}>
+              <p className="mt-1 text-xs text-white/55">
                 {t('attendance:sync.scheduleHint', {
                   schedule: syncInfo.sync_schedule_label,
                 })}
               </p>
             ) : null}
           </div>
+          </div>
 
           {/* Stats */}
-          <div className="flex flex-wrap gap-4">
+          <div className="relative flex flex-wrap gap-3">
             {canSelectEmployee && (
               <button
                 onClick={triggerDeviceSync}
@@ -942,7 +952,7 @@ const formatTimestamp = (timestamp) => {
                 className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all ${
                   syncLoading 
                     ? 'bg-slate-400 text-white cursor-not-allowed' 
-                    : 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:shadow-lg hover:scale-105'
+                    : 'border border-white/20 bg-white/15 text-white backdrop-blur-sm hover:bg-white/25 hover:shadow-lg'
                 }`}
               >
                 {syncLoading ? (
@@ -958,30 +968,14 @@ const formatTimestamp = (timestamp) => {
                 )}
               </button>
             )}
-            <StatCard 
-              icon={ClockIcon} 
-              label="attendance:stats.today" 
-              value={stats.today} 
-              color="emerald" 
-            />
-            <StatCard 
-              icon={ChartBarIcon} 
-              label="attendance:stats.totalHours" 
-              value={stats.totalHours} 
-              color="blue" 
-            />
-            <StatCard 
-              icon={DocumentArrowDownIcon} 
-              label="attendance:stats.total" 
-              value={stats.total} 
-              color="indigo" 
-            />
+     
           </div>
-        </header>
+        </div>
+      </header>
 
         {/* Sync Status Alert */}
         {syncStatus && (
-          <div className={`mb-6 p-4 rounded-xl border-2 flex items-center gap-3 ${
+          <div className={`mb-4 p-3 rounded-xl border flex items-center gap-3 ${
             syncStatus.type === 'success' 
               ? 'bg-emerald-50 border-emerald-200 text-emerald-800' 
               : syncStatus.type === 'error'
@@ -1007,7 +1001,7 @@ const formatTimestamp = (timestamp) => {
 
         {/* Soft notice only when today's punch is missing AND auto-sync failed recently */}
         {stats.todayMissing && syncInfo?.last_success === false && (
-          <div className="mb-6 p-4 rounded-xl flex items-start gap-3 bg-amber-50 text-amber-900 border border-amber-200">
+          <div className="mb-4 p-3 rounded-xl flex items-start gap-3 bg-amber-50 text-amber-900 border border-amber-200">
             <InformationCircleIcon className="h-5 w-5 flex-shrink-0 mt-0.5" />
             <div className="space-y-1">
               <p className="font-medium">
@@ -1029,7 +1023,7 @@ const formatTimestamp = (timestamp) => {
         )}
 
         {/* --- TABS NAVIGATION --- */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-3">
+        <div className="rounded-2xl border border-white/80 bg-white/85 p-2 shadow-lg shadow-slate-200/30 backdrop-blur-xl">
           <nav className="flex flex-wrap gap-2">
             <TabButton 
               id="daily" 
@@ -1052,13 +1046,13 @@ const formatTimestamp = (timestamp) => {
         {/* --- TAB CONTENT --- */}
         {activeTab === 'daily' ? (
           /* --- DAILY VIEW TAB --- */
-          <div className="space-y-6">
+          <div className="space-y-5">
             {/* Date picker toolbar */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-              <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-6">
+            <div className="rounded-2xl border border-white/80 bg-white/85 p-4 shadow-lg shadow-slate-200/30 backdrop-blur-xl">
+              <div className="flex flex-col gap-4 mb-4 lg:flex-row lg:items-start lg:justify-between">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <CalendarIcon className="h-5 w-5 text-indigo-500" />
+                    <CalendarIcon className="h-5 w-5 text-primary-400" />
                     <h2 className="text-lg font-bold text-slate-800">{t('attendance:daily.title')}</h2>
                   </div>
                   <p className="text-sm text-slate-500">{t('attendance:daily.subtitle')}</p>
@@ -1082,7 +1076,7 @@ const formatTimestamp = (timestamp) => {
                     <button
                       type="button"
                       onClick={() => handleDailyDateChange(getLocalToday())}
-                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-all"
+                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold bg-primary-50 text-primary-600 hover:bg-primary-100 transition-all"
                     >
                       {t('attendance:daily.goToToday')}
                     </button>
@@ -1090,12 +1084,12 @@ const formatTimestamp = (timestamp) => {
                 </div>
               </div>
 
-              <div className="flex flex-col xl:flex-row xl:items-end gap-4 mb-6">
+              <div className="flex flex-col gap-4 mb-4 xl:flex-row xl:items-end">
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
                     onClick={() => handleDailyDateChange(shiftDate(dailyDate, -1))}
-                    className="p-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition-all"
+                    className="rounded-xl bg-slate-100 p-2.5 text-slate-600 transition-all hover:bg-slate-200"
                     aria-label={t('attendance:daily.previousDay')}
                   >
                     <ChevronLeftIcon className="h-5 w-5" />
@@ -1106,32 +1100,20 @@ const formatTimestamp = (timestamp) => {
                       type="date"
                       value={dailyDate}
                       onChange={(e) => handleDailyDateChange(e.target.value)}
-                      className={`${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 transition-all font-medium w-full`}
+                      className={`${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} w-full rounded-xl border border-brand-border bg-white py-2.5 text-sm font-medium transition-all focus:border-primary-400 focus:ring-2 focus:ring-primary-100`}
                     />
                   </div>
                   <button
                     type="button"
                     onClick={() => handleDailyDateChange(shiftDate(dailyDate, 1))}
                     disabled={isViewingToday}
-                    className="p-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                    className="rounded-xl bg-slate-100 p-2.5 text-slate-600 transition-all hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-40"
                     aria-label={t('attendance:daily.nextDay')}
                   >
                     <ChevronRightIcon className="h-5 w-5" />
                   </button>
                 </div>
 
-                <div className="flex-1">
-                  <div className="relative">
-                    <MagnifyingGlassIcon className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 pointer-events-none`} />
-                    <input
-                      type="text"
-                      value={dailySearch}
-                      onChange={(e) => setDailySearch(e.target.value)}
-                      placeholder={t('attendance:daily.searchPlaceholder')}
-                      className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 transition-all font-medium placeholder:text-slate-400`}
-                    />
-                  </div>
-                </div>
               </div>
 
               <p className="text-sm font-semibold text-slate-700 mb-4">
@@ -1150,7 +1132,7 @@ const formatTimestamp = (timestamp) => {
                     onClick={() => setDailyStatusFilter(chip.id)}
                     className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                       dailyStatusFilter === chip.id
-                        ? 'bg-indigo-600 text-white shadow-sm'
+                        ? 'bg-primary text-white shadow-sm'
                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                     }`}
                   >
@@ -1161,26 +1143,26 @@ const formatTimestamp = (timestamp) => {
             </div>
 
             {dailyTotals && !dailyLoading && (
-              <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <StatCard icon={UsersIcon} label="attendance:daily.present" value={dailyTotals.present ?? 0} color="emerald" />
                 <StatCard icon={XCircleIcon} label="attendance:daily.absent" value={dailyTotals.absent ?? 0} color="blue" />
-                <StatCard icon={CheckCircleIcon} label="attendance:daily.complete" value={dailyTotals.complete ?? 0} color="indigo" />
-                <StatCard icon={ExclamationTriangleIcon} label="attendance:daily.partial" value={dailyTotals.partial ?? 0} color="blue" />
-                <StatCard icon={ClockIcon} label="attendance:daily.totalHours" value={dailyTotals.total_worked_hours ?? 0} color="emerald" />
-              </div>
+{/*                 <StatCard icon={CheckCircleIcon} label="attendance:daily.complete" value={dailyTotals.complete ?? 0} color="indigo" />
+ */}{/*                 <StatCard icon={ExclamationTriangleIcon} label="attendance:daily.partial" value={dailyTotals.partial ?? 0} color="blue" />
+ */}{/*                 <StatCard icon={ClockIcon} label="attendance:daily.totalHours" value={dailyTotals.total_worked_hours ?? 0} color="emerald" />
+ */}              </div>
             )}
 
             {/* Table */}
             {dailyLoading ? (
               <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8">
                 <div className="flex flex-col items-center justify-center">
-                  <div className="h-10 w-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+                  <div className="h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
                   <p className="mt-4 text-slate-500 font-medium animate-pulse">{t('attendance:daily.loading')}</p>
                 </div>
               </div>
             ) : dailyAttendance ? (
-              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                <div className="px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <div className="overflow-hidden rounded-2xl border border-white/80 bg-white shadow-lg shadow-slate-200/25">
+                <div className="flex flex-col gap-2 border-b border-slate-100 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
                   <h3 className="text-lg font-semibold text-slate-900">
                     {formatLocalizedShortDate(dailyAttendance.date, displayLocale)} ({getWeekdayLabel(dailyAttendance.date, dailyAttendance.day_of_week)})
                   </h3>
@@ -1195,13 +1177,13 @@ const formatTimestamp = (timestamp) => {
                   <table className={`w-full border-collapse ${isRTL ? 'text-right' : 'text-left'}`}>
                     <thead>
                       <tr className="bg-slate-50/80 border-b border-slate-100">
-                        <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('attendance:table.employee')}</th>
-                        <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('attendance:table.checkIn')}</th>
-                        <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('attendance:table.lunchOut')}</th>
-                        <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('attendance:table.afternoonIn')}</th>
-                        <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('attendance:table.checkOut')}</th>
-                        <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('attendance:table.workedHours')}</th>
-                        <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('attendance:table.status')}</th>
+                        <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-400">{t('attendance:table.employee')}</th>
+                        <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-400">{t('attendance:table.checkIn')}</th>
+                        <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-400">{t('attendance:table.lunchOut')}</th>
+                        <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-400">{t('attendance:table.afternoonIn')}</th>
+                        <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-400">{t('attendance:table.checkOut')}</th>
+                        <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-400">{t('attendance:table.workedHours')}</th>
+                        <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-400">{t('attendance:table.status')}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
@@ -1221,38 +1203,38 @@ const formatTimestamp = (timestamp) => {
                                 row.has_records ? 'hover:bg-emerald-50/30' : 'hover:bg-slate-50/50 opacity-80'
                               }`}
                             >
-                              <td className="px-6 py-4">
+                              <td className="px-4 py-3">
                                 <div>
                                   <p className="text-sm font-semibold text-slate-700">{row.first_name} {row.last_name}</p>
                                   <p className="text-xs text-slate-400">{row.employee_id}{row.department ? ` · ${row.department}` : ''}</p>
                                 </div>
                               </td>
-                              <td className="px-6 py-4" dir="ltr">
+                              <td className="px-4 py-3" dir="ltr">
                                 <div className="text-sm font-medium text-slate-800">
                                   {formatAttendanceTime(row.check_in)}
                                 </div>
                               </td>
-                              <td className="px-6 py-4" dir="ltr">
+                              <td className="px-4 py-3" dir="ltr">
                                 <div className="text-sm font-medium text-slate-800">
                                   {formatAttendanceTime(row.lunch_out)}
                                 </div>
                               </td>
-                              <td className="px-6 py-4" dir="ltr">
+                              <td className="px-4 py-3" dir="ltr">
                                 <div className="text-sm font-medium text-slate-800">
                                   {formatAttendanceTime(row.afternoon_in)}
                                 </div>
                               </td>
-                              <td className="px-6 py-4" dir="ltr">
+                              <td className="px-4 py-3" dir="ltr">
                                 <div className="text-sm font-medium text-slate-800">
                                   {formatAttendanceTime(row.check_out)}
                                 </div>
                               </td>
-                              <td className="px-6 py-4">
+                              <td className="px-4 py-3">
                                 <span className={`text-sm font-bold ${(row.total_worked_minutes || 0) > 0 ? 'text-emerald-600' : 'text-slate-400'}`}>
                                   {row.worked_time_display || '00:00'}
                                 </span>
                               </td>
-                              <td className="px-6 py-4">
+                              <td className="px-4 py-3">
                                 <DailyStatusBadge status={status} />
                               </td>
                             </tr>
@@ -1274,7 +1256,7 @@ const formatTimestamp = (timestamp) => {
                   <button
                     type="button"
                     onClick={() => loadDailyView(dailyDate)}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-bold hover:bg-indigo-700 transition-all"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white text-sm font-bold hover:bg-primary-600 transition-all"
                   >
                     <ArrowPathIcon className="h-4 w-4" />
                     {t('attendance:retry')}
@@ -1285,9 +1267,9 @@ const formatTimestamp = (timestamp) => {
           </div>
         ) : activeTab === 'summary' ? (
           /* --- ATTENDANCE SUMMARY TAB --- */
-          <div className="space-y-6">
+          <div className="space-y-5">
             {/* --- SUMMARY FILTERS TOOLBAR --- */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <div className="rounded-2xl border border-white/80 bg-white/85 p-4 shadow-lg shadow-slate-200/30 backdrop-blur-xl">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-2">
                   <ChartBarIcon className="h-5 w-5 text-slate-400" />
@@ -1362,7 +1344,7 @@ const formatTimestamp = (timestamp) => {
                       name="startDate"
                       value={summaryFilters.startDate}
                       onChange={handleSummaryFilterChange}
-                      className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400 font-medium`}
+                      className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-primary transition-all placeholder:text-slate-400 font-medium`}
                     />
                   </div>
                 </div>
@@ -1378,7 +1360,7 @@ const formatTimestamp = (timestamp) => {
                       name="endDate"
                       value={summaryFilters.endDate}
                       onChange={handleSummaryFilterChange}
-                      className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400 font-medium`}
+                      className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-primary transition-all placeholder:text-slate-400 font-medium`}
                     />
                   </div>
                 </div>
@@ -1388,7 +1370,7 @@ const formatTimestamp = (timestamp) => {
                 <button
                   onClick={fetchAttendanceSummary}
                   disabled={!summaryFilters.employeeId || summaryLoading}
-                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white text-sm font-bold rounded-xl hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-indigo-200/50 hover:shadow-indigo-200/70 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-white text-sm font-bold rounded-xl hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary-200/50 hover:shadow-primary-200/70 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:ring-offset-2"
                 >
                   {summaryLoading ? (
                     <>
@@ -1410,8 +1392,8 @@ const formatTimestamp = (timestamp) => {
               <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8">
                 <div className="flex flex-col items-center justify-center">
                   <div className="relative flex items-center justify-center">
-                    <div className="absolute animate-ping h-8 w-8 rounded-full bg-indigo-400 opacity-20"></div>
-                    <div className="h-10 w-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+                    <div className="absolute animate-ping h-8 w-8 rounded-full bg-primary-300 opacity-20"></div>
+                    <div className="h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
                   </div>
                   <p className="mt-4 text-slate-500 font-medium animate-pulse">{t('attendance:summary.loading')}</p>
                 </div>
@@ -1435,13 +1417,13 @@ const formatTimestamp = (timestamp) => {
                     <div className="flex flex-wrap gap-6">
                       <div className="text-center">
                         <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t('attendance:summary.totalDays')}</p>
-                        <p className="text-2xl font-black text-indigo-600">
+                        <p className="text-2xl font-black text-primary">
                           {attendanceSummary.totals?.total_days || attendanceSummary.daily_summaries.length}
                         </p>
                       </div>
                       <div className="text-center">
                         <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t('attendance:summary.daysWithRecords')}</p>
-                        <p className="text-2xl font-black text-blue-600">
+                        <p className="text-2xl font-black text-primary">
                           {attendanceSummary.totals?.days_with_records || attendanceSummary.daily_summaries.filter(d => d.total_records > 0).length}
                         </p>
                       </div>
@@ -1481,7 +1463,7 @@ const formatTimestamp = (timestamp) => {
                           value={summarySearch}
                           onChange={(e) => setSummarySearch(e.target.value)}
                           placeholder={t('attendance:summary.searchPlaceholder')}
-                          className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2.5 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 transition-all`}
+                          className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2.5 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-primary-400 transition-all`}
                         />
                       </div>
                     </div>
@@ -1498,7 +1480,7 @@ const formatTimestamp = (timestamp) => {
                           onClick={() => setSummaryStatusFilter(chip.id)}
                           className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                             summaryStatusFilter === chip.id
-                              ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200'
+                              ? 'bg-primary text-white shadow-md shadow-primary-200'
                               : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                           }`}
                         >
@@ -1600,8 +1582,8 @@ const formatTimestamp = (timestamp) => {
             )}
           </div>
         ) : activeTab === 'userStats' ? (
-          <div className="space-y-6">
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+          <div className="space-y-5">
+            <div className="rounded-2xl border border-white/80 bg-white/85 p-4 shadow-lg shadow-slate-200/30 backdrop-blur-xl">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
                 <div>
                   <div className="flex items-center gap-2">
@@ -1614,7 +1596,7 @@ const formatTimestamp = (timestamp) => {
                   type="button"
                   onClick={fetchUserStats}
                   disabled={statsLoading}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 font-bold disabled:opacity-50"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-xl hover:bg-primary-600 font-bold disabled:opacity-50"
                 >
                   <ArrowPathIcon className={`h-4 w-4 ${statsLoading ? 'animate-spin' : ''}`} />
                   {t('attendance:userStats.refresh')}
@@ -1644,7 +1626,7 @@ const formatTimestamp = (timestamp) => {
                       name="startDate"
                       value={filters.startDate}
                       onChange={handleFilterChange}
-                      className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 transition-all font-medium`}
+                      className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-primary-400 transition-all font-medium`}
                     />
                   </div>
                 </div>
@@ -1659,7 +1641,7 @@ const formatTimestamp = (timestamp) => {
                       name="endDate"
                       value={filters.endDate}
                       onChange={handleFilterChange}
-                      className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 transition-all font-medium`}
+                      className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-primary-400 transition-all font-medium`}
                     />
                   </div>
                 </div>
@@ -1697,14 +1679,14 @@ const formatTimestamp = (timestamp) => {
                     value={userStatsSearch}
                     onChange={(e) => setUserStatsSearch(e.target.value)}
                     placeholder={t('attendance:userStats.searchPlaceholder')}
-                    className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2.5 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 transition-all`}
+                    className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2.5 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-primary-400 transition-all`}
                   />
                 </div>
               </div>
 
             {statsLoading ? (
               <div className="p-12 text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
                 <p className="mt-4 text-slate-600">{t('attendance:userStats.loading')}</p>
               </div>
             ) : filteredUserStats.length > 0 ? (
@@ -1735,7 +1717,7 @@ const formatTimestamp = (timestamp) => {
                             </span>
                           </td>
                           <td className="px-6 py-4 text-center">
-                            <span className="inline-flex items-center px-4 py-2 rounded-xl text-sm font-bold bg-indigo-100 text-indigo-700">
+                            <span className="inline-flex items-center px-4 py-2 rounded-xl text-sm font-bold bg-primary-100 text-primary-600">
                               {stat.days_with_records}
                             </span>
                           </td>
@@ -1746,7 +1728,7 @@ const formatTimestamp = (timestamp) => {
                             </span>
                           </td>
                           <td className="px-6 py-4 text-center">
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-sm font-medium bg-blue-50 text-blue-700">
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-sm font-medium bg-primary-50 text-primary-600">
                               <XCircleIcon className="h-4 w-4" />
                               {stat.total_events}
                             </span>
@@ -1780,6 +1762,7 @@ const formatTimestamp = (timestamp) => {
             </div>
           </div>
         ) : null}
+    </div>
     </div>
   );
 }

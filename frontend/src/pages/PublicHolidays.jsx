@@ -16,6 +16,7 @@ import {
   TrashIcon,
 } from '@heroicons/react/24/outline';
 import { fetchTunisiaPublicHolidays } from '../services/holidaysApi';
+import dynLogo from '../assets/dynlogo.jpg';
 
 const MONTH_KEYS = [
   'january', 'february', 'march', 'april', 'may', 'june',
@@ -194,8 +195,8 @@ function WeekCalendar({ weekStart, dayMap, selectedItem, onSelectDay, todayKey, 
   };
 
   return (
-    <div className="rounded-2xl border border-slate-200/80 bg-white/80 p-4 shadow-sm backdrop-blur-sm md:p-6">
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-7">
+    <div className="rounded-2xl border border-brand-border bg-white/85 p-3 shadow-sm backdrop-blur-sm md:p-4">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-7">
         {days.map((cell, index) => {
           const dayInfo = dayMap[cell.key];
           const hasHoliday = Boolean(dayInfo?.items?.length);
@@ -209,7 +210,7 @@ function WeekCalendar({ weekStart, dayMap, selectedItem, onSelectDay, todayKey, 
               onClick={() => hasHoliday && onSelectDay(cell.key, dayInfo.items)}
               disabled={!hasHoliday}
               className={`
-                flex min-h-[140px] flex-col rounded-xl border p-3 transition-all
+                flex min-h-[120px] flex-col rounded-xl border p-2.5 transition-all
                 ${isRTL ? 'text-right' : 'text-left'}
                 ${hasHoliday ? 'cursor-pointer hover:scale-[1.02]' : 'cursor-default border-slate-100 bg-slate-50/50'}
                 ${isSelected ? 'border-primary-300 shadow-md' : 'border-slate-200/80'}
@@ -263,8 +264,8 @@ function CalendarPeriodFilter({
   ];
 
   return (
-    <div className={`mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
-      <div className={`flex rounded-xl border border-slate-200 bg-slate-100 p-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
+    <div className={`mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
+      <div className={`flex rounded-xl border border-brand-border bg-brand-surface p-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
         {views.map((view) => (
           <button
             key={view.id}
@@ -272,7 +273,7 @@ function CalendarPeriodFilter({
             onClick={() => onViewChange(view.id)}
             className={`rounded-lg px-4 py-2 text-sm font-semibold transition-all ${
               calendarView === view.id
-                ? 'bg-white text-primary-700 shadow-sm'
+                ? 'bg-primary text-white shadow-sm'
                 : 'text-slate-500 hover:text-slate-700'
             }`}
           >
@@ -285,20 +286,20 @@ function CalendarPeriodFilter({
         <button
           type="button"
           onClick={onPrev}
-          className="rounded-xl border border-slate-200 bg-white p-2 text-slate-600 transition hover:bg-slate-50"
+            className="rounded-xl border border-brand-border bg-white p-2 text-slate-600 transition hover:bg-primary-50 hover:text-primary"
           aria-label={t('calendar.previous')}
         >
           <ChevronLeftIcon className={`h-5 w-5 ${isRTL ? 'rotate-180' : ''}`} />
         </button>
 
-        <div className="min-w-[180px] rounded-xl border border-slate-200 bg-white px-4 py-2 text-center">
+        <div className="min-w-[180px] rounded-xl border border-brand-border bg-white px-4 py-2 text-center">
           <p className="text-sm font-bold text-slate-900">{periodLabel}</p>
         </div>
 
         <button
           type="button"
           onClick={onNext}
-          className="rounded-xl border border-slate-200 bg-white p-2 text-slate-600 transition hover:bg-slate-50"
+            className="rounded-xl border border-brand-border bg-white p-2 text-slate-600 transition hover:bg-primary-50 hover:text-primary"
           aria-label={t('calendar.next')}
         >
           <ChevronRightIcon className={`h-5 w-5 ${isRTL ? 'rotate-180' : ''}`} />
@@ -464,8 +465,8 @@ function ReligiousHolidaysSection({
   };
 
   return (
-    <section className="rounded-2xl border border-violet-200/80 bg-white p-5 shadow-sm md:p-6">
-      <div className={`mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
+    <section className="rounded-2xl border border-brand-border bg-white/90 p-4 shadow-lg shadow-slate-200/30 md:p-5">
+      <div className={`mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
         <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
           <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-100">
             <MoonIcon className="h-6 w-6 text-violet-600" />
@@ -828,17 +829,22 @@ export default function PublicHolidays() {
   const dayItems = selectedItem?.date ? dayMap[selectedItem.date]?.items || [] : [];
 
   return (
-    <div className="min-h-full bg-[#f3f2f1] p-4 md:p-8" dir={isRTL ? 'rtl' : 'ltr'}>
-      <div className="mx-auto max-w-7xl space-y-6">
-        <header className="rounded-2xl border border-white/30 bg-white/70 p-6 shadow-sm backdrop-blur-md">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_right,_rgba(74,106,173,0.12),_transparent_32%),linear-gradient(135deg,_#f8f7fc_0%,_#f4f6fb_52%,_#f9fafb_100%)] px-3 py-4 md:px-5 md:py-5" dir={isRTL ? 'rtl' : 'ltr'}>
+      <div className="mx-auto max-w-[1600px] space-y-5">
+        <header className="relative overflow-hidden rounded-[1.5rem] bg-gradient-to-br from-primary-900 via-primary-700 to-brand-blue px-5 py-5 text-white shadow-xl shadow-primary-900/15 md:px-7 md:py-6">
+          <div className="absolute -right-16 -top-20 h-64 w-64 rounded-full border border-white/10" />
+          <div className="absolute right-16 -bottom-28 h-56 w-56 rounded-full border border-white/10" />
           <div className={`flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
             <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-primary shadow-glow">
-                <FlagIcon className="h-7 w-7 text-white" />
-              </div>
+{/*               <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white p-1.5 shadow-lg shadow-black/15">
+                <img src={dynLogo} alt="Dynamix Services" className="h-full w-full object-contain" />
+              </div> */}
               <div>
-                <h1 className="text-2xl font-bold text-slate-900">{t('title')}</h1>
-                <p className="text-sm text-slate-500">{t('subtitle')}</p>
+                <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.2em] text-primary-100">
+                  {t('calendar.title')}
+                </span>
+                <h1 className="text-2xl font-black tracking-tight md:text-3xl">{t('title')}</h1>
+                <p className="text-sm text-white/70">{t('subtitle')}</p>
               </div>
             </div>
 
@@ -846,12 +852,12 @@ export default function PublicHolidays() {
               <button
                 type="button"
                 onClick={() => handleYearStep(-1)}
-                className="rounded-xl border border-slate-200 bg-white p-2 text-slate-600 transition hover:bg-slate-50"
+                className="rounded-xl border border-white/20 bg-white/90 p-2 text-slate-600 transition hover:bg-white"
               >
                 <ChevronLeftIcon className={`h-5 w-5 ${isRTL ? 'rotate-180' : ''}`} />
               </button>
 
-              <div className="min-w-[120px] rounded-xl border border-slate-200 bg-white px-4 py-2 text-center">
+              <div className="min-w-[120px] rounded-xl border border-white/20 bg-white/90 px-4 py-2 text-center">
                 <span className="text-xs font-medium uppercase tracking-wide text-slate-400">{t('year')}</span>
                 <p className="text-xl font-bold text-slate-900">{year}</p>
               </div>
@@ -859,7 +865,7 @@ export default function PublicHolidays() {
               <button
                 type="button"
                 onClick={() => handleYearStep(1)}
-                className="rounded-xl border border-slate-200 bg-white p-2 text-slate-600 transition hover:bg-slate-50"
+                className="rounded-xl border border-white/20 bg-white/90 p-2 text-slate-600 transition hover:bg-white"
               >
                 <ChevronRightIcon className={`h-5 w-5 ${isRTL ? 'rotate-180' : ''}`} />
               </button>
@@ -867,7 +873,7 @@ export default function PublicHolidays() {
               <button
                 type="button"
                 onClick={handleGoToToday}
-                className="rounded-xl border border-primary-200 bg-primary-50 px-3 py-2 text-sm font-medium text-primary-700"
+                className="rounded-xl border border-white/20 bg-white/15 px-3 py-2 text-sm font-bold text-white hover:bg-white/25"
               >
                 {t('today')}
               </button>
@@ -876,7 +882,7 @@ export default function PublicHolidays() {
                 type="button"
                 onClick={() => { loadPublicHolidays(); loadReligiousHolidays(); }}
                 disabled={loading}
-                className="rounded-xl border border-slate-200 bg-white p-2 text-slate-600 disabled:opacity-50"
+                className="rounded-xl border border-white/20 bg-white/90 p-2 text-slate-600 disabled:opacity-50"
               >
                 <ArrowPathIcon className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
               </button>
@@ -884,11 +890,11 @@ export default function PublicHolidays() {
           </div>
 
           {!loadingPublic && !error && (
-            <div className={`mt-4 flex flex-wrap items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <p className="text-sm text-slate-500">
+            <div className={`mt-3 flex flex-wrap items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <p className="text-sm text-white/70">
                 {t('totalCount', { public: publicHolidays.length, religious: religiousHolidays.length })}
               </p>
-              <div className={`flex gap-3 text-xs ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <div className={`flex gap-3 text-xs text-white/80 ${isRTL ? 'flex-row-reverse' : ''}`}>
                 <span className="inline-flex items-center gap-1.5">
                   <span className="h-2.5 w-2.5 rounded-full bg-amber-400" />
                   {t('legend.public')}
@@ -930,9 +936,9 @@ export default function PublicHolidays() {
 
         {!loadingPublic && !error && (
           <>
-            <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
-              <section className="rounded-2xl border border-slate-200/80 bg-white/50 p-4 shadow-sm backdrop-blur-sm md:p-6">
-                <div className="mb-4 flex items-center gap-2">
+            <div className="grid gap-5 lg:grid-cols-[1fr_320px]">
+              <section className="rounded-2xl border border-white/80 bg-white/70 p-3 shadow-lg shadow-slate-200/30 backdrop-blur-sm md:p-4">
+                <div className="mb-3 flex items-center gap-2">
                   <CalendarDaysIcon className="h-5 w-5 text-primary-500" />
                   <h2 className="text-lg font-semibold text-slate-800">{t('calendar.title')}</h2>
                 </div>
@@ -969,8 +975,8 @@ export default function PublicHolidays() {
                 )}
               </section>
 
-              <aside className="space-y-4">
-                <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
+              <aside className="space-y-3">
+                <div className="rounded-2xl border border-white/80 bg-white p-4 shadow-lg shadow-slate-200/30">
                   {selectedItem ? (
                     <div className={isRTL ? 'text-right' : ''}>
                       <div className={`mb-3 inline-flex rounded-full px-3 py-1 text-xs font-semibold ${

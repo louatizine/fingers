@@ -56,7 +56,7 @@ export default function RecentRequestsList({ title, subtitle, items, type = 'lea
 
         <button 
           onClick={handleViewAll}
-          className={`group inline-flex items-center gap-2 py-2.5 px-5 rounded-full bg-slate-900 text-xs font-bold text-white hover:bg-indigo-600 transition-all duration-300 shadow-lg ${isRTL ? 'flex-row-reverse' : ''}`}
+          className={`group inline-flex items-center gap-2 py-2.5 px-5 rounded-full bg-slate-900 text-xs font-bold text-white hover:bg-primary transition-all duration-300 shadow-lg ${isRTL ? 'flex-row-reverse' : ''}`}
         >
           {t('common.viewAll')}
           {isRTL ? <ArrowLeftIcon className="h-3.5 w-3.5" /> : <ArrowRightIcon className="h-3.5 w-3.5" />}
@@ -86,13 +86,13 @@ export default function RecentRequestsList({ title, subtitle, items, type = 'lea
                 <div className={`
                   flex items-center justify-center w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100
                   group-hover:scale-110 transition-all duration-300
-                  ${type === 'leave' ? 'text-indigo-600' : 'text-emerald-600'}
+                  ${type === 'leave' ? 'text-primary' : 'text-emerald-600'}
                 `}>
                   <Icon className="h-6 w-6" />
                 </div>
                 
                 <div>
-                  <p className="text-sm font-black text-slate-900 group-hover:text-indigo-600 transition-colors">
+                  <p className="text-sm font-black text-slate-900 group-hover:text-primary transition-colors">
                     {item.user_name}
                   </p>
                   <div className={`flex items-center gap-2 mt-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
