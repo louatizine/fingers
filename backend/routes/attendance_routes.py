@@ -32,6 +32,7 @@ from services.daily_attendance_service import (
 
 )
 
+from models.user_model import is_system_admin_account, system_admin_employee_ids
 from services.zk_attendance_utils import format_timestamp_for_api
 from utils.auth_utils import attendance_read_access
 
@@ -601,6 +602,12 @@ def export_attendance():
 
         )
 
+        hidden_employee_ids = system_admin_employee_ids(db)
+        records = [
+            record for record in records
+            if record.get('employee_id') not in hidden_employee_ids
+        ]
+
 
 
         output = StringIO()
@@ -883,7 +890,8 @@ def get_user_attendance_stats():
 
             user = db.users.find_one({'employee_id': employee_id})
 
-
+            if is_system_admin_account(user):
+                continue
 
             user_stats.append({
 

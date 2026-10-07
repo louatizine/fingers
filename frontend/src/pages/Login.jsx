@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useTranslation } from 'react-i18next'
-import dynLogo from '../assets/dynlogo.jpg'
+import dynLogo from '../assets/logo-dynamix 2.png'
 import { 
   UserIcon,
   KeyIcon,

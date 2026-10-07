@@ -9,6 +9,7 @@ from zoneinfo import ZoneInfo
 
 from config import Config
 from models.daily_attendance_model import DailyAttendanceModel
+from models.user_model import is_system_admin_account
 from services.daily_attendance_aggregator import DailyWorkedSummary
 
 logger = logging.getLogger(__name__)
@@ -152,12 +153,14 @@ def get_active_employees(db) -> List[dict]:
         {'is_active': {'$ne': False}},
         {
             'employee_id': 1,
+            'email': 1,
             'first_name': 1,
             'last_name': 1,
             'department': 1,
             'position': 1,
         },
     ))
+    users = [user for user in users if not is_system_admin_account(user)]
     users.sort(key=lambda u: (
         (u.get('first_name') or '').lower(),
         (u.get('last_name') or '').lower(),

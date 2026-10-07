@@ -1035,11 +1035,11 @@ const formatTimestamp = (timestamp) => {
               label={t('attendance:tabs.summary')} 
               icon={<ChartBarIcon className="h-5 w-5" />} 
             />
-            <TabButton 
+            {/* <TabButton 
               id="userStats" 
               label={t('attendance:tabs.userStats')} 
               icon={<UsersIcon className="h-5 w-5" />} 
-            />
+            /> */} 
           </nav>
         </div>
 

@@ -10,6 +10,25 @@ import bcrypt
 
 logger = logging.getLogger(__name__)
 
+# Login account for the app itself. It is not an employee and stays out of
+# employee lists and attendance views.
+SYSTEM_ADMIN_EMAIL = 'admin@hrmanagement.com'
+
+
+def is_system_admin_account(user) -> bool:
+    if not user:
+        return False
+    return (user.get('email') or '').strip().lower() == SYSTEM_ADMIN_EMAIL
+
+
+def system_admin_employee_ids(db) -> set:
+    """Employee ids that belong to the system admin login."""
+    ids = set()
+    for user in db.users.find({}, {'email': 1, 'employee_id': 1}):
+        if is_system_admin_account(user) and user.get('employee_id'):
+            ids.add(user['employee_id'])
+    return ids
+
 # Authentication helper functions
 def find_user_by_email(email):
     """
@@ -691,7 +710,7 @@ def get_all_users(filters=None):
     try:
         # Find all users matching the query
         users_cursor = db.users.find(query)
-        users = list(users_cursor)
+        users = [user for user in users_cursor if not is_system_admin_account(user)]
 
         # Process users for JSON serialization
         for user in users:
