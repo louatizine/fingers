@@ -25,13 +25,15 @@ def create_default_settings():
             'probation_period_months': 3,
             'include_weekends': False,
             'max_consecutive_days': 30,
-            # Attendance settings
+            # Attendance settings (morning 08:15–12:45, afternoon 14:00–17:30)
             'attendance': {
-                'check_in_start': '08:00',
-                'check_out_end': '17:00',
-                'lunch_break_start': '12:00',
-                'lunch_break_end': '13:00',
-                'working_days': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']
+                'check_in_start': '08:15',
+                'check_out_end': '17:30',
+                'lunch_break_start': '12:45',
+                'lunch_break_end': '14:00',
+                'working_days': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+                # Option B: punches optional, no late/early, not counted absent
+                'online_days': ['Fri'],
             },
             'created_at': datetime.utcnow(),
             'updated_at': datetime.utcnow()

@@ -5,6 +5,7 @@ A comprehensive web-based HR Management System built with React, Flask, and Mong
 ## 🚀 Features
 
 ### Authentication & Authorization
+
 - JWT-based authentication
 - Role-based access control (Admin, Supervisor, Employee)
 - Secure password hashing
@@ -12,6 +13,7 @@ A comprehensive web-based HR Management System built with React, Flask, and Mong
 - User profile management
 
 ### Employee Management
+
 - Create, update, and deactivate employees
 - Assign employees to projects
 - Company-based organization
@@ -20,6 +22,7 @@ A comprehensive web-based HR Management System built with React, Flask, and Mong
 - Employee search and filtering
 
 ### Biometric Attendance System
+
 - ZKTeco fingerprint device integration (K80 / similar)
 - Automatic background sync (users + attendance via `pyzk`)
 - Manual sync from the Attendance page
@@ -27,6 +30,7 @@ A comprehensive web-based HR Management System built with React, Flask, and Mong
 - Enroll fingerprints on the device (ZKTeco software or device screen)
 
 ### Leave Management
+
 - Multiple leave types (annual, sick, unpaid)
 - Automatic balance calculation
 - Company-specific leave policies
@@ -36,6 +40,7 @@ A comprehensive web-based HR Management System built with React, Flask, and Mong
 - Leave trends analytics
 
 ### Salary Advance Requests
+
 - Employee request submission
 - Admin/Supervisor approval workflow
 - Request history tracking
@@ -43,6 +48,7 @@ A comprehensive web-based HR Management System built with React, Flask, and Mong
 - Approval status tracking
 
 ### Dashboard & Analytics
+
 - Role-specific dashboards (Admin, Supervisor, Employee)
 - Interactive charts (Recharts)
 - Real-time statistics
@@ -53,6 +59,7 @@ A comprehensive web-based HR Management System built with React, Flask, and Mong
 - Leave balance visualization
 
 ### Notification System
+
 - In-app real-time notifications
 - Configurable SMTP settings
 - Email templates
@@ -61,6 +68,7 @@ A comprehensive web-based HR Management System built with React, Flask, and Mong
 - Notification history
 
 ### Multi-Language Support (i18n)
+
 - English, French, and Arabic
 - RTL support for Arabic
 - Real-time language switching
@@ -68,6 +76,7 @@ A comprehensive web-based HR Management System built with React, Flask, and Mong
 - Localized date and number formats
 
 ### Responsive Design
+
 - Mobile-first approach
 - Tablet and desktop optimized
 - Modern blue & white theme
@@ -77,6 +86,7 @@ A comprehensive web-based HR Management System built with React, Flask, and Mong
 ## 📋 Tech Stack
 
 ### Frontend
+
 - **React 18** - UI framework
 - **React Router 6** - Routing
 - **Tailwind CSS** - Styling
@@ -88,6 +98,7 @@ A comprehensive web-based HR Management System built with React, Flask, and Mong
 - **Vite** - Build tool
 
 ### Backend
+
 - **Flask 3.0** - Web framework
 - **Flask-JWT-Extended** - JWT authentication
 - **PyMongo** - MongoDB driver
@@ -97,6 +108,7 @@ A comprehensive web-based HR Management System built with React, Flask, and Mong
 - **pyzk** - ZKTeco device communication
 
 ### Database
+
 - **MongoDB** - NoSQL database
 
 ## 📁 Project Structure
@@ -191,6 +203,7 @@ Employees_Managements/
 ## 🛠️ Installation & Setup
 
 ### Prerequisites
+
 - Node.js 16+ and npm
 - Python 3.8+
 - MongoDB 4.4+
@@ -201,12 +214,14 @@ Employees_Managements/
 **Windows Users:** Use the provided batch files for easy setup!
 
 #### Backend
+
 ```bash
 cd backend
 start-backend.bat
 ```
 
 #### Frontend
+
 ```bash
 cd frontend
 npm install
@@ -218,11 +233,13 @@ npm run dev
 ### Backend Setup
 
 1. **Navigate to backend directory:**
+
 ```bash
 cd backend
 ```
 
 2. **Create virtual environment:**
+
 ```bash
 python -m venv venv
 
@@ -234,11 +251,13 @@ source venv/bin/activate
 ```
 
 3. **Install dependencies:**
+
 ```bash
 pip install -r requirements.txt
 ```
 
 4. **Configure environment variables:**
+
 ```bash
 # Copy example env file
 copy .env.example .env
@@ -250,17 +269,20 @@ copy .env.example .env
 ```
 
 5. **Start MongoDB:**
+
 ```bash
 # Make sure MongoDB is running on localhost:27017
 # Or update MONGO_URI in .env
 ```
 
 6. **Create admin user (first time only):**
+
 ```bash
 python create_admin.py
 ```
 
 7. **Run the backend:**
+
 ```bash
 python app.py
 # Or use: start-backend.bat
@@ -271,22 +293,26 @@ Backend will run on `http://localhost:5000`
 ### Frontend Setup
 
 1. **Navigate to frontend directory:**
+
 ```bash
 cd frontend
 ```
 
 2. **Install dependencies:**
+
 ```bash
 npm install
 ```
 
 3. **Configure environment (optional):**
+
 ```bash
 # Create .env file if you need to change API URL
 VITE_API_URL=http://localhost:5000
 ```
 
 4. **Start development server:**
+
 ```bash
 npm run dev
 ```
@@ -302,7 +328,7 @@ ZK_DEVICE_IP=192.168.100.5
 ZK_DEVICE_PORT=4370
 ZK_DEVICE_NAME=ZKTeco K80
 ZK_SYNC_ENABLED=true
-ZK_SYNC_TIMES=08:00,08:30,09:00
+ZK_SYNC_TIMES=08:00,08:30,09:00,14:00,18:00
 ATTENDANCE_TIMEZONE=Africa/Algiers
 ```
 
@@ -320,6 +346,7 @@ Password: admin123
 ## 📊 Database Schema
 
 ### Users Collection
+
 ```javascript
 {
   _id: ObjectId,
@@ -345,6 +372,7 @@ Password: admin123
 ```
 
 ### Leaves Collection
+
 ```javascript
 {
   _id: ObjectId,
@@ -367,6 +395,7 @@ Password: admin123
 ```
 
 ### Salary Advances Collection
+
 ```javascript
 {
   _id: ObjectId,
@@ -386,6 +415,7 @@ Password: admin123
 ```
 
 ### Companies Collection
+
 ```javascript
 {
   _id: ObjectId,
@@ -399,6 +429,7 @@ Password: admin123
 ```
 
 ### Projects Collection
+
 ```javascript
 {
   _id: ObjectId,
@@ -421,6 +452,7 @@ See [API_DOCUMENTATION.md](./API_DOCUMENTATION.md) for complete API reference.
 ## 🎨 Features by Role
 
 ### Admin
+
 - Full system access
 - Employee management (create, update, deactivate)
 - Company management
@@ -434,6 +466,7 @@ See [API_DOCUMENTATION.md](./API_DOCUMENTATION.md) for complete API reference.
 - User role management
 
 ### Supervisor
+
 - View employees in their company
 - Approve/reject leave requests
 - Approve/reject salary advances
@@ -443,6 +476,7 @@ See [API_DOCUMENTATION.md](./API_DOCUMENTATION.md) for complete API reference.
 - Team analytics
 
 ### Employee
+
 - View personal dashboard
 - Submit leave requests
 - Submit salary advance requests
@@ -455,6 +489,7 @@ See [API_DOCUMENTATION.md](./API_DOCUMENTATION.md) for complete API reference.
 ## 📧 Email Notifications
 
 Configure SMTP settings in admin panel:
+
 - Leave approval/rejection notifications
 - Salary advance approval/rejection notifications
 - Customizable email templates
@@ -464,16 +499,19 @@ Configure SMTP settings in admin panel:
 ## 🌐 Multi-Language Support
 
 The application supports three languages:
+
 - **English (en)** - Default
 - **French (fr)**
 - **Arabic (ar)** - with RTL support
 
 **Switching Languages:**
+
 - Click the language selector in the navbar
 - Changes apply immediately across the entire application
 - User preference is saved in localStorage
 
 **Translation Coverage:**
+
 - All UI components
 - Form labels and validation messages
 - Dashboard analytics
@@ -490,8 +528,8 @@ For more details, see [I18N_TRANSLATION_SUMMARY.md](./I18N_TRANSLATION_SUMMARY.m
    - Set `SECRET_KEY` and `JWT_SECRET_KEY` to strong random values
    - Configure production MongoDB URI
    - Set up SMTP credentials
-
 2. **Use production WSGI server:**
+
 ```bash
 pip install gunicorn
 gunicorn -w 4 -b 0.0.0.0:5000 app:app
@@ -500,12 +538,12 @@ gunicorn -w 4 -b 0.0.0.0:5000 app:app
 ### Frontend Deployment
 
 1. **Build for production:**
+
 ```bash
 npm run build
 ```
 
-2. **Deploy the `dist` folder to your hosting service**
-
+2. **Deploy the** `dist` **folder to your hosting service**
 3. **Update API URL:**
    - Set `VITE_API_URL` environment variable to your backend URL
 
@@ -528,17 +566,20 @@ npm run build
 Create test accounts with different roles to test the system:
 
 **Admin:**
+
 ```
 Email: admin@hrmanagement.com
 Password: admin123
 ```
 
 **Supervisor (Create via admin panel):**
+
 ```
 Role: supervisor
 ```
 
 **Employee (Create via admin panel):**
+
 ```
 Role: employee
 ```
@@ -563,6 +604,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## 📞 Support
 
 For issues and questions:
+
 - Create an issue in the repository
 - Check the troubleshooting guide
 - Contact: support@hrmanagement.com

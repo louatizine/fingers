@@ -44,8 +44,8 @@ class Config:
     ZK_DEVICE_PASSWORD = int(os.environ.get('ZK_DEVICE_PASSWORD') or 0)
     ZK_SYNC_ENABLED = os.environ.get('ZK_SYNC_ENABLED', 'true').lower() == 'true'
     # Comma-separated local times for automatic device sync (ATTENDANCE_TIMEZONE)
-    # Example: 08:00,08:30,09:00 — add evening times if check-outs should auto-import too
-    ZK_SYNC_TIMES = os.environ.get('ZK_SYNC_TIMES') or '08:00,08:30,09:00'
+    # Example: 08:00,08:30,09:00,14:00,18:00
+    ZK_SYNC_TIMES = os.environ.get('ZK_SYNC_TIMES') or '08:00,08:30,09:00,14:00,18:00'
     # Legacy interval mode (minutes). Used only when ZK_SYNC_TIMES is empty.
     ZK_SYNC_INTERVAL_MINUTES = int(os.environ.get('ZK_SYNC_INTERVAL_MINUTES') or 0)
     # Only import attendance on or after this date (default: 6 months ago)

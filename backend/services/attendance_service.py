@@ -25,13 +25,23 @@ def get_attendance_settings():
         if settings and 'attendance' in settings:
             return settings['attendance']
         
-        # Return default if not found
+        # Return default if not found (08:15–12:45 / 14:00–17:30)
+        from services.work_schedule import (
+            DEFAULT_CHECK_IN_START,
+            DEFAULT_CHECK_OUT_END,
+            DEFAULT_LUNCH_BREAK_END,
+            DEFAULT_LUNCH_BREAK_START,
+        )
+
+        from services.work_schedule import DEFAULT_ONLINE_DAYS, DEFAULT_WORKING_DAYS
+
         return {
-            'check_in_start': '08:00',
-            'check_out_end': '17:00',
-            'lunch_break_start': '12:00',
-            'lunch_break_end': '13:00',
-            'working_days': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']
+            'check_in_start': DEFAULT_CHECK_IN_START,
+            'check_out_end': DEFAULT_CHECK_OUT_END,
+            'lunch_break_start': DEFAULT_LUNCH_BREAK_START,
+            'lunch_break_end': DEFAULT_LUNCH_BREAK_END,
+            'working_days': list(DEFAULT_WORKING_DAYS),
+            'online_days': list(DEFAULT_ONLINE_DAYS),
         }
     except Exception as e:
         logger.error(f"Error getting attendance settings: {e}")

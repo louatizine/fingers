@@ -209,24 +209,32 @@ export default function Leaves() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fadeIn">
 
       {/* Header */}
-      <div className={`flex flex-col md:flex-row md:items-center justify-between gap-4 ${isRTL ? 'md:flex-row-reverse' : ''}`}>
-        <div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight">{t('leaves.title')}</h1>
-          <p className="text-slate-500 font-medium mt-0.5 text-sm">{t('leaves.subtitle')}</p>
-        </div>
+      <div className={`relative overflow-hidden rounded-[1.5rem] bg-gradient-to-br from-primary-900 via-primary-700 to-brand-blue px-5 py-5 text-white shadow-xl shadow-primary-900/15 md:px-7 md:py-6 ${isRTL ? 'md:flex-row-reverse' : ''}`}>
+        <div className="absolute -right-16 -top-20 h-64 w-64 rounded-full border border-white/10" />
+        <div className="absolute right-16 -bottom-28 h-56 w-56 rounded-full border border-white/10" />
+        <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-5">
+          <div>
+            <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.22em] text-primary-100">
+              <CalendarDaysIcon className="h-4 w-4" />
+              <span>{t('leaves.table.title')}</span>
+            </div>
+            <h1 className="text-3xl font-black tracking-tight md:text-4xl">{t('leaves.title')}</h1>
+            <p className="mt-2 max-w-2xl text-sm font-medium leading-6 text-white/70 md:text-base">{t('leaves.subtitle')}</p>
+          </div>
 
-        {user.role === 'employee' && (
-          <button
-            onClick={() => setShowModal(true)}
-            className={`inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary to-primary-600 text-white text-sm font-semibold rounded-xl shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 active:scale-95 transition-all duration-200 ${isRTL ? 'flex-row-reverse' : ''}`}
-          >
-            <PlusIcon className="h-5 w-5" aria-hidden="true" />
-            <span>{t('leaves.new_request')}</span>
-          </button>
-        )}
+          {user.role === 'employee' && (
+            <button
+              onClick={() => setShowModal(true)}
+              className={`inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold text-primary shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary-50 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary-800 active:translate-y-0 ${isRTL ? 'flex-row-reverse' : ''}`}
+            >
+              <PlusIcon className="h-5 w-5" aria-hidden="true" />
+              <span>{t('leaves.new_request')}</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Balance Cards (Employee Only) */}
@@ -260,7 +268,7 @@ export default function Leaves() {
           ].map((card, i) => (
             <div
               key={i}
-              className={`${card.bgColor} p-6 rounded-2xl border ${card.borderColor} shadow-sm hover:shadow-md transition-all duration-300 group hover:-translate-y-0.5`}
+              className={`${card.bgColor} relative overflow-hidden p-6 rounded-2xl border ${card.borderColor} shadow-soft hover:shadow-medium transition-all duration-300 group hover:-translate-y-0.5`}
             >
               <div className="flex items-center justify-between mb-3">
                 <p className="text-xs font-bold uppercase tracking-wider text-slate-500">{card.label}</p>
@@ -276,11 +284,16 @@ export default function Leaves() {
       )}
 
       {/* Table Container */}
-      <div className="w-full mx-auto bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+      <div className="w-full mx-auto overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-soft">
         {/* Table Header */}
-        <div className="px-8 py-4 border-b border-slate-200 bg-gradient-to-r from-slate-50/50 to-white">
-          <h2 className="text-lg font-bold text-slate-800">{t('leaves.table.title')}</h2>
-          <p className="text-sm text-slate-500 mt-1">{t('leaves.table.subtitle')}</p>
+        <div className="flex flex-col gap-1 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white px-6 py-5 md:flex-row md:items-center md:justify-between md:px-8">
+          <div>
+            <h2 className="text-lg font-black text-slate-800">{t('leaves.table.title')}</h2>
+            <p className="mt-1 text-sm text-slate-500">{t('leaves.table.subtitle')}</p>
+          </div>
+          <span className="w-fit rounded-full bg-primary-50 px-3 py-1 text-xs font-bold text-primary">
+            {leaves.length} {t('leaves.table.title')}
+          </span>
         </div>
 
         <div className="overflow-x-auto">
@@ -298,7 +311,7 @@ export default function Leaves() {
 
             <tbody className="divide-y divide-slate-100">
               {currentLeaves.map((leave) => (
-                <tr key={leave._id} className="hover:bg-slate-50/50 transition-colors duration-200">
+                <tr key={leave._id} className="transition-colors duration-200 hover:bg-primary-50/30">
                   {user.role !== 'employee' && (
                     <td className="px-6 py-4">
                       <div className="font-semibold text-slate-900">{leave.user_name}</div>

@@ -137,6 +137,7 @@ const getSummaryDefaultDateRange = () => getDatePresets().since2022;
 const getDayStatus = (day) => {
   if (!day) return 'no_data';
   if (day.status) return day.status;
+  if (!day.has_records && day.is_online_day) return 'online';
   if (day.is_complete) return 'complete';
   if (day.has_records && day.pair_count > 0) return 'partial';
   if (day.has_records) return 'incomplete';
@@ -245,6 +246,8 @@ function Attendance() {
   const [syncLoading, setSyncLoading] = useState(false);
   const [syncStatus, setSyncStatus] = useState(null);
   const [syncInfo, setSyncInfo] = useState(null);
+  const [syncRangeStart, setSyncRangeStart] = useState('');
+  const [syncRangeEnd, setSyncRangeEnd] = useState('');
   const [activeDatePreset, setActiveDatePreset] = useState('since2022');
   const [summaryDatePreset, setSummaryDatePreset] = useState('since2022');
   const [summarySearch, setSummarySearch] = useState('');
@@ -521,14 +524,20 @@ function Attendance() {
     }
   };
 
-  const triggerDeviceSync = async () => {
+  const triggerDeviceSync = async (payload) => {
     setSyncLoading(true);
     setSyncStatus(null);
+    const startedMessage = payload?.start_date
+      ? t('attendance:sync.rangeStarted', {
+          start: payload.start_date,
+          end: payload.end_date,
+        })
+      : t('attendance:sync.started');
     try {
-      const response = await apiClient.post('/device-sync/trigger');
+      const response = await apiClient.post('/device-sync/trigger', payload || {});
 
       if (response.data.success) {
-        setSyncStatus({ type: 'success', message: t('attendance:sync.started') });
+        setSyncStatus({ type: 'success', message: startedMessage });
 
         const pollInterval = setInterval(async () => {
           try {
@@ -568,11 +577,17 @@ function Attendance() {
           clearInterval(pollInterval);
           setSyncLoading(false);
           setSyncStatus((prev) =>
-            prev?.type === 'success' && prev?.message === t('attendance:sync.started')
+            prev?.type === 'success' && prev?.message === startedMessage
               ? { type: 'warning', message: t('attendance:sync.timeout') }
               : prev
           );
         }, 300000);
+      } else {
+        setSyncStatus({
+          type: 'error',
+          message: response.data?.error || t('attendance:sync.failed'),
+        });
+        setSyncLoading(false);
       }
     } catch (error) {
       console.error('Error triggering sync:', error);
@@ -582,6 +597,31 @@ function Attendance() {
       });
       setSyncLoading(false);
     }
+  };
+
+  const handleSync = () => {
+    const hasStart = Boolean(syncRangeStart);
+    const hasEnd = Boolean(syncRangeEnd);
+    if (!hasStart && !hasEnd) {
+      triggerDeviceSync();
+      return;
+    }
+    if (!hasStart || !hasEnd) {
+      setSyncStatus({ type: 'error', message: t('attendance:sync.rangeIncomplete') });
+      return;
+    }
+    if (syncRangeStart > syncRangeEnd) {
+      setSyncStatus({ type: 'error', message: t('attendance:sync.rangeInvalid') });
+      return;
+    }
+    const start = new Date(`${syncRangeStart}T00:00:00`);
+    const end = new Date(`${syncRangeEnd}T00:00:00`);
+    const dayCount = Math.round((end - start) / 86400000) + 1;
+    if (dayCount > 62) {
+      setSyncStatus({ type: 'error', message: t('attendance:sync.rangeTooLong') });
+      return;
+    }
+    triggerDeviceSync({ start_date: syncRangeStart, end_date: syncRangeEnd });
   };
 
   const applyDatePreset = (presetId, target = 'userStats') => {
@@ -641,7 +681,8 @@ function Attendance() {
 
     return rows.filter((row) => {
       if (dailyStatusFilter === 'present' && !row.has_records) return false;
-      if (dailyStatusFilter === 'absent' && row.has_records) return false;
+      if (dailyStatusFilter === 'absent' && (row.has_records || row.status === 'online')) return false;
+      if (dailyStatusFilter === 'online' && row.status !== 'online') return false;
 
       if (!q) return true;
       return (
@@ -669,6 +710,16 @@ function Attendance() {
   const formatWorkedHours = (hours) =>
     t('attendance:formats.hoursValue', { value: hours ?? 0 });
 
+  const formatLateDisplay = (row) => row?.late_display || '00:00';
+  const formatEarlyDisplay = (row) => row?.early_display || '00:00';
+
+  const formatLateMinutesAsDisplay = (totalMinutes) => {
+    const mins = Math.max(0, Number(totalMinutes) || 0);
+    const hh = String(Math.floor(mins / 60)).padStart(2, '0');
+    const mm = String(mins % 60).padStart(2, '0');
+    return `${hh}:${mm}`;
+  };
+
   const filteredDailySummaries = useMemo(() => {
     const rows = attendanceSummary?.daily_summaries || [];
     const q = summarySearch.trim().toLowerCase();
@@ -680,7 +731,8 @@ function Attendance() {
 
         if (summaryStatusFilter === 'complete' && status !== 'complete') return false;
         if (summaryStatusFilter === 'partial' && status !== 'partial' && status !== 'incomplete') return false;
-        if (summaryStatusFilter === 'no_data' && day.has_records) return false;
+        if (summaryStatusFilter === 'online' && status !== 'online') return false;
+        if (summaryStatusFilter === 'no_data' && (day.has_records || status === 'online')) return false;
 
         if (!q) return true;
         const weekday = translateWeekday({
@@ -731,6 +783,8 @@ function Attendance() {
       t('attendance:exportCsv.afternoonIn'),
       t('attendance:exportCsv.checkOut'),
       t('attendance:exportCsv.workedHours'),
+      t('attendance:exportCsv.late'),
+      t('attendance:exportCsv.early'),
       t('attendance:exportCsv.status'),
       t('attendance:exportCsv.records'),
     ];
@@ -744,6 +798,8 @@ function Attendance() {
         day.afternoon_in ? formatAttendanceTime(day.afternoon_in) : emptyTime,
         day.check_out ? formatAttendanceTime(day.check_out) : emptyTime,
         formatWorkedHours(day.worked_hours || 0),
+        formatLateDisplay(day),
+        formatEarlyDisplay(day),
         t(`attendance:status.${status}`),
         day.total_records || 0,
       ];
@@ -761,6 +817,8 @@ function Attendance() {
       `${t('attendance:exportCsv.completeDays')}: ${attendanceSummary.totals?.complete_days || attendanceSummary.daily_summaries.filter((d) => d.is_complete).length}`,
       `${t('attendance:exportCsv.absentDays')}: ${attendanceSummary.totals?.absent_days || attendanceSummary.daily_summaries.filter((d) => !d.has_records).length}`,
       `${t('attendance:exportCsv.totalWorkedHours')}: ${attendanceSummary.totals?.worked_hours || attendanceSummary.daily_summaries.reduce((sum, d) => sum + (d.worked_hours || 0), 0)}`,
+      `${t('attendance:exportCsv.totalLate')}: ${formatLateMinutesAsDisplay(attendanceSummary.totals?.total_late_minutes || attendanceSummary.daily_summaries.reduce((sum, d) => sum + (d.total_late_minutes || 0), 0))}`,
+      `${t('attendance:exportCsv.totalEarly')}: ${formatLateMinutesAsDisplay(attendanceSummary.totals?.total_early_minutes || attendanceSummary.daily_summaries.reduce((sum, d) => sum + (d.total_early_minutes || 0), 0))}`,
     ].join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv' });
@@ -849,12 +907,14 @@ const formatTimestamp = (timestamp) => {
       complete: 'bg-emerald-50 text-emerald-700 border-emerald-200',
       partial: 'bg-amber-50 text-amber-700 border-amber-200',
       incomplete: 'bg-orange-50 text-orange-700 border-orange-200',
+      online: 'bg-sky-50 text-sky-700 border-sky-200',
       no_data: 'bg-slate-50 text-slate-500 border-slate-200',
     };
     const dots = {
       complete: 'bg-emerald-500',
       partial: 'bg-amber-500',
       incomplete: 'bg-orange-500',
+      online: 'bg-sky-500',
       no_data: 'bg-slate-400',
     };
     const resolved = status || 'no_data';
@@ -944,31 +1004,58 @@ const formatTimestamp = (timestamp) => {
           </div>
 
           {/* Stats */}
-          <div className="relative flex flex-wrap gap-3">
+          <div className="relative flex flex-col items-stretch gap-2 sm:items-end">
             {canSelectEmployee && (
-              <button
-                onClick={triggerDeviceSync}
-                disabled={syncLoading}
-                className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all ${
-                  syncLoading 
-                    ? 'bg-slate-400 text-white cursor-not-allowed' 
-                    : 'border border-white/20 bg-white/15 text-white backdrop-blur-sm hover:bg-white/25 hover:shadow-lg'
-                }`}
-              >
-                {syncLoading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                    {t('attendance:sync.syncing')}
-                  </>
-                ) : (
-                  <>
-                    <ArrowPathIcon className="h-5 w-5" />
-                    {t('attendance:sync.button')}
-                  </>
-                )}
-              </button>
+              <>
+                <div className="flex flex-wrap items-end gap-2">
+                  <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-wide text-white/70">
+                    {t('attendance:sync.from')}
+                    <input
+                      type="date"
+                      value={syncRangeStart}
+                      max={getLocalToday()}
+                      onChange={(e) => setSyncRangeStart(e.target.value)}
+                      className="rounded-xl border border-white/20 bg-white px-3 py-2.5 text-sm font-medium normal-case tracking-normal text-slate-800"
+                    />
+                  </label>
+                  <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-wide text-white/70">
+                    {t('attendance:sync.to')}
+                    <input
+                      type="date"
+                      value={syncRangeEnd}
+                      max={getLocalToday()}
+                      onChange={(e) => setSyncRangeEnd(e.target.value)}
+                      className="rounded-xl border border-white/20 bg-white px-3 py-2.5 text-sm font-medium normal-case tracking-normal text-slate-800"
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleSync}
+                    disabled={syncLoading}
+                    className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all ${
+                      syncLoading
+                        ? 'bg-slate-400 text-white cursor-not-allowed'
+                        : 'border border-white/20 bg-white/15 text-white backdrop-blur-sm hover:bg-white/25 hover:shadow-lg'
+                    }`}
+                  >
+                    {syncLoading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                        {t('attendance:sync.syncing')}
+                      </>
+                    ) : (
+                      <>
+                        <ArrowPathIcon className="h-5 w-5" />
+                        {t('attendance:sync.button')}
+                      </>
+                    )}
+                  </button>
+                </div>
+                <p className="max-w-md text-xs text-white/60">
+                  {t('attendance:sync.syncDaysHint')}
+                </p>
+              </>
             )}
-     
           </div>
         </div>
       </header>
@@ -1009,7 +1096,7 @@ const formatTimestamp = (timestamp) => {
                   schedule:
                     syncInfo?.sync_schedule_label
                     || (syncInfo?.sync_times || []).join(', ')
-                    || '08:00, 08:30, 09:00',
+                    || '08:00, 08:30, 09:00, 14:00, 18:00',
                 })}
               </p>
               <p className="text-sm text-amber-800">
@@ -1113,7 +1200,6 @@ const formatTimestamp = (timestamp) => {
                     <ChevronRightIcon className="h-5 w-5" />
                   </button>
                 </div>
-
               </div>
 
               <p className="text-sm font-semibold text-slate-700 mb-4">
@@ -1125,6 +1211,7 @@ const formatTimestamp = (timestamp) => {
                   { id: 'all', label: t('attendance:daily.filterAll') },
                   { id: 'present', label: t('attendance:daily.filterPresent') },
                   { id: 'absent', label: t('attendance:daily.filterAbsent') },
+                  { id: 'online', label: t('attendance:daily.filterOnline') },
                 ].map((chip) => (
                   <button
                     key={chip.id}
@@ -1143,13 +1230,13 @@ const formatTimestamp = (timestamp) => {
             </div>
 
             {dailyTotals && !dailyLoading && (
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <StatCard icon={UsersIcon} label="attendance:daily.present" value={dailyTotals.present ?? 0} color="emerald" />
                 <StatCard icon={XCircleIcon} label="attendance:daily.absent" value={dailyTotals.absent ?? 0} color="blue" />
-{/*                 <StatCard icon={CheckCircleIcon} label="attendance:daily.complete" value={dailyTotals.complete ?? 0} color="indigo" />
- */}{/*                 <StatCard icon={ExclamationTriangleIcon} label="attendance:daily.partial" value={dailyTotals.partial ?? 0} color="blue" />
- */}{/*                 <StatCard icon={ClockIcon} label="attendance:daily.totalHours" value={dailyTotals.total_worked_hours ?? 0} color="emerald" />
- */}              </div>
+                {(dailyTotals.online > 0 || dailyAttendance?.is_online_day) && (
+                  <StatCard icon={CheckCircleIcon} label="attendance:daily.online" value={dailyTotals.online ?? 0} color="indigo" />
+                )}
+              </div>
             )}
 
             {/* Table */}
@@ -1183,24 +1270,32 @@ const formatTimestamp = (timestamp) => {
                         <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-400">{t('attendance:table.afternoonIn')}</th>
                         <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-400">{t('attendance:table.checkOut')}</th>
                         <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-400">{t('attendance:table.workedHours')}</th>
+                        <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-400">{t('attendance:table.late')}</th>
+                        <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-400">{t('attendance:table.early')}</th>
                         <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-400">{t('attendance:table.status')}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {filteredDailyRows.length === 0 ? (
                         <tr>
-                          <td colSpan={7} className="px-6 py-12 text-center text-slate-500">
+                          <td colSpan={9} className="px-6 py-12 text-center text-slate-500">
                             {t('attendance:daily.noMatches')}
                           </td>
                         </tr>
                       ) : (
                         filteredDailyRows.map((row) => {
-                          const status = row.status || (row.has_records ? 'partial' : 'no_data');
+                          const status = row.status || (row.has_records ? 'partial' : (row.is_online_day ? 'online' : 'no_data'));
+                          const isLate = (row.total_late_minutes || 0) > 0;
+                          const isEarly = (row.total_early_minutes || 0) > 0;
                           return (
                             <tr
                               key={row.employee_id}
                               className={`group transition-colors ${
-                                row.has_records ? 'hover:bg-emerald-50/30' : 'hover:bg-slate-50/50 opacity-80'
+                                row.has_records
+                                  ? 'hover:bg-emerald-50/30'
+                                  : status === 'online'
+                                    ? 'hover:bg-sky-50/40'
+                                    : 'hover:bg-slate-50/50 opacity-80'
                               }`}
                             >
                               <td className="px-4 py-3">
@@ -1232,6 +1327,16 @@ const formatTimestamp = (timestamp) => {
                               <td className="px-4 py-3">
                                 <span className={`text-sm font-bold ${(row.total_worked_minutes || 0) > 0 ? 'text-emerald-600' : 'text-slate-400'}`}>
                                   {row.worked_time_display || '00:00'}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3" dir="ltr">
+                                <span className={`text-sm font-bold ${isLate ? 'text-rose-600' : 'text-slate-400'}`}>
+                                  {formatLateDisplay(row)}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3" dir="ltr">
+                                <span className={`text-sm font-bold ${isEarly ? 'text-sky-600' : 'text-slate-400'}`}>
+                                  {formatEarlyDisplay(row)}
                                 </span>
                               </td>
                               <td className="px-4 py-3">
@@ -1439,6 +1544,24 @@ const formatTimestamp = (timestamp) => {
                           {attendanceSummary.totals?.worked_hours || attendanceSummary.daily_summaries.reduce((sum, d) => sum + (d.worked_hours || 0), 0)}
                         </p>
                       </div>
+                      <div className="text-center">
+                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t('attendance:summary.totalLate')}</p>
+                        <p className="text-2xl font-black text-rose-600">
+                          {formatLateMinutesAsDisplay(
+                            attendanceSummary.totals?.total_late_minutes
+                            ?? attendanceSummary.daily_summaries.reduce((sum, d) => sum + (d.total_late_minutes || 0), 0)
+                          )}
+                        </p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t('attendance:summary.totalEarly')}</p>
+                        <p className="text-2xl font-black text-sky-600">
+                          {formatLateMinutesAsDisplay(
+                            attendanceSummary.totals?.total_early_minutes
+                            ?? attendanceSummary.daily_summaries.reduce((sum, d) => sum + (d.total_early_minutes || 0), 0)
+                          )}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1472,6 +1595,7 @@ const formatTimestamp = (timestamp) => {
                         { id: 'all', label: t('attendance:summary.filterAll') },
                         { id: 'complete', label: t('attendance:summary.filterComplete') },
                         { id: 'partial', label: t('attendance:summary.filterPartial') },
+                        { id: 'online', label: t('attendance:summary.filterOnline') },
                         { id: 'no_data', label: t('attendance:summary.filterNoData') },
                       ].map((chip) => (
                         <button
@@ -1500,6 +1624,8 @@ const formatTimestamp = (timestamp) => {
                           <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('attendance:table.afternoonIn')}</th>
                           <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('attendance:table.checkOut')}</th>
                           <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('attendance:table.workedHours')}</th>
+                          <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('attendance:table.late')}</th>
+                          <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('attendance:table.early')}</th>
                           <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('attendance:table.status')}</th>
                           <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('attendance:table.records')}</th>
                         </tr>
@@ -1507,12 +1633,14 @@ const formatTimestamp = (timestamp) => {
                       <tbody className="divide-y divide-slate-100">
                         {filteredDailySummaries.length === 0 ? (
                           <tr>
-                            <td colSpan={9} className="px-6 py-10 text-center text-sm text-slate-500">
+                            <td colSpan={11} className="px-6 py-10 text-center text-sm text-slate-500">
                               {t('attendance:summary.noMatches')}
                             </td>
                           </tr>
                         ) : filteredDailySummaries.map((day, index) => {
                           const status = getDayStatus(day) || 'no_data';
+                          const isLate = (day.total_late_minutes || 0) > 0;
+                          const isEarly = (day.total_early_minutes || 0) > 0;
                           return (
                             <tr key={index} className="group hover:bg-slate-50/30 transition-colors">
                               <td className="px-6 py-4">
@@ -1548,6 +1676,16 @@ const formatTimestamp = (timestamp) => {
                               <td className="px-6 py-4">
                                 <span className={`text-sm font-bold ${(day.total_worked_minutes || 0) > 0 ? 'text-emerald-600' : 'text-slate-500'}`}>
                                   {day.worked_time_display || formatWorkedHours(day.worked_hours ?? day.total_worked_hours ?? 0)}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4" dir="ltr">
+                                <span className={`text-sm font-bold ${isLate ? 'text-rose-600' : 'text-slate-400'}`}>
+                                  {formatLateDisplay(day)}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4" dir="ltr">
+                                <span className={`text-sm font-bold ${isEarly ? 'text-sky-600' : 'text-slate-400'}`}>
+                                  {formatEarlyDisplay(day)}
                                 </span>
                               </td>
                               <td className="px-6 py-4">

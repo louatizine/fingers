@@ -260,11 +260,12 @@ def get_attendance_settings_endpoint():
         return jsonify({
             'success': True,
             'data': {
-                'checkInStart': settings.get('check_in_start', '08:00'),
-                'checkOutEnd': settings.get('check_out_end', '17:00'),
-                'lunchBreakStart': settings.get('lunch_break_start', '12:00'),
-                'lunchBreakEnd': settings.get('lunch_break_end', '13:00'),
-                'workingDays': settings.get('working_days', ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'])
+                'checkInStart': settings.get('check_in_start', '08:15'),
+                'checkOutEnd': settings.get('check_out_end', '17:30'),
+                'lunchBreakStart': settings.get('lunch_break_start', '12:45'),
+                'lunchBreakEnd': settings.get('lunch_break_end', '14:00'),
+                'workingDays': settings.get('working_days', ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']),
+                'onlineDays': settings.get('online_days', ['Fri']),
             }
         }), 200
         
@@ -293,13 +294,14 @@ def update_attendance_settings_endpoint():
         
         data = request.get_json()
         
-        # Build settings data
+        # Build settings data (defaults: 08:15–12:45 / 14:00–17:30, Fri online)
         settings_data = {
-            'check_in_start': data.get('checkInStart', '08:00'),
-            'check_out_end': data.get('checkOutEnd', '17:00'),
-            'lunch_break_start': data.get('lunchBreakStart', '12:00'),
-            'lunch_break_end': data.get('lunchBreakEnd', '13:00'),
-            'working_days': data.get('workingDays', ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'])
+            'check_in_start': data.get('checkInStart', '08:15'),
+            'check_out_end': data.get('checkOutEnd', '17:30'),
+            'lunch_break_start': data.get('lunchBreakStart', '12:45'),
+            'lunch_break_end': data.get('lunchBreakEnd', '14:00'),
+            'working_days': data.get('workingDays', ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']),
+            'online_days': data.get('onlineDays', ['Fri']),
         }
         
         # Update settings

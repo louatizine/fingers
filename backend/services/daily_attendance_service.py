@@ -7,12 +7,38 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple
 from zoneinfo import ZoneInfo
 
+from pymongo import InsertOne, UpdateOne
+
 from config import Config
 from models.daily_attendance_model import DailyAttendanceModel
 from models.user_model import is_system_admin_account
 from services.daily_attendance_aggregator import DailyWorkedSummary
 
 logger = logging.getLogger(__name__)
+
+_SUMMARY_COMPARE_FIELDS = (
+    'total_worked_minutes',
+    'total_worked_hours',
+    'worked_time_display',
+    'event_count',
+    'pair_count',
+    'unmatched_events',
+    'check_in_at',
+    'check_out_at',
+    'lunch_out_at',
+    'afternoon_in_at',
+    'first_event_at',
+    'last_event_at',
+    'morning_late_minutes',
+    'afternoon_late_minutes',
+    'total_late_minutes',
+    'late_display',
+    'morning_early_minutes',
+    'afternoon_early_minutes',
+    'total_early_minutes',
+    'early_display',
+)
+_UPSERT_BATCH_SIZE = 1000
 
 
 def _local_today_str() -> str:
@@ -30,54 +56,69 @@ def upsert_daily_summaries(
     """
     Idempotently upsert daily summaries keyed by (employee_id, date).
 
+    Existing rows for the affected dates are loaded once, then writes are
+    sent in batches. Unchanged days are not written.
+
     Returns counts: created, updated, unchanged.
     """
     stats = {'created': 0, 'updated': 0, 'unchanged': 0}
-    collection = db[DailyAttendanceModel.COLLECTION]
+    if not summaries:
+        return stats
 
+    collection = db[DailyAttendanceModel.COLLECTION]
+    existing_by_key = _load_existing_summaries(
+        collection,
+        {summary.date for summary in summaries},
+    )
+
+    operations = []
     for summary in summaries:
         doc = DailyAttendanceModel.build_document(
             summary,
             device_id=device_id,
             source=source,
         )
-        existing = collection.find_one({
-            'employee_id': summary.employee_id,
-            'date': summary.date,
-        })
+        existing = existing_by_key.get((summary.employee_id, summary.date))
 
         if not existing:
             doc['created_at'] = doc['updated_at']
-            collection.insert_one(doc)
+            operations.append(InsertOne(doc))
             stats['created'] += 1
             continue
 
-        comparable_fields = (
-            'total_worked_minutes',
-            'total_worked_hours',
-            'worked_time_display',
-            'event_count',
-            'pair_count',
-            'unmatched_events',
-            'check_in_at',
-            'check_out_at',
-            'lunch_out_at',
-            'afternoon_in_at',
-            'first_event_at',
-            'last_event_at',
+        changed = any(
+            existing.get(field) != doc.get(field)
+            for field in _SUMMARY_COMPARE_FIELDS
         )
-        changed = any(existing.get(f) != doc.get(f) for f in comparable_fields)
-
         if changed:
-            collection.update_one(
-                {'_id': existing['_id']},
-                {'$set': doc},
-            )
+            operations.append(UpdateOne({'_id': existing['_id']}, {'$set': doc}))
             stats['updated'] += 1
         else:
             stats['unchanged'] += 1
 
+    for offset in range(0, len(operations), _UPSERT_BATCH_SIZE):
+        collection.bulk_write(
+            operations[offset:offset + _UPSERT_BATCH_SIZE],
+            ordered=False,
+        )
+
     return stats
+
+
+def _load_existing_summaries(collection, dates: set) -> Dict[Tuple[Any, Any], dict]:
+    """Load current summaries for the dates about to be written."""
+    existing: Dict[Tuple[Any, Any], dict] = {}
+    if not dates:
+        return existing
+
+    projection = {'_id': 1, 'employee_id': 1, 'date': 1}
+    projection.update({field: 1 for field in _SUMMARY_COMPARE_FIELDS})
+    date_list = list(dates)
+    for offset in range(0, len(date_list), 200):
+        chunk = date_list[offset:offset + 200]
+        for doc in collection.find({'date': {'$in': chunk}}, projection):
+            existing[(doc.get('employee_id'), doc.get('date'))] = doc
+    return existing
 
 
 def build_date_filter(

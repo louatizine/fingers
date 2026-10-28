@@ -33,6 +33,7 @@ from services.daily_attendance_service import (
 )
 
 from models.user_model import is_system_admin_account, system_admin_employee_ids
+from services.work_schedule import empty_late_fields, get_work_schedule
 from services.zk_attendance_utils import format_timestamp_for_api
 from utils.auth_utils import attendance_read_access
 
@@ -84,8 +85,8 @@ def _parse_date_str(date_str: str) -> str:
 
 
 
-def _summary_doc_to_daily_row(doc: dict) -> dict:
-    response = DailyAttendanceModel.summary_to_response(doc)
+def _summary_doc_to_daily_row(doc: dict, schedule=None) -> dict:
+    response = DailyAttendanceModel.summary_to_response(doc, schedule=schedule)
     date_obj = datetime.strptime(doc['date'], '%Y-%m-%d')
     response['day_of_week'] = date_obj.strftime('%a')
     response['status'] = _derive_status(response)
@@ -99,7 +100,9 @@ def _summary_doc_to_daily_row(doc: dict) -> dict:
 def _derive_status(summary: dict) -> str:
 
     if not summary.get('has_records'):
-
+        # Option B: online day with no fingerprint → not absent
+        if summary.get('is_online_day'):
+            return 'online'
         return 'no_data'
 
     if summary.get('is_complete'):
@@ -116,11 +119,13 @@ def _derive_status(summary: dict) -> str:
 
 
 
-def _empty_day_row(employee_id: str, date_str: str) -> dict:
+def _empty_day_row(employee_id: str, date_str: str, schedule=None) -> dict:
 
     date_obj = datetime.strptime(date_str, '%Y-%m-%d')
+    active = schedule or get_work_schedule()
+    is_online_day = active.is_online_day(date_str)
 
-    return {
+    row = {
 
         'employee_id': employee_id,
 
@@ -158,11 +163,18 @@ def _empty_day_row(employee_id: str, date_str: str) -> dict:
 
         'is_complete': False,
 
-        'status': 'no_data',
+        'is_online_day': is_online_day,
+
+        'status': 'online' if is_online_day else 'no_data',
 
         'total_records': 0,
 
     }
+
+    row.update(empty_late_fields())
+    row['is_online_day'] = is_online_day
+
+    return row
 
 
 
@@ -456,12 +468,15 @@ def get_daily_attendance_all():
         db = get_db()
         employees = get_active_employees(db)
         summaries_by_employee = get_summaries_for_date(db, date_str)
+        schedule = get_work_schedule()
 
         attendance_rows = []
         present_count = 0
         complete_count = 0
         partial_count = 0
         total_worked_hours = 0.0
+        total_late_minutes = 0
+        late_employees = 0
 
         for employee in employees:
             employee_id = employee.get('employee_id')
@@ -470,9 +485,9 @@ def get_daily_attendance_all():
 
             summary_doc = summaries_by_employee.get(employee_id)
             if summary_doc:
-                row = _summary_doc_to_daily_row(summary_doc)
+                row = _summary_doc_to_daily_row(summary_doc, schedule=schedule)
             else:
-                row = _empty_day_row(employee_id, date_str)
+                row = _empty_day_row(employee_id, date_str, schedule=schedule)
 
             row['first_name'] = employee.get('first_name', '')
             row['last_name'] = employee.get('last_name', '')
@@ -484,6 +499,11 @@ def get_daily_attendance_all():
                 present_count += 1
                 total_worked_hours += row.get('worked_hours', 0) or 0
 
+            late_mins = row.get('total_late_minutes', 0) or 0
+            if late_mins > 0:
+                total_late_minutes += late_mins
+                late_employees += 1
+
             status = row.get('status')
             if status == 'complete':
                 complete_count += 1
@@ -491,21 +511,31 @@ def get_daily_attendance_all():
                 partial_count += 1
 
         total_employees = len(attendance_rows)
-        absent_count = total_employees - present_count
+        online_count = sum(1 for r in attendance_rows if r.get('status') == 'online')
+        # Option B: online (no punch) is not counted as absent
+        absent_count = sum(
+            1 for r in attendance_rows
+            if not r.get('has_records') and r.get('status') != 'online'
+        )
 
         return jsonify({
             'success': True,
             'date': date_str,
             'day_of_week': date_obj.strftime('%a'),
+            'work_schedule': schedule.to_api_dict(),
+            'is_online_day': schedule.is_online_day(date_str),
             'attendance': attendance_rows,
             'totals': {
                 'total_employees': total_employees,
                 'present': present_count,
                 'absent': absent_count,
+                'online': online_count,
                 'complete': complete_count,
                 'partial': partial_count,
                 'no_data': absent_count,
                 'total_worked_hours': round(total_worked_hours, 2),
+                'total_late_minutes': total_late_minutes,
+                'late_employees': late_employees,
             },
         }), 200
 
@@ -754,6 +784,8 @@ def get_attendance_summary():
 
         end = datetime.strptime(end_date_str, '%Y-%m-%d')
 
+        schedule = get_work_schedule()
+
 
 
         while current <= end:
@@ -762,11 +794,15 @@ def get_attendance_summary():
 
             if day_str in stored:
 
-                daily_summaries.append(_summary_doc_to_daily_row(stored[day_str]))
+                daily_summaries.append(
+                    _summary_doc_to_daily_row(stored[day_str], schedule=schedule)
+                )
 
             else:
 
-                daily_summaries.append(_empty_day_row(employee_id, day_str))
+                daily_summaries.append(
+                    _empty_day_row(employee_id, day_str, schedule=schedule)
+                )
 
             current += timedelta(days=1)
 
@@ -776,12 +812,32 @@ def get_attendance_summary():
 
         complete_days = sum(1 for d in daily_summaries if d['is_complete'])
 
+        online_days = sum(1 for d in daily_summaries if d.get('status') == 'online')
+
         total_worked_hours = round(
 
             sum(d['worked_hours'] for d in daily_summaries),
 
             2,
 
+        )
+
+        total_late_minutes = sum(
+            d.get('total_late_minutes', 0) or 0 for d in daily_summaries
+        )
+
+        total_early_minutes = sum(
+            d.get('total_early_minutes', 0) or 0 for d in daily_summaries
+        )
+
+        late_days = sum(
+            1 for d in daily_summaries if (d.get('total_late_minutes') or 0) > 0
+        )
+
+        # Option B: online days without punches are not absent
+        absent_days = sum(
+            1 for d in daily_summaries
+            if not d.get('has_records') and d.get('status') != 'online'
         )
 
 
@@ -798,6 +854,8 @@ def get_attendance_summary():
 
                 'end_date': end_date_str,
 
+                'work_schedule': schedule.to_api_dict(),
+
                 'daily_summaries': daily_summaries,
 
                 'totals': {
@@ -810,9 +868,17 @@ def get_attendance_summary():
 
                     'total_days': len(daily_summaries),
 
-                    'absent_days': len(daily_summaries) - days_with_records,
+                    'absent_days': absent_days,
+
+                    'online_days': online_days,
 
                     'total_records': sum(d['event_count'] for d in daily_summaries),
+
+                    'total_late_minutes': total_late_minutes,
+
+                    'total_early_minutes': total_early_minutes,
+
+                    'late_days': late_days,
 
                 },
 

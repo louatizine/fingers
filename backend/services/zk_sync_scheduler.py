@@ -1,7 +1,7 @@
 """
 Background scheduler for automatic ZKTeco device synchronization.
 
-Default mode: run at fixed local times (e.g. 08:00, 08:30, 09:00).
+Default mode: run at fixed local times (e.g. 08:00, 08:30, 09:00, 14:00, 18:00).
 Legacy fallback: interval minutes when ZK_SYNC_TIMES is empty and
 ZK_SYNC_INTERVAL_MINUTES > 0.
 Manual "Sync from Device" remains available anytime via the API.

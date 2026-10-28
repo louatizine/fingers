@@ -213,15 +213,21 @@ export default function SalaryAdvances() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fadeIn">
       {/* Dynamic Header */}
-      <div className="relative group">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-slate-200 pb-8">
+      <div className="relative overflow-hidden rounded-[1.5rem] bg-gradient-to-br from-primary-900 via-primary-700 to-brand-blue px-5 py-5 text-white shadow-xl shadow-primary-900/15 md:px-7 md:py-6">
+        <div className="absolute -right-16 -top-20 h-64 w-64 rounded-full border border-white/10" />
+        <div className="absolute right-16 -bottom-28 h-56 w-56 rounded-full border border-white/10" />
+        <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-5">
           <div>
-            <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">
+            <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.22em] text-primary-100">
+              <BanknotesIcon className="h-4 w-4" />
+              <span>{t('salaryAdvances.totalRequests')}</span>
+            </div>
+            <h1 className="text-3xl font-black tracking-tight md:text-4xl">
               {t('salaryAdvances.title')}
             </h1>
-            <p className="mt-2 text-lg text-slate-500 font-medium">
+            <p className="mt-2 max-w-2xl text-sm font-medium leading-6 text-white/70 md:text-base">
               {t('salaryAdvances.subtitle')}
             </p>
           </div>
@@ -229,7 +235,7 @@ export default function SalaryAdvances() {
           {user.role === 'employee' && (
             <button
               onClick={() => setShowModal(true)}
-              className="relative group overflow-hidden bg-slate-900 text-white px-6 py-3 rounded-2xl font-bold text-sm shadow-2xl transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
+              className="relative group flex items-center gap-2 overflow-hidden rounded-xl bg-white px-5 py-3 text-sm font-bold text-primary shadow-lg transition-all hover:-translate-y-0.5 hover:bg-primary-50 hover:shadow-xl active:translate-y-0"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <PlusIcon className="h-5 w-5 z-10" />
@@ -240,8 +246,8 @@ export default function SalaryAdvances() {
       </div>
 
       {/* Control Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 p-5 bg-white/70 backdrop-blur-md rounded-2xl border border-white shadow-sm ring-1 ring-slate-200">
-        <div className="flex items-center gap-2 px-3 py-1 bg-slate-100 rounded-full">
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-soft md:p-5">
+        <div className="flex items-center gap-2 rounded-full bg-primary-50 px-3 py-1.5">
           <span className="text-xs font-bold text-slate-500 uppercase tracking-tighter">{t('salaryAdvances.totalRequests')}</span>
           <span className="text-xs font-black text-slate-900">{advances.length}</span>
         </div>
@@ -263,7 +269,7 @@ export default function SalaryAdvances() {
       </div>
 
       {/* Table Section */}
-      <div className="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden">
+      <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-soft">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -295,7 +301,7 @@ export default function SalaryAdvances() {
 
             <tbody className="divide-y divide-slate-100">
               {currentAdvances.map((item) => (
-                <tr key={item._id} className="group hover:bg-slate-50/50 transition-colors">
+                <tr key={item._id} className="group transition-colors hover:bg-primary-50/30">
                   {user.role !== 'employee' && (
                     <td className="px-8 py-5">
                       <div className="font-bold text-slate-900 text-sm">{item.user_name}</div>

@@ -8,7 +8,7 @@ Used by the background scheduler and manual API trigger.
 import logging
 import threading
 from datetime import datetime, UTC
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from config import Config
 from sync_device_to_db import DeviceToDBSyncer
@@ -43,6 +43,7 @@ def run_device_sync(
     triggered_by: str = 'scheduler',
     auto_create_users: bool = True,
     clear_device_after: bool = False,
+    rebuild_dates: Optional[List[str]] = None,
 ) -> Dict[str, Any]:
     """
     Sync users and attendance from the ZKTeco device to MongoDB.
@@ -100,6 +101,7 @@ def run_device_sync(
         success = syncer.full_sync(
             auto_create_users=auto_create_users,
             clear_device_after=clear_device_after,
+            rebuild_dates=rebuild_dates,
         )
 
         stats = syncer.stats
@@ -148,6 +150,7 @@ def run_device_sync_async(
     triggered_by: str = 'manual',
     auto_create_users: bool = True,
     clear_device_after: bool = False,
+    rebuild_dates: Optional[List[str]] = None,
 ) -> None:
     """Run device sync in a background thread."""
     thread = threading.Thread(
@@ -156,6 +159,7 @@ def run_device_sync_async(
             'triggered_by': triggered_by,
             'auto_create_users': auto_create_users,
             'clear_device_after': clear_device_after,
+            'rebuild_dates': rebuild_dates,
         },
         daemon=True,
     )

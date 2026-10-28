@@ -1,13 +1,9 @@
 """
 Aggregate raw attendance events into daily worked-hours summaries.
 
-Work runs 08:15–12:45, then again 14:00–17:30.
-Each punch is placed by local time. A punch up to 10 minutes late
-still stays in that column:
-  before 10:40 → check-in
-  10:40–13:32  → lunch departure
-  13:32–15:55  → afternoon return
-  15:55 on    → check-out
+Default work runs 08:15–12:45, then again 14:00–17:30 (from WorkSchedule /
+Settings). Each punch is placed by local time. A punch up to the schedule's
+slot grace still stays in that column.
 """
 
 from __future__ import annotations
@@ -17,6 +13,8 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Dict, List, Optional, Sequence, Tuple
 from zoneinfo import ZoneInfo
+
+from services.work_schedule import DEFAULT_SCHEDULE, WorkSchedule, get_work_schedule
 
 logger = logging.getLogger(__name__)
 
@@ -28,25 +26,6 @@ MIN_VALID_PAIR_MINUTES = 20
 LUNCH_BREAK_MIN_MINUTES = 120
 # Hour (local) after which the last punch is treated as end-of-day check-out
 END_OF_DAY_HOUR = 16
-# Scheduled punch times, then a 10-minute lateness margin on each column boundary
-LATE_GRACE_MINUTES = 10
-CHECK_IN_AT_MINUTES = 8 * 60 + 15
-LUNCH_OUT_AT_MINUTES = 12 * 60 + 45
-AFTERNOON_IN_AT_MINUTES = 14 * 60
-CHECK_OUT_AT_MINUTES = 17 * 60 + 30
-
-
-def _slot_end_minutes(earlier: int, later: int) -> int:
-    """Halfway to the next punch, plus the lateness margin."""
-    return (earlier + later) // 2 + LATE_GRACE_MINUTES
-
-
-CHECK_IN_UNTIL_MINUTES = _slot_end_minutes(CHECK_IN_AT_MINUTES, LUNCH_OUT_AT_MINUTES)
-LUNCH_OUT_UNTIL_MINUTES = _slot_end_minutes(LUNCH_OUT_AT_MINUTES, AFTERNOON_IN_AT_MINUTES)
-AFTERNOON_IN_UNTIL_MINUTES = _slot_end_minutes(AFTERNOON_IN_AT_MINUTES, CHECK_OUT_AT_MINUTES)
-# Fixed lunch break removed from a span that covers it: 12:45–14:00
-BREAK_START_MINUTES = 12 * 60 + 45
-BREAK_END_MINUTES = 14 * 60
 
 
 @dataclass(frozen=True)
@@ -70,6 +49,12 @@ class DailyWorkedSummary:
     first_event_at: Optional[datetime] = None
     last_event_at: Optional[datetime] = None
     warnings: List[str] = field(default_factory=list)
+    morning_late_minutes: int = 0
+    afternoon_late_minutes: int = 0
+    total_late_minutes: int = 0
+    morning_early_minutes: int = 0
+    afternoon_early_minutes: int = 0
+    total_early_minutes: int = 0
 
 
 def minutes_to_display(total_minutes: int) -> str:
@@ -199,20 +184,17 @@ def is_missing_lunch_return_pattern(timestamps: Sequence[datetime]) -> bool:
     return lunch_gap_minutes >= LUNCH_BREAK_MIN_MINUTES and evening_out.hour >= END_OF_DAY_HOUR
 
 
-def punch_slot(timestamp: datetime) -> str:
+def punch_slot(
+    timestamp: datetime,
+    schedule: Optional[WorkSchedule] = None,
+) -> str:
     """Map one punch to its appointment column using local wall-clock time."""
-    minutes = timestamp.hour * 60 + timestamp.minute
-    if minutes < CHECK_IN_UNTIL_MINUTES:
-        return 'check_in'
-    if minutes < LUNCH_OUT_UNTIL_MINUTES:
-        return 'lunch_out'
-    if minutes < AFTERNOON_IN_UNTIL_MINUTES:
-        return 'afternoon_in'
-    return 'check_out'
+    return (schedule or DEFAULT_SCHEDULE).punch_slot(timestamp)
 
 
 def assign_punch_slots(
     sorted_ts: Sequence[datetime],
+    schedule: Optional[WorkSchedule] = None,
 ) -> Tuple[Optional[datetime], Optional[datetime], Optional[datetime], Optional[datetime]]:
     """
     Place punches into check-in, lunch departure, afternoon return, and check-out.
@@ -220,6 +202,7 @@ def assign_punch_slots(
     Several punches in one window keep the earliest arrival or return, and the
     latest lunch departure or check-out.
     """
+    active = schedule or DEFAULT_SCHEDULE
     grouped: Dict[str, List[datetime]] = {
         'check_in': [],
         'lunch_out': [],
@@ -227,7 +210,7 @@ def assign_punch_slots(
         'check_out': [],
     }
     for timestamp in sorted_ts:
-        grouped[punch_slot(timestamp)].append(timestamp)
+        grouped[active.punch_slot(timestamp)].append(timestamp)
 
     check_in = grouped['check_in'][0] if grouped['check_in'] else None
     lunch_out = grouped['lunch_out'][-1] if grouped['lunch_out'] else None
@@ -245,22 +228,31 @@ def _minutes_between(start: Optional[datetime], end: Optional[datetime]) -> int:
     return delta
 
 
-def break_overlap_minutes(start: Optional[datetime], end: Optional[datetime]) -> int:
-    """Minutes of 12:45–14:00 that fall inside a worked interval."""
+def break_overlap_minutes(
+    start: Optional[datetime],
+    end: Optional[datetime],
+    schedule: Optional[WorkSchedule] = None,
+) -> int:
+    """Minutes of the configured lunch break that fall inside a worked interval."""
     if not start or not end or end <= start:
         return 0
+    active = schedule or DEFAULT_SCHEDULE
     start_m = start.hour * 60 + start.minute
     end_m = end.hour * 60 + end.minute
-    overlap = min(end_m, BREAK_END_MINUTES) - max(start_m, BREAK_START_MINUTES)
+    overlap = min(end_m, active.break_end_minutes) - max(start_m, active.break_start_minutes)
     return max(0, overlap)
 
 
-def _net_worked_minutes(start: Optional[datetime], end: Optional[datetime]) -> int:
+def _net_worked_minutes(
+    start: Optional[datetime],
+    end: Optional[datetime],
+    schedule: Optional[WorkSchedule] = None,
+) -> int:
     """Worked minutes in an interval after removing the standard lunch break."""
     gross = _minutes_between(start, end)
     if gross <= 0:
         return 0
-    return max(0, gross - break_overlap_minutes(start, end))
+    return max(0, gross - break_overlap_minutes(start, end, schedule))
 
 
 def lunch_break_times(
@@ -286,6 +278,7 @@ def calculate_daily_worked_minutes(
     *,
     employee_id: str = '',
     date: str = '',
+    schedule: Optional[WorkSchedule] = None,
 ) -> Tuple[int, int, int, Optional[datetime], Optional[datetime], Optional[datetime], Optional[datetime], Optional[datetime], Optional[datetime], List[str]]:
     """
     Pair events sequentially and sum valid in→out durations.
@@ -296,6 +289,7 @@ def calculate_daily_worked_minutes(
     """
     warnings: List[str] = []
     raw_sorted = sorted(timestamps)
+    active = schedule or DEFAULT_SCHEDULE
 
     if not raw_sorted:
         return 0, 0, 0, None, None, None, None, None, None, warnings
@@ -303,20 +297,25 @@ def calculate_daily_worked_minutes(
     sorted_ts, normalize_warnings = normalize_day_timestamps(raw_sorted)
     warnings.extend(normalize_warnings)
 
-    check_in_at, lunch_out_at, afternoon_in_at, check_out_at = assign_punch_slots(sorted_ts)
-    morning_minutes = _net_worked_minutes(check_in_at, lunch_out_at)
-    afternoon_minutes = _net_worked_minutes(afternoon_in_at, check_out_at)
+    check_in_at, lunch_out_at, afternoon_in_at, check_out_at = assign_punch_slots(
+        sorted_ts,
+        active,
+    )
+    morning_minutes = _net_worked_minutes(check_in_at, lunch_out_at, active)
+    afternoon_minutes = _net_worked_minutes(afternoon_in_at, check_out_at, active)
 
     if lunch_out_at and afternoon_in_at:
         total_minutes = morning_minutes + afternoon_minutes
         pair_count = (1 if morning_minutes else 0) + (1 if afternoon_minutes else 0)
     elif check_in_at and check_out_at:
-        total_minutes = _net_worked_minutes(check_in_at, check_out_at)
+        total_minutes = _net_worked_minutes(check_in_at, check_out_at, active)
         pair_count = 1 if total_minutes else 0
-        removed = break_overlap_minutes(check_in_at, check_out_at)
+        removed = break_overlap_minutes(check_in_at, check_out_at, active)
         if removed:
             warnings.append(
-                f'Removed {removed} min lunch break (12:45–14:00) for {employee_id} on {date}'
+                f'Removed {removed} min lunch break '
+                f'({active.lunch_break_start}–{active.lunch_break_end}) '
+                f'for {employee_id} on {date}'
             )
     elif morning_minutes:
         total_minutes = morning_minutes
@@ -356,7 +355,9 @@ def build_daily_summary(
     employee_id: str,
     date: str,
     timestamps: Sequence[datetime],
+    schedule: Optional[WorkSchedule] = None,
 ) -> DailyWorkedSummary:
+    active = schedule or DEFAULT_SCHEDULE
     (
         total_minutes,
         pair_count,
@@ -372,6 +373,12 @@ def build_daily_summary(
         timestamps,
         employee_id=employee_id,
         date=date,
+        schedule=active,
+    )
+    timing = active.timing_from_punches(
+        check_in_at,
+        afternoon_in_at,
+        skip_penalties=bool(date and active.is_online_day(date)),
     )
     return DailyWorkedSummary(
         employee_id=employee_id,
@@ -387,18 +394,26 @@ def build_daily_summary(
         first_event_at=first_evt,
         last_event_at=last_evt,
         warnings=warnings,
+        morning_late_minutes=timing['morning_late_minutes'],
+        afternoon_late_minutes=timing['afternoon_late_minutes'],
+        total_late_minutes=timing['total_late_minutes'],
+        morning_early_minutes=timing['morning_early_minutes'],
+        afternoon_early_minutes=timing['afternoon_early_minutes'],
+        total_early_minutes=timing['total_early_minutes'],
     )
 
 
 def aggregate_events_to_daily_summaries(
     events: Sequence[AttendanceEvent],
     tz: ZoneInfo,
+    schedule: Optional[WorkSchedule] = None,
 ) -> List[DailyWorkedSummary]:
     """Group, deduplicate, and aggregate events into per-employee daily summaries."""
+    active = schedule or get_work_schedule()
     unique_events = deduplicate_events(events)
     groups = group_events_by_employee_date(unique_events, tz)
 
     summaries: List[DailyWorkedSummary] = []
     for (employee_id, date), timestamps in sorted(groups.items()):
-        summaries.append(build_daily_summary(employee_id, date, timestamps))
+        summaries.append(build_daily_summary(employee_id, date, timestamps, active))
     return summaries

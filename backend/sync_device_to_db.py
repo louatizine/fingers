@@ -13,8 +13,8 @@ This script:
 
 import sys
 import logging
-from datetime import datetime, timezone
-from typing import Dict, List
+from datetime import datetime, timedelta, timezone
+from typing import Dict, List, Optional, Set
 from zoneinfo import ZoneInfo
 from zk_device_manager import ZKDeviceManager
 from services.zk_attendance_utils import (
@@ -26,7 +26,9 @@ from services.zk_attendance_utils import (
 from services.daily_attendance_aggregator import (
     AttendanceEvent,
     aggregate_events_to_daily_summaries,
+    local_date_for_timestamp,
 )
+from models.daily_attendance_model import DailyAttendanceModel
 from services.daily_attendance_service import upsert_daily_summaries
 from pymongo import MongoClient
 from bson.objectid import ObjectId
@@ -44,6 +46,9 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
+
+SYNC_STATE_COLLECTION = 'device_sync_state'
+SYNC_STATE_ID = 'zkteco_attendance'
 
 
 class DeviceToDBSyncer:
@@ -92,7 +97,11 @@ class DeviceToDBSyncer:
                 'daily_summaries': 0,
                 'skipped_before_min_date': 0,
                 'skipped_unknown_user': 0,
+                'skipped_already_synced': 0,
                 'legacy_events': 0,
+                'incremental': False,
+                'days_rebuilt': 0,
+                'forced_days': 0,
                 'failed': 0,
             }
         }
@@ -100,6 +109,7 @@ class DeviceToDBSyncer:
             os.getenv('ATTENDANCE_TIMEZONE', 'Africa/Algiers')
         )
         self._device_user_cache: Dict[str, Dict] = {}
+        self._unmapped_timestamps: List[datetime] = []
     
     def connect_to_database(self) -> bool:
         """Connect to MongoDB database."""
@@ -375,10 +385,20 @@ class DeviceToDBSyncer:
                 self._device_user_cache.setdefault(str(employee_id), user)
         return user
 
-    def sync_attendance(self, limit: int = None, clear_after_sync: bool = False) -> bool:
+    def sync_attendance(
+        self,
+        limit: int = None,
+        clear_after_sync: bool = False,
+        rebuild_dates: List[str] = None,
+    ) -> bool:
         """
         Sync attendance from device into daily worked-hours summaries.
 
+        The terminal still sends its full punch log. After the first successful
+        sync, only today and any earlier day that received a new punch are
+        rebuilt. ``rebuild_dates`` adds those calendar days as well, using every
+        punch on each day. Closed days stay as they are, and a requested older
+        day does not move the saved cursor backward.
         Raw device punches are aggregated in memory and never stored individually.
         """
         logger.info("=" * 80)
@@ -386,6 +406,12 @@ class DeviceToDBSyncer:
         logger.info("=" * 80)
 
         self._load_device_user_cache()
+        self._unmapped_timestamps = []
+        state = self._load_sync_state()
+        watermark = self._watermark_from_state(state)
+        legacy_imported = bool(state and state.get('legacy_imported'))
+        forced_dates = self._normalize_rebuild_dates(rebuild_dates)
+        self.stats['attendance']['forced_days'] = len(forced_dates)
 
         device_logs = self.device_manager.get_attendance_logs()
         self.stats['attendance']['total_on_device'] = len(device_logs)
@@ -395,18 +421,54 @@ class DeviceToDBSyncer:
             if limit:
                 device_logs = device_logs[:limit]
                 logger.info(f"Limiting sync to {limit} events")
-            device_logs.sort(key=lambda x: x['timestamp'])
         else:
             logger.info("No attendance logs found on device")
 
+        open_dates, cursor_dates, allow_cursor_advance = self._select_open_dates(
+            device_logs,
+            watermark,
+            forced_dates,
+        )
+        if open_dates is None:
+            logger.info('Full attendance sync (no saved watermark yet)')
+            self.stats['attendance']['incremental'] = False
+        else:
+            self.stats['attendance']['incremental'] = True
+            self.stats['attendance']['days_rebuilt'] = len(open_dates)
+            logger.info(
+                'Incremental sync%s — rebuilding %s day(s): %s',
+                f' from {watermark.isoformat(sep=" ")}' if watermark else '',
+                len(open_dates),
+                ', '.join(sorted(open_dates)),
+            )
+            device_logs = self._keep_logs_on_dates(device_logs, open_dates)
+
+        if device_logs:
+            device_logs.sort(key=lambda x: x['timestamp'])
+
         device_events = self._collect_device_events(device_logs) if device_logs else []
-        legacy_events = self._collect_legacy_attendance_events()
+        if legacy_imported:
+            legacy_events: List[AttendanceEvent] = []
+            logger.info('Skipping legacy attendance collection (already imported)')
+        elif open_dates is None:
+            legacy_events = self._collect_legacy_attendance_events()
+            legacy_imported = True
+        else:
+            legacy_events = self._collect_legacy_attendance_events(only_dates=open_dates)
+
         events = device_events + legacy_events
         self.stats['attendance']['events_processed'] = len(events)
         self.stats['attendance']['legacy_events'] = len(legacy_events)
 
         if not events:
             logger.info("No attendance events to aggregate after filtering")
+            self._save_sync_state(
+                self._events_for_cursor(device_events, cursor_dates),
+                legacy_imported=legacy_imported,
+                previous_watermark=watermark,
+                allow_cursor_advance=allow_cursor_advance,
+            )
+            self._print_attendance_sync_summary()
             return True
 
         logger.info(
@@ -429,6 +491,12 @@ class DeviceToDBSyncer:
         self.stats['attendance']['summaries_updated'] = upsert_stats['updated']
         self.stats['attendance']['summaries_unchanged'] = upsert_stats['unchanged']
 
+        self._save_sync_state(
+            self._events_for_cursor(device_events, cursor_dates),
+            legacy_imported=legacy_imported,
+            previous_watermark=watermark,
+            allow_cursor_advance=allow_cursor_advance,
+        )
         self._print_attendance_sync_summary()
 
         if clear_after_sync and (
@@ -444,6 +512,213 @@ class DeviceToDBSyncer:
                     logger.error("✗ Failed to clear device logs")
 
         return True
+
+    def _is_before_min_sync(self, timestamp: datetime) -> bool:
+        if not self.min_sync_date:
+            return False
+        return timestamp < self.min_sync_date.replace(tzinfo=None)
+
+    def _load_sync_state(self) -> Optional[Dict]:
+        """
+        Return the saved sync cursor.
+
+        When summaries already exist but no cursor has been stored, the cursor
+        is taken from the newest saved punch so the next run does not rebuild
+        history that is already in the database.
+        """
+        if self.db is None:
+            return None
+
+        state = self.db[SYNC_STATE_COLLECTION].find_one({'_id': SYNC_STATE_ID})
+        if state:
+            return state
+
+        latest = self.db[DailyAttendanceModel.COLLECTION].find_one(
+            {'last_event_at': {'$ne': None}},
+            projection={'last_event_at': 1},
+            sort=[('last_event_at', -1)],
+        )
+        if not latest or not latest.get('last_event_at'):
+            return None
+
+        try:
+            watermark = normalize_device_timestamp(latest['last_event_at'])
+        except Exception:
+            logger.warning('Could not read a watermark from existing summaries')
+            return None
+
+        state = {
+            '_id': SYNC_STATE_ID,
+            'watermark': watermark,
+            'legacy_imported': True,
+            'bootstrapped': True,
+            'updated_at': datetime.utcnow(),
+        }
+        self.db[SYNC_STATE_COLLECTION].insert_one(state)
+        logger.info(
+            'Bootstrapped sync watermark from existing summaries: %s',
+            watermark.isoformat(sep=' '),
+        )
+        return state
+
+    def _watermark_from_state(self, state: Optional[Dict]) -> Optional[datetime]:
+        if not state or not state.get('watermark'):
+            return None
+        try:
+            return normalize_device_timestamp(state['watermark'])
+        except Exception:
+            logger.warning('Ignoring unreadable sync watermark')
+            return None
+
+    def _normalize_rebuild_dates(self, rebuild_dates: List[str] = None) -> Set[str]:
+        """Keep valid calendar days on or after the configured minimum date."""
+        dates: Set[str] = set()
+        if not rebuild_dates:
+            return dates
+        for value in rebuild_dates:
+            try:
+                day = datetime.strptime(str(value), '%Y-%m-%d')
+            except ValueError:
+                logger.warning('Ignoring invalid rebuild date: %s', value)
+                continue
+            if self._is_before_min_sync(day):
+                logger.info('Ignoring rebuild date before minimum sync date: %s', value)
+                continue
+            dates.add(day.date().isoformat())
+        return dates
+
+    def _select_open_dates(
+        self,
+        device_logs: List[Dict],
+        watermark: Optional[datetime],
+        forced_dates: Set[str],
+    ):
+        """
+        Days to rebuild, and whether this run may move the saved cursor.
+
+        A requested older day is added on top of the normal incremental set.
+        When no cursor exists yet, a specific-day request rebuilds only those
+        days plus today, and does not pretend the rest of history was synced.
+        """
+        base_dates = self._dates_needing_rebuild(device_logs, watermark)
+        today = datetime.now(self._attendance_tz).date().isoformat()
+
+        if base_dates is None and not forced_dates:
+            return None, None, True
+
+        if base_dates is None:
+            return set(forced_dates) | {today}, set(), False
+
+        return set(base_dates) | set(forced_dates), set(base_dates), True
+
+    def _events_for_cursor(
+        self,
+        device_events: List[AttendanceEvent],
+        cursor_dates: Optional[Set[str]],
+    ) -> List[AttendanceEvent]:
+        """Punches that may move the saved cursor. None means every punch."""
+        if cursor_dates is None:
+            return device_events
+        return [
+            event for event in device_events
+            if local_date_for_timestamp(event.timestamp, self._attendance_tz) in cursor_dates
+        ]
+
+    def _dates_needing_rebuild(
+        self,
+        device_logs: List[Dict],
+        watermark: Optional[datetime],
+    ) -> Optional[Set[str]]:
+        """
+        Calendar days to rebuild.
+
+        None means a full sync. Otherwise today is always included, plus any
+        earlier day that has a punch newer than the saved watermark. The whole
+        day is rebuilt so worked hours stay based on every punch that day.
+        """
+        if watermark is None:
+            return None
+
+        today = datetime.now(self._attendance_tz).date().isoformat()
+        dates = {today}
+        for device_log in device_logs:
+            try:
+                timestamp = normalize_device_timestamp(device_log.get('timestamp', ''))
+            except Exception:
+                continue
+            if self._is_before_min_sync(timestamp):
+                continue
+            if timestamp > watermark:
+                dates.add(local_date_for_timestamp(timestamp, self._attendance_tz))
+        return dates
+
+    def _keep_logs_on_dates(self, device_logs: List[Dict], dates: Set[str]) -> List[Dict]:
+        """Keep every punch that falls on a day being rebuilt."""
+        kept: List[Dict] = []
+        skipped = 0
+        for device_log in device_logs:
+            try:
+                timestamp = normalize_device_timestamp(device_log.get('timestamp', ''))
+            except Exception:
+                kept.append(device_log)
+                continue
+            if self._is_before_min_sync(timestamp):
+                kept.append(device_log)
+                continue
+            day = local_date_for_timestamp(timestamp, self._attendance_tz)
+            if day in dates:
+                kept.append(device_log)
+            else:
+                skipped += 1
+        self.stats['attendance']['skipped_already_synced'] = skipped
+        logger.info(
+            'Keeping %s punches on open days, skipping %s already synced',
+            len(kept),
+            skipped,
+        )
+        return kept
+
+    def _save_sync_state(
+        self,
+        device_events: List[AttendanceEvent],
+        *,
+        legacy_imported: bool,
+        previous_watermark: Optional[datetime],
+        allow_cursor_advance: bool = True,
+    ) -> None:
+        """Advance the cursor only through punches that were actually saved."""
+        if self.db is None:
+            return
+
+        watermark = previous_watermark
+        if allow_cursor_advance and device_events:
+            newest = max(event.timestamp for event in device_events)
+            # Keep the cursor behind a new punch that has no matching employee
+            # so the next sync tries that punch again.
+            if previous_watermark is not None and self._unmapped_timestamps:
+                blocking = [
+                    ts for ts in self._unmapped_timestamps
+                    if ts > previous_watermark
+                ]
+                if blocking:
+                    newest = min(newest, min(blocking) - timedelta(seconds=1))
+            if watermark is None or newest > watermark:
+                watermark = newest
+
+        update = {
+            'legacy_imported': legacy_imported,
+            'updated_at': datetime.utcnow(),
+        }
+        if watermark is not None:
+            update['watermark'] = watermark
+
+        self.db[SYNC_STATE_COLLECTION].update_one(
+            {'_id': SYNC_STATE_ID},
+            {'$set': update},
+            upsert=True,
+        )
+        if watermark is not None:
+            logger.info('Sync watermark is now %s', watermark.isoformat(sep=' '))
 
     def _collect_device_events(self, device_logs: List[Dict]) -> List[AttendanceEvent]:
         """Map device punches to employee events (timestamps only)."""
@@ -461,10 +736,9 @@ class DeviceToDBSyncer:
                 self.stats['attendance']['failed'] += 1
                 continue
 
-            if self.min_sync_date:
-                if timestamp < self.min_sync_date.replace(tzinfo=None):
-                    self.stats['attendance']['skipped_before_min_date'] += 1
-                    continue
+            if self._is_before_min_sync(timestamp):
+                self.stats['attendance']['skipped_before_min_date'] += 1
+                continue
 
             device_user_id = device_log.get('user_id', '')
             user = self._resolve_user_from_cache(device_user_id)
@@ -474,6 +748,7 @@ class DeviceToDBSyncer:
                     device_user_id,
                 )
                 self.stats['attendance']['skipped_unknown_user'] += 1
+                self._unmapped_timestamps.append(timestamp)
                 continue
 
             employee_id = user.get('employee_id')
@@ -481,7 +756,10 @@ class DeviceToDBSyncer:
 
         return events
 
-    def _collect_legacy_attendance_events(self) -> List[AttendanceEvent]:
+    def _collect_legacy_attendance_events(
+        self,
+        only_dates: Optional[Set[str]] = None,
+    ) -> List[AttendanceEvent]:
         """Rebuild events from previously stored raw attendance logs (timestamps only)."""
         events: List[AttendanceEvent] = []
         if self.db is None:
@@ -503,8 +781,12 @@ class DeviceToDBSyncer:
                 self.stats['attendance']['failed'] += 1
                 continue
 
-            if self.min_sync_date and ts < self.min_sync_date.replace(tzinfo=None):
+            if self._is_before_min_sync(ts):
                 continue
+
+            if only_dates is not None:
+                if local_date_for_timestamp(ts, self._attendance_tz) not in only_dates:
+                    continue
 
             events.append(AttendanceEvent(employee_id=employee_id, timestamp=ts))
 
@@ -546,11 +828,22 @@ class DeviceToDBSyncer:
         print(f"  Summaries updated:         {stats['summaries_updated']}")
         print(f"  Summaries unchanged:       {stats['summaries_unchanged']}")
         print(f"  Before min date skipped:   {stats['skipped_before_min_date']}")
+        print(f"  Already synced skipped:    {stats['skipped_already_synced']}")
         print(f"  Unknown user skipped:      {stats['skipped_unknown_user']}")
+        mode = 'incremental' if stats['incremental'] else 'full'
+        days = stats['days_rebuilt'] if stats['incremental'] else 'all'
+        print(f"  Sync mode:                 {mode} ({days} day(s))")
+        if stats.get('forced_days'):
+            print(f"  Requested days:            {stats['forced_days']}")
         print(f"  Failed:                    {stats['failed']}")
         print("=" * 80 + "\n")
     
-    def full_sync(self, auto_create_users: bool = True, clear_device_after: bool = False) -> bool:
+    def full_sync(
+        self,
+        auto_create_users: bool = True,
+        clear_device_after: bool = False,
+        rebuild_dates: List[str] = None,
+    ) -> bool:
         """
         Perform a complete sync of both users and attendance.
         
@@ -571,7 +864,10 @@ class DeviceToDBSyncer:
             return False
         
         # Then sync attendance
-        if not self.sync_attendance(clear_after_sync=clear_device_after):
+        if not self.sync_attendance(
+            clear_after_sync=clear_device_after,
+            rebuild_dates=rebuild_dates,
+        ):
             logger.error("Attendance sync failed")
             return False
         

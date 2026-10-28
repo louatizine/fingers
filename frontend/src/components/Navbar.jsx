@@ -35,6 +35,7 @@ import LanguageSwitcher from './LanguageSwitcher'
 import apiClient from '../services/api'
 import { format } from 'date-fns'
 import { fr, ar } from 'date-fns/locale'
+import dynLogo from '../assets/dynlogo.jpg'
 
 export const NavbarContext = createContext({ fetchNotifications: () => {} })
 
@@ -300,23 +301,27 @@ export default function Navbar() {
   return (
     <NavbarContext.Provider value={{ fetchNotifications }}>
       {/* Main Navigation */}
-      <nav className="sticky top-0 z-50 w-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-white/20 dark:border-white/5">
-        <div className="max-w-[1600px] mx-auto px-8 h-20 flex items-center justify-between">
+      <nav className="sticky top-0 z-50 w-full border-b border-brand-border bg-white/90 shadow-[0_4px_20px_rgba(59,33,118,0.06)] backdrop-blur-xl dark:border-white/5 dark:bg-slate-900/90">
+        <div className="mx-auto flex h-16 max-w-[1600px] items-center justify-between px-4 md:px-6">
           
           {/* Left: Brand & Date */}
-          <div className="flex items-center gap-8">
-            <div className="flex flex-col">
-              <span className="text-[10px] font-medium text-slate-400/80 uppercase tracking-[0.3em]">
+          <div className="flex min-w-0 items-center gap-4 md:gap-6">
+{/*             <div className="hidden h-10 w-24 shrink-0 items-center overflow-hidden rounded-xl border border-brand-border bg-white px-1 shadow-sm sm:flex">
+              <img src={dynLogo} alt="Dynamix Services" className="h-full w-full object-contain" />
+            </div> */}
+            <div className="hidden h-7 w-px bg-brand-border sm:block" />
+            <div className="flex min-w-0 fl ex-col">
+              <span className="text-[9px] font-bold uppercase tracking-[0.24em] text-slate-400/80">
                 {today}
               </span>
-              <h1 className="text-lg font-light text-slate-900 dark:text-white/90 tracking-tight">
+              <h1 className="truncate text-base font-medium tracking-tight text-slate-900 dark:text-white/90 md:text-lg">
                 Welcome back, <span className="font-medium bg-gradient-to-r from-primary to-brand-blue bg-clip-text text-transparent">{user?.first_name}</span>
               </h1>
             </div>
           </div>
 
           {/* Center: Search */}
-          <div className="flex-1 max-w-xl mx-12 hidden lg:block">
+          <div className="mx-8 hidden max-w-xl flex-1 lg:block">
             <div className="relative">
               <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400/60" />
               <input
@@ -324,16 +329,16 @@ export default function Navbar() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search..."
-                className="w-full bg-white/50 dark:bg-white/5 border border-white/50 dark:border-white/10 rounded-xl py-3 pl-12 pr-4 text-sm outline-none transition-all placeholder:text-slate-400/60 focus:ring-2 focus:ring-primary/30"
+                className="w-full rounded-xl border border-brand-border bg-slate-50/70 py-2.5 pl-11 pr-4 text-sm outline-none transition-all placeholder:text-slate-400/60 focus:border-primary-300 focus:bg-white focus:ring-4 focus:ring-primary-100 dark:border-white/10 dark:bg-white/5 dark:focus:bg-white/10"
               />
             </div>
           </div>
 
           {/* Right: Actions */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 md:gap-3">
             
             {/* Theme Toggle */}
-            <button 
+{/*             <button 
               onClick={() => setDarkMode(!darkMode)}
               className="h-12 w-12 flex items-center justify-center rounded-xl bg-white/50 dark:bg-white/5 border border-white/50 dark:border-white/10 hover:scale-105 transition-all duration-300"
             >
@@ -342,7 +347,7 @@ export default function Navbar() {
               ) : (
                 <MoonIcon className="h-5 w-5 text-slate-600 dark:text-slate-400" />
               )}
-            </button>
+            </button> */}
 
             {/* Language Switcher */}
             <div className="scale-90">
@@ -358,7 +363,7 @@ export default function Navbar() {
                 <>
                   <Menu.Button 
                     onClick={() => setShowNotifications(!showNotifications)}
-                    className="relative h-12 w-12 flex items-center justify-center rounded-xl bg-white/50 dark:bg-white/5 border border-white/50 dark:border-white/10 hover:scale-105 transition-all duration-300"
+                    className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-brand-border bg-white text-slate-500 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary-200 hover:bg-primary-50 hover:text-primary dark:border-white/10 dark:bg-white/5"
                   >
                     <BellIcon className={`h-5 w-5 ${open ? 'text-primary' : 'text-slate-600 dark:text-slate-400'} transition-colors duration-300`} />
                     {unreadCount > 0 && (
@@ -460,9 +465,9 @@ export default function Navbar() {
 
             {/* Profile */}
             <Menu as="div" className="relative">
-              <Menu.Button className="flex items-center gap-3 px-1 py-1 rounded-2xl bg-gradient-to-r from-white/80 to-white/40 dark:from-white/10 dark:to-white/5 backdrop-blur-sm border border-white/50 dark:border-white/10 hover:scale-105 transition-all duration-300">
+              <Menu.Button className="flex items-center gap-2 rounded-xl border border-brand-border bg-white px-1.5 py-1.5 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary-200 hover:bg-primary-50 dark:border-white/10 dark:bg-white/5">
                 <div className="relative">
-                  <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-brand-blue p-0.5">
+                  <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary to-brand-blue p-0.5">
                     <div className="h-full w-full rounded-xl bg-white dark:bg-slate-900 flex items-center justify-center text-sm font-bold text-slate-900 dark:text-white">
                       {user?.first_name?.[0]?.toUpperCase()}
                     </div>
@@ -477,7 +482,7 @@ export default function Navbar() {
                     {user?.email}
                   </span>
                 </div>
-                <ChevronRightIcon className="h-4 w-4 text-slate-400" />
+                <ChevronRightIcon className="mr-1 h-4 w-4 text-slate-400" />
               </Menu.Button>
 
               <Transition

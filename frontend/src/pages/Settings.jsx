@@ -33,11 +33,12 @@ export default function Settings() {
     maxConsecutiveDays: 30
   })
   const [attendanceSettings, setAttendanceSettings] = useState({
-    checkInStart: '08:00',
-    checkOutEnd: '17:00',
-    lunchBreakStart: '12:00',
-    lunchBreakEnd: '13:00',
-    workingDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']
+    checkInStart: '08:15',
+    checkOutEnd: '17:30',
+    lunchBreakStart: '12:45',
+    lunchBreakEnd: '14:00',
+    workingDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+    onlineDays: ['Fri'],
   })
   const [companies, setCompanies] = useState([])
   const [loading, setLoading] = useState(false)
@@ -92,7 +93,15 @@ export default function Settings() {
     try {
       const response = await settingsAPI.getAttendanceSettings()
       if (response.data.success) {
-        setAttendanceSettings(response.data.data)
+        const data = response.data.data || {}
+        setAttendanceSettings({
+          checkInStart: data.checkInStart || '08:15',
+          checkOutEnd: data.checkOutEnd || '17:30',
+          lunchBreakStart: data.lunchBreakStart || '12:45',
+          lunchBreakEnd: data.lunchBreakEnd || '14:00',
+          workingDays: data.workingDays || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+          onlineDays: data.onlineDays || ['Fri'],
+        })
       }
     } catch (error) {
       console.error('Failed to load attendance settings:', error)
@@ -163,6 +172,16 @@ export default function Settings() {
     })
   }
 
+  const handleOnlineDayToggle = (day) => {
+    setAttendanceSettings((prev) => {
+      const currentDays = [...(prev.onlineDays || [])]
+      if (currentDays.includes(day)) {
+        return { ...prev, onlineDays: currentDays.filter((d) => d !== day) }
+      }
+      return { ...prev, onlineDays: [...currentDays, day] }
+    })
+  }
+
   // --- Calculation Logic ---
   const calculateVacationBalance = (employee) => {
     const {
@@ -209,10 +228,10 @@ export default function Settings() {
     <button
       onClick={() => setActiveTab(id)}
       className={`
-        flex items-center gap-3 py-4 px-1 border-b-2 font-semibold text-sm transition-all duration-200
+        flex items-center gap-3 rounded-xl border-b-2 px-4 py-3.5 font-semibold text-sm transition-all duration-200
         ${activeTab === id 
-          ? 'border-primary text-primary' 
-          : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+          ? 'border-primary bg-primary-50 text-primary'
+          : 'border-transparent text-slate-500 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700'
         }
       `}
     >
@@ -230,7 +249,7 @@ export default function Settings() {
     const colors = colorClasses[color] || colorClasses.indigo
     
     return (
-      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+      <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white to-slate-50 p-4 shadow-soft transition-all hover:-translate-y-0.5 hover:shadow-medium">
         <div className="flex items-center gap-4">
           <div className={`h-12 w-12 rounded-xl ${colors.bg} flex items-center justify-center`}>
             <Icon className={`h-6 w-6 ${colors.text}`} />
@@ -245,8 +264,8 @@ export default function Settings() {
   }
 
   const SettingCard = ({ title, subtitle, icon: Icon, children }) => (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-      <div className="px-6 py-5 border-b border-slate-100">
+    <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-soft">
+      <div className="border-b border-slate-100 bg-gradient-to-r from-slate-50/80 to-white px-6 py-5">
         <div className="flex items-center">
           <div className={`h-10 w-10 rounded-xl bg-primary-50 flex items-center justify-center mr-4`}>
             <Icon className="h-5 w-5 text-primary" />
@@ -264,20 +283,23 @@ export default function Settings() {
   )
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fadeIn">
       
       {/* --- HEADER SECTION --- */}
-      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <header className="relative overflow-hidden rounded-[1.5rem] bg-gradient-to-br from-primary-900 via-primary-700 to-brand-blue px-5 py-5 text-white shadow-xl shadow-primary-900/15 md:px-7 md:py-6">
+        <div className="absolute -right-16 -top-20 h-64 w-64 rounded-full border border-white/10" />
+        <div className="absolute right-16 -bottom-28 h-56 w-56 rounded-full border border-white/10" />
+        <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <div className="p-3 bg-primary rounded-2xl shadow-lg shadow-primary-200">
+              <div className="rounded-2xl bg-white/15 p-3 shadow-lg shadow-black/15">
                 <Cog6ToothIcon className="h-7 w-7 text-white" />
               </div>
-              <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
+              <h1 className="text-3xl font-black tracking-tight md:text-4xl">
                 {t('settings.title')}
               </h1>
             </div>
-            <p className={`text-slate-500 font-medium ${isRTL ? 'mr-1' : 'ml-1'}`}>
+            <p className={`font-medium text-white/70 ${isRTL ? 'mr-1' : 'ml-1'}`}>
               {t('settings.subtitle') || 'Configure system settings and policies'}
             </p>
           </div>
@@ -304,11 +326,12 @@ export default function Settings() {
               color="blue" 
             />
           </div>
+        </div>
         </header>
 
         {/* --- TABS NAVIGATION --- */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm px-6">
-          <nav className="-mb-px flex space-x-8">
+        <div className="rounded-2xl border border-slate-200 bg-white px-4 shadow-soft md:px-6">
+            <nav className="flex gap-2 overflow-x-auto">
             <TabButton 
               id="holiday" 
               label={t('settings.tabs.holiday')} 
@@ -565,6 +588,39 @@ export default function Settings() {
                   </div>
                   <p className="text-xs text-slate-400 mt-3 font-medium">
                     {t('settings.attendance.selectedDays', { days: attendanceSettings.workingDays.map(day => t(`settings.attendance.days.${day}`)).join(', ') })}
+                  </p>
+                </div>
+
+                {/* Online / remote days — punches optional (option B) */}
+                <div>
+                  <label className={`block text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 ${isRTL ? 'mr-1' : 'ml-1'}`}>
+                    {t('settings.attendance.onlineDays')}
+                  </label>
+                  <p className="text-xs text-slate-500 mb-3">
+                    {t('settings.attendance.onlineDaysHelp')}
+                  </p>
+                  <div className="flex flex-wrap gap-3">
+                    {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
+                      <button
+                        key={`online-${day}`}
+                        type="button"
+                        onClick={() => handleOnlineDayToggle(day)}
+                        className={`px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                          (attendanceSettings.onlineDays || []).includes(day)
+                            ? 'bg-sky-600 text-white shadow-lg shadow-sky-200'
+                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                        }`}
+                      >
+                        {t(`settings.attendance.days.${day}`)}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-xs text-slate-400 mt-3 font-medium">
+                    {t('settings.attendance.selectedOnlineDays', {
+                      days: (attendanceSettings.onlineDays || []).length
+                        ? attendanceSettings.onlineDays.map((day) => t(`settings.attendance.days.${day}`)).join(', ')
+                        : t('settings.attendance.noneSelected'),
+                    })}
                   </p>
                 </div>
 

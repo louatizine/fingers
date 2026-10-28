@@ -15,9 +15,16 @@
     "timeout": "La synchronisation prend plus de temps que prévu",
     "hint": "Des enregistrements manquants ? Utilisez « Synchroniser depuis l'Appareil » à tout moment pour importer les pointages depuis le terminal.",
     "lastSync": "Dernière synchronisation : {{time}}",
-    "neverSynced": "En attente de la prochaine synchronisation automatique du matin",
+    "neverSynced": "En attente de la prochaine synchronisation automatique",
     "pendingToday": "Le pointage du jour n'est pas encore importé. La synchronisation automatique s'exécute à {{schedule}}. Un administrateur peut aussi cliquer sur « Synchroniser depuis l'Appareil » à tout moment.",
-    "scheduleHint": "Synchronisation automatique : {{schedule}}"
+    "scheduleHint": "Synchronisation automatique : {{schedule}}",
+    "from": "Du",
+    "to": "Au",
+    "syncDaysHint": "Laissez les deux dates vides pour importer les nouveaux pointages. Remplissez-les pour ne recalculer que ces jours.",
+    "rangeIncomplete": "Indiquez une date de début et une date de fin, ou laissez les deux vides.",
+    "rangeInvalid": "La date de début doit être antérieure ou égale à la date de fin.",
+    "rangeTooLong": "Choisissez 62 jours au maximum.",
+    "rangeStarted": "Synchronisation démarrée du {{start}} au {{end}}. Le terminal envoie encore tout son journal, puis seuls ces jours sont recalculés."
   },
   "stats": {
     "today": "Aujourd'hui (page)",
@@ -90,13 +97,17 @@
     "afternoonIn": "Retour après-midi",
     "checkOut": "Sortie",
     "workedHours": "Heures travaillées",
+    "late": "Retard",
+    "early": "Avance",
     "status": "Statut",
     "records": "Enregistrements",
     "totalDays": "Jours totaux",
     "daysWithRecords": "Jours avec enregistrements",
     "completeDays": "Jours complets",
     "absentDays": "Jours absents",
-    "totalWorkedHours": "Total heures travaillées"
+    "totalWorkedHours": "Total heures travaillées",
+    "totalLate": "Total retards",
+    "totalEarly": "Total avances"
   },
   "filters": {
     "title": "Filtres",
@@ -131,6 +142,8 @@
     "deviceId": "ID Appareil",
     "matchScore": "Score de correspondance",
     "workedHours": "Heures travaillées",
+    "late": "Retard",
+    "early": "Avance",
     "records": "Enregistrements"
   },
   "summary": {
@@ -147,6 +160,9 @@
     "daysWithRecords": "Jours avec enregistrements",
     "completeDays": "Jours complets",
     "totalHours": "Heures totales",
+    "totalLate": "Total retards",
+    "totalEarly": "Total avances",
+    "filterOnline": "En ligne",
     "dailyAttendance": "Présence quotidienne",
     "detailedView": "Vue détaillée",
     "noRecordsPeriod": "Aucun enregistrement pour cette période",
@@ -164,6 +180,7 @@
     "absent": "Absent",
     "no_data": "Aucune donnée",
     "incomplete": "Incomplet",
+    "online": "En ligne",
     "checkedIn": "Entrée enregistrée"
   },
   "pagination": {
@@ -182,6 +199,7 @@
     "noDataDesc": "Aucun employé actif dans le système",
     "present": "Présent",
     "absent": "Absent",
+    "online": "En ligne",
     "complete": "Complet",
     "partial": "Partiel",
     "totalHours": "Heures Totales",
@@ -193,6 +211,7 @@
     "filterAll": "Tous",
     "filterPresent": "Présents",
     "filterAbsent": "Absents",
+    "filterOnline": "En ligne",
     "showingCount": "{{count}} sur {{total}} employés affichés",
     "noMatches": "Aucun employé ne correspond à votre recherche ou filtre"
   }

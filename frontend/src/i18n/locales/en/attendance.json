@@ -15,9 +15,16 @@
     "timeout": "Sync is taking longer than expected",
     "hint": "Missing older records? Use Sync from Device anytime to import attendance from the fingerprint terminal.",
     "lastSync": "Last device sync: {{time}}",
-    "neverSynced": "Waiting for the next automatic morning sync",
+    "neverSynced": "Waiting for the next automatic sync",
     "pendingToday": "Today's attendance has not been imported yet. Auto-sync runs at {{schedule}}. An admin can also click \"Sync from Device\" anytime.",
-    "scheduleHint": "Automatic device sync: {{schedule}}"
+    "scheduleHint": "Automatic device sync: {{schedule}}",
+    "from": "From",
+    "to": "To",
+    "syncDaysHint": "Leave both dates empty to import new punches. Fill both to rebuild only those days.",
+    "rangeIncomplete": "Enter both a start date and an end date, or leave both empty.",
+    "rangeInvalid": "The start date must be on or before the end date.",
+    "rangeTooLong": "Choose 62 days or fewer.",
+    "rangeStarted": "Sync started for {{start}} to {{end}}. The terminal still sends its full log, then these days are rebuilt."
   },
   "stats": {
     "today": "Today (page)",
@@ -90,13 +97,17 @@
     "afternoonIn": "Afternoon return",
     "checkOut": "Check-out",
     "workedHours": "Worked Hours",
+    "late": "Lateness",
+    "early": "Early",
     "status": "Status",
     "records": "Records",
     "totalDays": "Total Days",
     "daysWithRecords": "Days with Records",
     "completeDays": "Complete Days",
     "absentDays": "Absent Days",
-    "totalWorkedHours": "Total Worked Hours"
+    "totalWorkedHours": "Total Worked Hours",
+    "totalLate": "Total Lateness",
+    "totalEarly": "Total Early"
   },
   "filters": {
     "title": "Filters",
@@ -131,6 +142,8 @@
     "deviceId": "Device ID",
     "matchScore": "Match Score",
     "workedHours": "Worked Hours",
+    "late": "Lateness",
+    "early": "Early",
     "records": "Records"
   },
   "summary": {
@@ -147,6 +160,9 @@
     "daysWithRecords": "Days with Records",
     "completeDays": "Complete Days",
     "totalHours": "Total Hours",
+    "totalLate": "Total Lateness",
+    "totalEarly": "Total Early",
+    "filterOnline": "Online",
     "dailyAttendance": "Daily Attendance",
     "detailedView": "Detailed Table",
     "noRecordsPeriod": "No attendance records found for this period",
@@ -164,6 +180,7 @@
     "absent": "Absent",
     "no_data": "No Data",
     "incomplete": "Incomplete",
+    "online": "Online",
     "checkedIn": "Checked In"
   },
   "pagination": {
@@ -182,6 +199,7 @@
     "noDataDesc": "No active employees in the system",
     "present": "Present",
     "absent": "Absent",
+    "online": "Online",
     "complete": "Complete",
     "partial": "Partial",
     "totalHours": "Total Hours",
@@ -193,6 +211,7 @@
     "filterAll": "All",
     "filterPresent": "Present",
     "filterAbsent": "Absent",
+    "filterOnline": "Online",
     "showingCount": "Showing {{count}} of {{total}} employees",
     "noMatches": "No employees match your search or filter"
   }

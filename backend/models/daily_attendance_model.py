@@ -3,19 +3,26 @@ Daily attendance summary model and persistence helpers.
 """
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 from services.daily_attendance_aggregator import (
     DailyWorkedSummary,
     minutes_to_decimal_hours,
     minutes_to_display,
-    punch_slot,
 )
+from services.work_schedule import WorkSchedule, get_work_schedule
 from services.zk_attendance_utils import format_timestamp_for_api
 
 
-def _place_saved_punches(check_in, lunch_out, afternoon_in, check_out):
+def _place_saved_punches(
+    check_in,
+    lunch_out,
+    afternoon_in,
+    check_out,
+    schedule: Optional[WorkSchedule] = None,
+):
     """Move a saved punch into the column that matches its clock time."""
+    active = schedule or get_work_schedule()
     slots = {
         'check_in': check_in,
         'lunch_out': lunch_out,
@@ -26,7 +33,7 @@ def _place_saved_punches(check_in, lunch_out, afternoon_in, check_out):
         value = slots[name]
         if not isinstance(value, datetime):
             continue
-        target = punch_slot(value)
+        target = active.punch_slot(value)
         if target != name and not slots[target]:
             slots[target] = value
             slots[name] = None
@@ -85,14 +92,26 @@ class DailyAttendanceModel:
             'afternoon_in_at': summary.afternoon_in_at,
             'first_event_at': summary.first_event_at,
             'last_event_at': summary.last_event_at,
+            'morning_late_minutes': summary.morning_late_minutes,
+            'afternoon_late_minutes': summary.afternoon_late_minutes,
+            'total_late_minutes': summary.total_late_minutes,
+            'late_display': minutes_to_display(summary.total_late_minutes),
+            'morning_early_minutes': summary.morning_early_minutes,
+            'afternoon_early_minutes': summary.afternoon_early_minutes,
+            'total_early_minutes': summary.total_early_minutes,
+            'early_display': minutes_to_display(summary.total_early_minutes),
             'device_id': device_id,
             'source': source,
             'updated_at': now,
         }
 
     @staticmethod
-    def summary_to_response(doc: dict) -> dict:
+    def summary_to_response(
+        doc: dict,
+        schedule: Optional[WorkSchedule] = None,
+    ) -> dict:
         """API-friendly dict from a stored summary document."""
+        active = schedule or get_work_schedule()
         pair_count = doc.get('pair_count', 0)
         check_in = doc.get('check_in_at')
         check_out = doc.get('check_out_at')
@@ -103,15 +122,25 @@ class DailyAttendanceModel:
             lunch_out,
             afternoon_in,
             check_out,
+            active,
         )
         # Older summaries stored lunch departure as check-out when the
         # afternoon return had no end-of-day punch yet.
         if afternoon_in and lunch_out and check_out == lunch_out:
             check_out = None
         has_records = doc.get('event_count', 0) > 0
+        date_str = doc.get('date') or ''
+        is_online_day = bool(date_str and active.is_online_day(date_str))
+        # Always recompute late/early from current schedule so Settings changes apply.
+        # Online days: punches optional — no late/early penalty.
+        timing = active.timing_from_punches(
+            check_in,
+            afternoon_in,
+            skip_penalties=is_online_day,
+        )
         return {
             'employee_id': doc.get('employee_id'),
-            'date': doc.get('date'),
+            'date': date_str,
             'worked_time_display': doc.get('worked_time_display', '00:00'),
             'total_worked_hours': doc.get('total_worked_hours', 0),
             'total_worked_minutes': doc.get('total_worked_minutes', 0),
@@ -133,6 +162,17 @@ class DailyAttendanceModel:
             'last_event_at': format_timestamp_for_api(doc['last_event_at'])
             if doc.get('last_event_at')
             else None,
+            'morning_late_minutes': timing['morning_late_minutes'],
+            'afternoon_late_minutes': timing['afternoon_late_minutes'],
+            'total_late_minutes': timing['total_late_minutes'],
+            'late_display': timing['late_display'],
+            'is_late': timing['is_late'],
+            'morning_early_minutes': timing['morning_early_minutes'],
+            'afternoon_early_minutes': timing['afternoon_early_minutes'],
+            'total_early_minutes': timing['total_early_minutes'],
+            'early_display': timing['early_display'],
+            'is_early': timing['is_early'],
+            'is_online_day': is_online_day,
             'device_id': doc.get('device_id'),
             'is_complete': (
                 doc.get('unmatched_events', 0) == 0
