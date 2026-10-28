@@ -26,7 +26,8 @@
     "name": "الاسم",
     "templateId": "معرف القالب",
     "enrolledAt": "تاريخ التسجيل",
-    "actions": "الإجراءات"
+    "actions": "الإجراءات",
+    "id": "المعرّف: {{id}}"
   },
   "remove": "إزالة",
   "removeDialog": {
@@ -44,5 +45,20 @@
   },
   "loading": "جاري تحميل المستخدمين المسجلين...",
   "noUsers": "لم يتم العثور على مستخدمين مسجلين",
-  "notAvailable": "غير متاح"
+  "notAvailable": "غير متاح",
+  "empty": {
+    "noUsersFound": "لم يتم العثور على مستخدمين",
+    "noEnrolled": "لا توجد بصمات مسجلة",
+    "noMatch": "لا نتائج لـ «{{term}}»",
+    "noEnrolledDesc": "سجّل الموظفين على الجهاز لتظهر بصماتهم هنا."
+  },
+  "pendingEnrollment": "التسجيل قيد الانتظار",
+  "notEnrolledYet": "غير مسجل بعد",
+  "removeFingerprint": "إزالة البصمة",
+  "noAction": "لا إجراء",
+  "showing": "عرض {{from}} إلى {{to}} من {{total}}",
+  "revokeTitle": "إزالة البصمة؟",
+  "revokeDesc": "ستتم إزالة بصمة {{name}} من الجهاز. لا يمكن التراجع عن هذا الإجراء.",
+  "keepIt": "الإبقاء عليها",
+  "yesRemove": "نعم، إزالة"
 }

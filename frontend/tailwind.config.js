@@ -1,4 +1,21 @@
 /** @type {import('tailwindcss').Config} */
+
+// Warm "paper & violet ink" greys. Overriding slate/gray re-skins every page at once
+// while keeping the existing class names in the codebase.
+const ink = {
+  50: '#F8F6F1',
+  100: '#F1EEE7',
+  200: '#E5E0D5',
+  300: '#CEC8BA',
+  400: '#9A93A9',
+  500: '#6F6882',
+  600: '#524B65',
+  700: '#3B3552',
+  800: '#271F3E',
+  900: '#161128',
+  950: '#0E0A1C',
+}
+
 module.exports = {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
@@ -25,8 +42,8 @@ module.exports = {
           red: '#D10424',
           yellow: '#F1CA15',
           primary: '#3B2176',
-          surface: '#F5F0FB',
-          border: '#E4D8F2',
+          surface: '#F6F2FA',
+          border: '#E5E0D5',
         },
         accent: {
           DEFAULT: '#4A6AAD',
@@ -35,12 +52,19 @@ module.exports = {
           red: '#D10424',
           yellow: '#F1CA15',
         },
+        paper: {
+          DEFAULT: '#F5F2EB',
+          deep: '#ECE8DE',
+        },
+        ink: ink,
+        slate: ink,
+        gray: ink,
         neutral: {
           white: '#FFFFFF',
-          light: '#F8F9FA',
-          medium: '#E9ECEF',
-          dark: '#6C757D',
-          charcoal: '#212529',
+          light: '#F5F2EB',
+          medium: '#E5E0D5',
+          dark: '#6F6882',
+          charcoal: '#161128',
           black: '#000000',
         },
         status: {
@@ -51,26 +75,41 @@ module.exports = {
         },
       },
       fontFamily: {
-        sans: ['"Inter"', '"Segoe UI"', 'system-ui', '-apple-system', 'sans-serif'],
+        sans: ['"Schibsted Grotesk"', '"IBM Plex Sans Arabic"', '"Segoe UI"', 'system-ui', 'sans-serif'],
+        display: ['"Familjen Grotesk"', '"IBM Plex Sans Arabic"', '"Segoe UI"', 'system-ui', 'sans-serif'],
+        mono: ['"DM Mono"', '"IBM Plex Sans Arabic"', 'ui-monospace', 'Consolas', 'monospace'],
+      },
+      fontWeight: {
+        // Lighter, calmer weights: the heavy "font-black" look is a big part of the generic feel.
+        semibold: '600',
+        bold: '600',
+        extrabold: '700',
+        black: '700',
       },
       borderRadius: {
-        'xl': '1rem',
-        '2xl': '1.5rem',
-        '3xl': '2rem',
+        lg: '0.5rem',
+        xl: '0.625rem',
+        '2xl': '0.75rem',
+        '3xl': '1rem',
       },
       boxShadow: {
-        'soft': '0 2px 8px rgba(0, 0, 0, 0.04)',
-        'medium': '0 4px 16px rgba(0, 0, 0, 0.08)',
-        'large': '0 8px 32px rgba(0, 0, 0, 0.12)',
-        'glow': '0 0 24px rgba(59, 33, 118, 0.28)',
-        'glow-purple': '0 0 24px rgba(59, 33, 118, 0.35)',
+        sm: '0 1px 0 rgba(22, 17, 40, 0.04)',
+        DEFAULT: '0 1px 2px rgba(22, 17, 40, 0.06)',
+        md: '0 1px 2px rgba(22, 17, 40, 0.05), 0 4px 12px -4px rgba(22, 17, 40, 0.10)',
+        lg: '0 1px 2px rgba(22, 17, 40, 0.05), 0 10px 24px -10px rgba(22, 17, 40, 0.16)',
+        xl: '0 2px 4px rgba(22, 17, 40, 0.05), 0 18px 36px -14px rgba(22, 17, 40, 0.22)',
+        '2xl': '0 4px 8px rgba(22, 17, 40, 0.06), 0 28px 56px -18px rgba(22, 17, 40, 0.30)',
+        soft: '0 1px 0 rgba(22, 17, 40, 0.04), 0 1px 2px rgba(22, 17, 40, 0.04)',
+        medium: '0 1px 2px rgba(22, 17, 40, 0.05), 0 4px 12px -4px rgba(22, 17, 40, 0.10)',
+        large: '0 2px 4px rgba(22, 17, 40, 0.05), 0 18px 36px -14px rgba(22, 17, 40, 0.22)',
+        glow: '0 0 0 4px rgba(59, 33, 118, 0.12)',
+        'glow-purple': '0 0 0 4px rgba(59, 33, 118, 0.12)',
       },
       backgroundImage: {
         'gradient-primary': 'linear-gradient(135deg, #3B2176 0%, #2F1A5E 100%)',
         'gradient-brand': 'linear-gradient(135deg, #3B2176 0%, #2F1A5E 100%)',
         'gradient-purple': 'linear-gradient(135deg, #3B2176 0%, #2F1A5E 100%)',
         'gradient-sunset': 'linear-gradient(135deg, #D10424 0%, #F1CA15 100%)',
-        'glass': 'linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)',
       },
       backdropBlur: {
         xs: '2px',
@@ -82,6 +121,10 @@ module.exports = {
         'float': 'float 6s ease-in-out infinite',
         'slide-up': 'slideUp 0.5s ease-out',
         'scale-in': 'scaleIn 0.3s ease-out',
+        'shake': 'shake 0.45s cubic-bezier(.36,.07,.19,.97) both',
+        'cube-hop': 'cubeHop 1.1s ease-in-out infinite',
+        'rise': 'rise 0.6s cubic-bezier(0.16, 1, 0.3, 1) both',
+        'cube-pulse': 'cubePulse 3.2s ease-in-out infinite',
       },
       keyframes: {
         float: {
@@ -95,6 +138,24 @@ module.exports = {
         scaleIn: {
           '0%': { transform: 'scale(0.95)', opacity: '0' },
           '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+        shake: {
+          '10%, 90%': { transform: 'translateX(-1px)' },
+          '20%, 80%': { transform: 'translateX(2px)' },
+          '30%, 50%, 70%': { transform: 'translateX(-4px)' },
+          '40%, 60%': { transform: 'translateX(4px)' },
+        },
+        cubeHop: {
+          '0%, 60%, 100%': { transform: 'translateY(0) scale(1)', opacity: '0.55' },
+          '30%': { transform: 'translateY(-10px) scale(1.08)', opacity: '1' },
+        },
+        cubePulse: {
+          '0%, 100%': { opacity: '0.35', transform: 'scale(0.82)' },
+          '50%': { opacity: '1', transform: 'scale(1)' },
+        },
+        rise: {
+          '0%': { transform: 'translateY(14px)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
         },
       },
     },

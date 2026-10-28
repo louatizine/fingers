@@ -14,7 +14,9 @@ import {
   ChevronRightIcon,
   BanknotesIcon,
   ArrowPathIcon
-} from '@heroicons/react/24/outline'
+} from '../components/ui/icons'
+import PageHeader from '../components/ui/PageHeader'
+import LoadingSpinner from '../components/LoadingSpinner'
 
 export default function SalaryAdvances() {
   const { t } = useTranslation()
@@ -204,62 +206,42 @@ export default function SalaryAdvances() {
   }
 
   if (loading) {
-    return (
-      <div className="flex flex-col justify-center items-center h-96">
-        <ArrowPathIcon className="h-10 w-10 text-primary animate-spin opacity-20" />
-        <p className="mt-4 text-sm font-medium text-slate-400 tracking-wide">{t('salaryAdvances.loading')}</p>
-      </div>
-    )
+    return <LoadingSpinner message={t('salaryAdvances.loading')} />
   }
 
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* Dynamic Header */}
-      <div className="relative overflow-hidden rounded-[1.5rem] bg-gradient-to-br from-primary-900 via-primary-700 to-brand-blue px-5 py-5 text-white shadow-xl shadow-primary-900/15 md:px-7 md:py-6">
-        <div className="absolute -right-16 -top-20 h-64 w-64 rounded-full border border-white/10" />
-        <div className="absolute right-16 -bottom-28 h-56 w-56 rounded-full border border-white/10" />
-        <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-5">
-          <div>
-            <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.22em] text-primary-100">
-              <BanknotesIcon className="h-4 w-4" />
-              <span>{t('salaryAdvances.totalRequests')}</span>
-            </div>
-            <h1 className="text-3xl font-black tracking-tight md:text-4xl">
-              {t('salaryAdvances.title')}
-            </h1>
-            <p className="mt-2 max-w-2xl text-sm font-medium leading-6 text-white/70 md:text-base">
-              {t('salaryAdvances.subtitle')}
-            </p>
-          </div>
-
-          {user.role === 'employee' && (
-            <button
-              onClick={() => setShowModal(true)}
-              className="relative group flex items-center gap-2 overflow-hidden rounded-xl bg-white px-5 py-3 text-sm font-bold text-primary shadow-lg transition-all hover:-translate-y-0.5 hover:bg-primary-50 hover:shadow-xl active:translate-y-0"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <PlusIcon className="h-5 w-5 z-10" />
-              <span className="z-10">{t('salaryAdvances.newRequest')}</span>
+      <PageHeader
+        icon={BanknotesIcon}
+        kicker={t('salaryAdvances.totalRequests')}
+        title={t('salaryAdvances.title')}
+        subtitle={t('salaryAdvances.subtitle')}
+        actions={
+          user.role === 'employee' && (
+            <button onClick={() => setShowModal(true)} className="btn-primary">
+              <PlusIcon className="h-5 w-5" />
+              <span>{t('salaryAdvances.newRequest')}</span>
             </button>
-          )}
-        </div>
-      </div>
+          )
+        }
+      />
 
       {/* Control Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-soft md:p-5">
-        <div className="flex items-center gap-2 rounded-full bg-primary-50 px-3 py-1.5">
-          <span className="text-xs font-bold text-slate-500 uppercase tracking-tighter">{t('salaryAdvances.totalRequests')}</span>
-          <span className="text-xs font-black text-slate-900">{advances.length}</span>
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white px-5 py-3 shadow-soft">
+        <div className="flex items-baseline gap-3">
+          <span className="font-display text-3xl font-light leading-none tabular-nums text-slate-900">{advances.length}</span>
+          <span className="kicker">{t('salaryAdvances.totalRequests')}</span>
         </div>
 
         <div className="flex items-center gap-4">
-          <label className="text-xs font-bold text-slate-400 uppercase">{t('salaryAdvances.itemsPerPage')}</label>
-          <div className="flex bg-slate-100 p-1 rounded-xl">
+          <label className="kicker">{t('salaryAdvances.itemsPerPage')}</label>
+          <div className="flex rounded-lg bg-slate-100 p-1">
             {[10, 20, 50].map(val => (
               <button
                 key={val}
                 onClick={() => { setItemsPerPage(val); setCurrentPage(1); }}
-                className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${itemsPerPage === val ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
+                className={`rounded-md px-3 py-1 font-mono text-xs font-medium transition-all ${itemsPerPage === val ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
               >
                 {val}
               </button>
@@ -269,30 +251,30 @@ export default function SalaryAdvances() {
       </div>
 
       {/* Table Section */}
-      <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-soft">
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-soft">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full border-collapse text-start">
             <thead>
-              <tr className="bg-slate-50/50">
+              <tr className="border-b border-slate-200 bg-slate-50">
                 {user.role !== 'employee' && (
-                  <th className="px-8 py-5 text-[10px] font-black uppercase text-slate-400 tracking-widest">
+                  <th className="kicker px-8 py-3.5 text-start">
                     {t('salaryAdvances.table.employee')}
                   </th>
                 )}
-                <th className="px-8 py-5 text-[10px] font-black uppercase text-slate-400 tracking-widest">
+                <th className="kicker px-8 py-3.5 text-start">
                   {t('salaryAdvances.table.amount')}
                 </th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase text-slate-400 tracking-widest">
+                <th className="kicker px-8 py-3.5 text-start">
                   {t('salaryAdvances.table.reason')}
                 </th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase text-slate-400 tracking-widest">
+                <th className="kicker px-8 py-3.5 text-start">
                   {t('salaryAdvances.table.date')}
                 </th>
-                <th className="px-8 py-5 text-[10px] font-black uppercase text-slate-400 tracking-widest">
+                <th className="kicker px-8 py-3.5 text-start">
                   {t('salaryAdvances.table.status')}
                 </th>
                 {user.role !== 'employee' && (
-                  <th className="px-8 py-5 text-right text-[10px] font-black uppercase text-slate-400 tracking-widest">
+                  <th className="kicker px-8 py-3.5 text-end">
                     {t('salaryAdvances.table.actions')}
                   </th>
                 )}
@@ -309,17 +291,12 @@ export default function SalaryAdvances() {
                   )}
 
                   <td className="px-8 py-5">
-                    <div className="flex items-center gap-2">
-                      <div className="h-8 w-8 rounded-full bg-primary-50 flex items-center justify-center">
-                        <BanknotesIcon className="h-4 w-4 text-primary" />
-                      </div>
-                      <span className="font-black text-slate-900">
-                        {item.amount}{' '}
-                        <span className="text-[10px] opacity-40 uppercase tracking-tighter">
-                          {t('currency.dinar')}
-                        </span>
+                    <span className="font-display text-lg font-medium tabular-nums text-slate-900">
+                      {item.amount}{' '}
+                      <span className="font-mono text-[11px] font-medium uppercase text-slate-400">
+                        {t('currency.dinar')}
                       </span>
-                    </div>
+                    </span>
                   </td>
 
                   <td className="px-8 py-5">
@@ -329,7 +306,7 @@ export default function SalaryAdvances() {
                   </td>
 
                   <td className="px-8 py-5">
-                    <span className="text-xs font-bold text-slate-400 uppercase tracking-tighter">
+                    <span className="font-mono text-xs text-slate-500">
                       {new Date(item.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                     </span>
                   </td>
@@ -339,7 +316,7 @@ export default function SalaryAdvances() {
                   </td>
 
                   {user.role !== 'employee' && (
-                    <td className="px-8 py-5 text-right">
+                    <td className="px-8 py-5 text-end">
                       <ActionButtons item={item} />
                     </td>
                   )}
@@ -401,7 +378,7 @@ export default function SalaryAdvances() {
             onClick={() => { setShowModal(false); setShowRejectModal(false) }}
           />
 
-          <div className="relative w-full max-w-lg bg-white rounded-[2.5rem] shadow-2xl p-8 transform transition-all animate-in zoom-in-95 duration-300">
+          <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl p-8 transform transition-all animate-in zoom-in-95 duration-300">
             <div className="flex justify-between items-start mb-8">
               <div>
                 <h3 className="text-2xl font-black text-slate-900 tracking-tight">

@@ -38,10 +38,18 @@
     "days": "أيام",
     "filters": "فلاتر",
     "thisYear": "هذا العام",
-    "previousYear": "العام السابق"
-  },  "currency": {
+    "previousYear": "العام السابق",
+    "creating": "جارٍ الإنشاء…",
+    "clearSelection": "إلغاء التحديد",
+    "unknown": "غير معروف",
+    "general": "عام",
+    "na": "غير متوفر",
+    "remove": "إزالة"
+  },
+  "currency": {
     "dinar": "د.ت"
-  },  "nav": {
+  },
+  "nav": {
     "dashboard": "لوحة التحكم",
     "employees": "الموظفون",
     "leaves": "الإجازات",
@@ -52,84 +60,43 @@
     "fingerprint": "بصمة الإصبع",
     "settings": "الإعدادات",
     "profile": "الملف الشخصي",
-    "logout": "تسجيل الخروج"
+    "logout": "تسجيل الخروج",
+    "languageSelector": "اختر اللغة",
+    "closeMenu": "إغلاق القائمة",
+    "openMenu": "فتح القائمة",
+    "main": "التنقل الرئيسي",
+    "skipToContent": "تخطي إلى المحتوى",
+    "collapseSidebar": "طي الشريط الجانبي",
+    "expandSidebar": "توسيع الشريط الجانبي",
+    "searchJump": "بحث أو الانتقال إلى…"
+  },
+  "command": {
+    "placeholder": "ابحث في الصفحات أو الأشخاص أو الإجراءات…",
+    "pages": "الصفحات",
+    "people": "الأشخاص",
+    "actions": "الإجراءات",
+    "empty": "لا توجد نتائج",
+    "hint": "للتنقل",
+    "open": "فتح",
+    "logout": "تسجيل الخروج",
+    "profile": "فتح ملفي الشخصي",
+    "requestLeave": "طلب إجازة",
+    "requestAdvance": "طلب سلفة"
+  },
+  "toast": {
+    "success": "نجاح",
+    "error": "حدث خطأ",
+    "warning": "تنبيه",
+    "info": "إشعار"
   },
   "branding": {
     "title": "إدارة الموارد البشرية",
     "subtitle": "نظام المؤسسة"
   },
   "dashboard": {
-    "title_employee": "لوحة التحكم الخاصة بي",
-    "title_admin": "لوحة تحكم المسؤول",
-    "title_supervisor": "لوحة تحكم المشرف",
-    "welcome": "مرحبًا بعودتك، {{name}}!",
-    "subtitle_employee": "نظرة عامة على نشاطك.",
-    "subtitle_admin": "نظرة عامة وتحليلات على مستوى النظام",
-    "subtitle_supervisor": "عمليات الشركة وإدارة الفريق",
-    "request_leave": "طلب إجازة",
-    "request_advance": "طلب سلفة",
-    "view_calendar": "عرض التقويم",
-    "view_schedule": "عرض الجدول",
-    "vacation_balance": "رصيد الإجازات",
-    "days_available": "أيام متاحة",
-    "vacation_earned": "مكتسب",
-    "vacation_used": "مستخدم",
-    "my_leave_requests": "طلبات الإجازة الخاصة بي",
-    "my_salary_advances": "السلف المالية الخاصة بي",
-    "total_requests": "إجمالي الطلبات",
-    "recentActivity": "النشاط الأخير",
-    "days": "أيام",
-    "balance_progress": "تقدم الرصيد",
-    "current_status_overview": "نظرة عامة على الحالة الحالية",
-    "financial_requests_summary": "ملخص الطلبات المالية",
-    "approved_days": "أيام الموافقة",
-    "total_approved_amount": "المبلغ الإجمالي الموافق عليه",
-    "latest_activities": "آخر الأنشطة",
-    "financial_activities": "الأنشطة المالية",
-    "no_recent_leave_requests": "لا توجد طلبات إجازة حديثة",
-    "no_recent_salary_advances": "لا توجد سلف مالية حديثة",
-    "view_all_requests": "عرض جميع الطلبات",
-    "view_all_advances": "عرض جميع السلف",
-    "view_profile": "عرض الملف الشخصي",
-    "quick_actions": "إجراءات سريعة",
-    "active": "نشط",
-    "stats": {
-      "annual_leave": "الإجازة السنوية",
-      "sick_leave": "الإجازة المرضية",
-      "pending_requests": "الطلبات المعلقة",
-      "approved_leaves": "الإجازات الموافق عليها",
-      "total_employees": "إجمالي الموظفين",
-      "pending_leaves": "الإجازات المعلقة",
-      "pending_advances": "السلف المعلقة",
-      "active_projects": "المشاريع النشطة",
-      "days_remaining": "أيام متبقية",
-      "days_available": "أيام متاحة",
-      "awaiting_approval": "في انتظار الموافقة",
-      "this_year": "هذا العام",
-      "active_employees": "الموظفون النشطون",
-      "in_progress": "قيد التنفيذ"
-    },
-    "charts": {
-      "leave_requests": "نظرة عامة على طلبات الإجازة",
-      "leave_requests_subtitle": "التوزيع حسب الحالة",
-      "salary_advances": "طلبات السلف المالية",
-      "salary_advances_subtitle": "حالة الشهر الحالي",
-      "leave_balance": "رصيد الإجازات",
-      "recent_activity": "النشاط الأخير",
-      "leave_trends": "اتجاهات الإجازات",
-      "upcoming_timeoff": "الإجازات القادمة",
-      "system_health": "صحة النظام"
-    },
-    "recent": {
-      "leave_requests": "طلبات الإجازة الأخيرة",
-      "leave_requests_subtitle": "آخر الطلبات المقدمة",
-      "salary_advances": "السلف المالية الأخيرة",
-      "salary_advances_subtitle": "الطلبات المالية"
-    },
     "companyLeaveStatus": "نظرة عامة على حالة الإجازات في الشركة",
     "salaryAdvanceRequests": "طلبات السلف المالية",
-    "advanceRequestOverview": "نظرة عامة على طلبات السلف",
-    "companyWideLeaveDistribution": "توزيع الإجازات على مستوى الشركة"
+    "advanceRequestOverview": "نظرة عامة على طلبات السلف"
   },
   "leaves": {
     "title": "طلبات الإجازة",
@@ -162,7 +129,10 @@
       "days": "الأيام",
       "reason": "السبب",
       "status": "الحالة",
-      "actions": "الإجراءات"
+      "actions": "الإجراءات",
+      "showing": "عرض {{from}} إلى {{to}} من {{total}}",
+      "noRequests": "لا توجد طلبات إجازة",
+      "noRequestsDesc": "ستظهر طلباتك هنا بمجرد إرسالها."
     },
     "modal": {
       "title": "طلب إجازة جديد",
@@ -172,7 +142,13 @@
       "number_of_days": "عدد الأيام",
       "reason": "السبب",
       "submit": "إرسال الطلب",
-      "cancel": "إلغاء"
+      "cancel": "إلغاء",
+      "startDate": "تاريخ البداية",
+      "endDate": "تاريخ النهاية",
+      "leaveType": "نوع الإجازة",
+      "reasonPlaceholder": "اذكر سبب طلبك…",
+      "rejectionReasonPlaceholder": "سبب الرفض (اختياري)",
+      "submitButton": "إرسال الطلب"
     },
     "messages": {
       "insufficient_warning": "⚠️ تحذير: رصيد غير كافٍ! متاح: {{available}} يوم، مطلوب: {{requested}} يوم. تم إرسال طلبك للموافقة.",
@@ -181,8 +157,10 @@
       "rejected": "تم رفض طلب الإجازة",
       "failed": "فشل في إرسال الطلب",
       "confirm_approve": "هل تريد الموافقة على طلب الإجازة هذا؟",
-      "rejection_reason": "أدخل سبب الرفض (اختياري):"
-    }
+      "rejection_reason": "أدخل سبب الرفض (اختياري):",
+      "invalid_days": "عدد الأيام غير صالح"
+    },
+    "loading": "جارٍ تحميل الطلبات…"
   },
   "employees": {
     "title": "إدارة الموظفين",
@@ -304,7 +282,8 @@
       "birthday": "تاريخ الميلاد",
       "yearsOfService": "سنوات الخدمة",
       "address": "العنوان",
-      "teamMates": "زملاء الفريق"
+      "teamMates": "زملاء الفريق",
+      "title": "تفاصيل الموظف"
     },
     "messages": {
       "createSuccess": "تم إنشاء الموظف بنجاح",
@@ -315,7 +294,9 @@
       "activateError": "فشل في تفعيل الموظف",
       "confirmDeactivate": "هل أنت متأكد من إلغاء تفعيل هذا الموظف؟ سيفقد الوصول إلى النظام.",
       "confirmActivate": "هل أنت متأكد من تفعيل هذا الموظف؟ سيستعيد الوصول إلى النظام."
-    }
+    },
+    "noResults": "لا توجد نتائج",
+    "clearFilters": "مسح عوامل التصفية"
   },
   "profile": {
     "title": "ملفي الشخصي",
@@ -352,7 +333,8 @@
     "messages": {
       "updateSuccess": "تم تحديث الملف الشخصي بنجاح",
       "updateError": "فشل في تحديث الملف الشخصي"
-    }
+    },
+    "accountStatus": "حالة الحساب"
   },
   "settings": {
     "title": "الإعدادات",
@@ -394,7 +376,8 @@
       "usedVacationDays": "أيام الإجازة المستخدمة",
       "formulaNote": "سيتم تطبيق هذه الصيغة على جميع الموظفين أثناء إعادة الحساب",
       "recalculating": "جارٍ إعادة الحساب...",
-      "saveButton": "حفظ الإعدادات"
+      "saveButton": "حفظ الإعدادات",
+      "changesAffectAll": "تنطبق التغييرات على جميع الموظفين"
     },
     "employeeBalances": {
       "title": "أرصدة إجازات الموظفين",
@@ -577,6 +560,18 @@
     "footer": {
       "employeeNote": "أنت معين في المشاريع المعروضة أعلاه",
       "managerNote": "إدارة {{count}} مشروع نشط"
+    },
+    "hasDeactivatedUsers": "يضم هذا المشروع أعضاء معطّلين",
+    "unassignedProjects": "بدون فريق",
+    "searchPlaceholder": "البحث في المشاريع بالاسم أو الوصف…",
+    "searchEmployees": "البحث عن الموظفين…",
+    "noSearchResults": "لا توجد مشاريع تطابق بحثك",
+    "noSearchResultsSubtitle": "جرّب اسماً آخر أو امسح عوامل التصفية.",
+    "clearFilters": "مسح عوامل التصفية",
+    "filters": {
+      "all": "الكل",
+      "withMembers": "مع فريق",
+      "unassigned": "بدون فريق"
     }
   },
   "salaryAdvances": {
@@ -626,6 +621,9 @@
   "login": {
     "title": "إدارة الموارد البشرية",
     "subtitle": "نظام تخطيط موارد المؤسسة",
+    "heroEyebrow": "منصة الموارد البشرية",
+    "heroLine1": "كل فريق،",
+    "heroLine2": "كل يوم، بوضوح.",
     "welcomeBack": "مرحبًا بعودتك",
     "signInMessage": "تسجيل الدخول للوصول إلى حسابك",
     "pleaseSignIn": "يرجى تسجيل الدخول للمتابعة",
@@ -642,7 +640,8 @@
     "signingIn": "جاري تسجيل الدخول...",
     "authenticating": "جاري المصادقة...",
     "demoCredentials": "بيانات الاعتماد التجريبية",
-    "footer": "© 2026 نظام إدارة الموارد البشرية. جميع الحقوق محفوظة.",
+    "footer": "© 2026 Dynamix Services",
+    "enterHint": "اضغط Enter للمتابعة",
     "loginError": "فشل تسجيل الدخول",
     "validation": {
       "requiredFields": "يرجى ملء جميع الحقول"
@@ -680,7 +679,8 @@
     "download": "تحميل",
     "print": "طباعة",
     "activate": "تفعيل",
-    "deactivate": "إلغاء التفعيل"
+    "deactivate": "إلغاء التفعيل",
+    "export": "تصدير"
   },
   "time": {
     "days": "أيام",
@@ -725,12 +725,8 @@
       "deactivated": "معطل"
     }
   },
-  "dashboard": {
-    "companyLeaveStatus": "نظرة عامة على حالة الإجازات في الشركة",
-    "salaryAdvanceRequests": "طلبات السلف المالية",
-    "advanceRequestOverview": "نظرة عامة على طلبات السلف"
-  },
-  "notifications": {    "title": "الإشعارات",
+  "notifications": {
+    "title": "الإشعارات",
     "allRead": "تم قراءة الكل",
     "unreadCount": "{{count}} غير مقروءة",
     "markAllAsRead": "تحديد الكل كمقروء",
@@ -740,8 +736,26 @@
     "viewAll": "عرض جميع الإشعارات",
     "minutesAgo": "منذ {{count}} دقائق",
     "hoursAgo": "منذ {{count}} ساعات",
-    "recently": "مؤخراً",    "policyUpdate": "تحديث سياسة الإجازات",
+    "recently": "مؤخراً",
+    "policyUpdate": "تحديث سياسة الإجازات",
     "maternityPolicyUpdate": "سياسة إجازة الأمومة الجديدة سارية اعتبارًا من 1 يوليو.",
-    "referenceId": "معرف المرجع"
+    "referenceId": "معرف المرجع",
+    "markAsRead": "تحديد كمقروء",
+    "delete": "حذف الإشعار"
+  },
+  "validation": {
+    "required": "هذا الحقل مطلوب",
+    "invalidEmail": "عنوان البريد الإلكتروني غير صالح",
+    "passwordLength": "يجب ألا تقل كلمة المرور عن 8 أحرف"
+  },
+  "notFound": {
+    "title": "الصفحة غير موجودة",
+    "description": "الصفحة التي تبحث عنها غير موجودة أو تم نقلها.",
+    "goBackDashboard": "العودة إلى لوحة التحكم"
+  },
+  "roles": {
+    "admin": "مدير",
+    "supervisor": "مشرف",
+    "employee": "موظف"
   }
 }

@@ -73,5 +73,16 @@
   "attendance_shortcut": "Attendance",
   "check_attendance": "Check attendance records",
   "attendance_shortcut_desc": "Open daily logs, summaries, and device sync status from one place.",
-  "open_attendance": "Open Attendance"
+  "open_attendance": "Open Attendance",
+  "greeting": {
+    "morning": "Good morning",
+    "afternoon": "Good afternoon",
+    "evening": "Good evening"
+  },
+  "inbox": {
+    "clear": "Nothing is waiting. You're all caught up.",
+    "leaves": "{{count}} leave request awaiting your decision.",
+    "advances": "{{count}} salary advance awaiting your decision.",
+    "both": "{{leaves}} leave requests and {{advances}} advances need a decision."
+  }
 }

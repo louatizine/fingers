@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { attendanceAPI } from '../services/api';
-import { ClockIcon, CalendarIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
+import { ClockIcon, CalendarIcon, CheckCircleIcon, XCircleIcon } from './ui/icons';
 import { useTranslation } from 'react-i18next';
 
 /**

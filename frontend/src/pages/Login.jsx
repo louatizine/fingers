@@ -1,15 +1,54 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useTranslation } from 'react-i18next'
-import dynLogo from '../assets/logo-dynamix 2.png'
-import { 
+import { CUBE_COLORS, CubeBar, CubeLoader } from '../components/ui/CubeBar'
+import {
   UserIcon,
   KeyIcon,
   ArrowRightIcon,
+  ArrowLeftIcon,
   EyeIcon,
   EyeSlashIcon,
   ShieldCheckIcon
-} from '@heroicons/react/24/outline'
+} from '../components/ui/icons'
+import LiveClock from '../components/ui/LiveClock'
+import LanguageSwitcher from '../components/LanguageSwitcher'
+import Kbd from '../components/ui/Kbd'
+
+const GRID_COLS = 14
+const GRID_ROWS = 7
+
+/** A field of small squares. A few light up in the five Dynamix colours; the rest stay ghosted. */
+function CubeField() {
+  const cells = useMemo(
+    () =>
+      Array.from({ length: GRID_COLS * GRID_ROWS }, (_, i) => {
+        const v = (i * 7919 + 13) % 23
+        if (v < 5) return { kind: 'solid', color: CUBE_COLORS[v], delay: (i % 9) * 260 }
+        if (v < 10) return { kind: 'outline' }
+        return { kind: 'ghost' }
+      }),
+    []
+  )
+
+  return (
+    <div
+      className="grid gap-2"
+      style={{ gridTemplateColumns: `repeat(${GRID_COLS}, minmax(0, 1fr))` }}
+      aria-hidden="true"
+    >
+      {cells.map((cell, i) => (
+        <span
+          key={i}
+          className={`aspect-square rounded-[3px] ${
+            cell.kind === 'outline' ? 'border border-white/25' : cell.kind === 'ghost' ? 'bg-white/[0.05]' : 'animate-cube-pulse'
+          }`}
+          style={cell.kind === 'solid' ? { backgroundColor: cell.color, animationDelay: `${cell.delay}ms` } : undefined}
+        />
+      ))}
+    </div>
+  )
+}
 
 export default function Login() {
   const [userId, setUserId] = useState('')
@@ -19,14 +58,15 @@ export default function Login() {
   const [loading, setLoading] = useState(false)
   const [shake, setShake] = useState(false)
   const { login } = useAuth()
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const isRTL = i18n.language === 'ar'
+  const Arrow = isRTL ? ArrowLeftIcon : ArrowRightIcon
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
     setLoading(true)
-    
-    // Form validation
+
     if (!userId || !password) {
       setError(t('login.validation.requiredFields'))
       setShake(true)
@@ -34,9 +74,8 @@ export default function Login() {
       setLoading(false)
       return
     }
-    
+
     try {
-      // Remove vendor parameter
       await login(userId, password)
     } catch (err) {
       setError(err.response?.data?.error || t('login.errors.invalidCredentials'))
@@ -47,170 +86,169 @@ export default function Login() {
     }
   }
 
-  // Auto-focus first input
   useEffect(() => {
+    document.title = `${t('login.welcomeBack')} · Dynamix`
     document.querySelector('input')?.focus()
-  }, [])
+  }, [t])
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#F7F5FB] p-4 font-sans">
+    <div className="grid min-h-screen font-sans lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">
+      <aside className="relative hidden overflow-hidden bg-primary-700 text-white lg:flex lg:flex-col lg:justify-between lg:gap-10 lg:p-14">
+        <img
+          src="/cube.png"
+          alt=""
+          aria-hidden="true"
+          className="pointer-events-none absolute -bottom-16 -end-10 h-72 w-auto opacity-[0.08] animate-float"
+        />
 
-      <div className="w-full max-w-md relative z-10">
-        {/* Premium Header */}
-        <div className="text-center mb-10 transform transition-all duration-700 hover:scale-105">
-          <div className="inline-flex flex-col items-center">
-            {/* Company lockup */}
-            <div className="relative mb-4 rounded-2xl bg-white p-3 shadow-lg shadow-primary/10">
-              <img
-                src={dynLogo}
-                alt="Dynamix Services"
-                className="h-auto w-[min(82vw,320px)] rounded-xl object-contain"
-              />
-            </div>
-            {/* Tagline */}
-            <div className="flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-slate-200 shadow-sm mt-4">
-              <ShieldCheckIcon className="h-4 w-4 text-primary" />
-              <p className="text-xs font-semibold text-slate-600">
-                Workforce Management Platform
-              </p>
-            </div>
+        <div className="relative flex items-center gap-3">
+          <img src="/cube.png" alt="" className="h-12 w-auto" />
+          <div className="leading-none">
+            <p className="font-display text-3xl font-medium tracking-tight">Dynamix</p>
+            <p className="mt-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.34em] text-brand-yellow">services</p>
           </div>
         </div>
 
-        {/* Glass Card */}
-        <div className={`bg-white/90 backdrop-blur-sm rounded-2xl shadow-2xl shadow-primary/10 border border-white/50 overflow-hidden transition-all duration-300 ${shake ? 'animate-shake' : ''}`}>
-          
-          {/* Card Header with Gradient */}
-          <div className="relative overflow-hidden">
-            <div className="absolute inset-0 bg-primary" />
-            {/* Animated background elements */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16 animate-ping" />
-            
-            <div className="relative px-8 py-7">
-              <div className="text-center">
-                <h2 className="text-2xl font-bold text-white mb-2 tracking-tight">
-                  {t('login.welcomeBack')}
-                </h2>
-                <p className="text-primary-100/90 font-medium">
-                  {t('login.pleaseSignIn')}
-                </p>
-              </div>
-              
-              {/* Security Badge */}
-              <div className="flex items-center justify-center gap-2 mt-4">
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-white/20 rounded-full backdrop-blur-sm">
-                  <ShieldCheckIcon className="h-4 w-4 text-white" />
-                  <span className="text-xs font-semibold text-white">{t('login.securePortal')}</span>
-                </div>
-              </div>
+        <div className="relative">
+          <p className="font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-primary-200 rtl:font-sans rtl:tracking-normal">
+            {t('login.heroEyebrow', 'Plateforme RH')}
+          </p>
+          <h1 className="mt-5 max-w-xl font-display text-5xl font-light leading-[1.05] xl:text-6xl">
+            {t('login.heroLine1', 'Chaque équipe,')}
+            <br />
+            <em className="font-light italic text-brand-yellow">{t('login.heroLine2', 'chaque jour, en clair.')}</em>
+          </h1>
+
+          <div className="mt-14 max-w-xl">
+            <CubeField />
+          </div>
+        </div>
+
+        <div className="relative flex items-end justify-between gap-6">
+          <LiveClock variant="studio" />
+          <div className="flex flex-col items-end gap-3">
+            <CubeBar width="w-6" />
+            <span className="font-mono text-xs text-primary-200">{t('login.footer')}</span>
+          </div>
+        </div>
+      </aside>
+
+      <main className="relative flex items-center justify-center px-6 py-12 sm:px-10">
+        <div className="absolute end-6 top-6">
+          <LanguageSwitcher />
+        </div>
+
+        <div className="w-full max-w-sm">
+          <div className="mb-10 flex items-center gap-3 lg:hidden">
+            <img src="/cube.png" alt="" className="h-10 w-auto" />
+            <div className="leading-none">
+              <p className="font-display text-2xl font-medium tracking-tight text-primary">Dynamix</p>
+              <p className="mt-1 font-mono text-[10px] font-medium uppercase tracking-[0.32em] text-brand-red">services</p>
             </div>
           </div>
 
-          {/* Form with Enhanced Fields */}
-          <div className="p-8">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Error Message - Premium Style */}
-              {error && (
-                <div className="p-4 bg-gradient-to-r from-red-50/80 to-rose-50/80 backdrop-blur-sm border border-red-200/50 rounded-xl animate-fade-in">
-                  <div className="flex items-center gap-3">
-                    <div className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
-                    <p className="text-sm font-semibold text-red-700">{error}</p>
-                  </div>
-                </div>
-              )}
+          <p className="kicker flex items-center gap-2">
+            <ShieldCheckIcon className="h-3.5 w-3.5 text-primary" />
+            {t('login.securePortal')}
+          </p>
+          <h2 className="mt-4 font-display text-4xl font-medium leading-tight text-slate-900">
+            {t('login.welcomeBack')}
+          </h2>
+          <p className="mt-2 text-[15px] text-slate-600">{t('login.pleaseSignIn')}</p>
 
-              {/* User ID Field with Floating Label */}
-              <div className="relative">
-                <label className="absolute -top-2 left-3 px-2 bg-white text-xs font-semibold text-slate-700 z-10">
-                  {t('login.userId')}
-                </label>
-                <div className="relative group">
-                  <UserIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-primary transition-colors" />
-                  <input
-                    type="text"
-                    value={userId}
-                    onChange={(e) => setUserId(e.target.value)}
-                    className="w-full pl-11 pr-4 py-3.5 bg-white border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-                    placeholder={t('login.userIdPlaceholder')}
-                    required
-                    disabled={loading}
-                  />
-                  {userId && (
-                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                      <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Password Field with Toggle */}
-              <div className="relative">
-                <div className="flex justify-between items-center mb-1">
-                  <label className="text-xs font-semibold text-slate-700 px-1">
-                    {t('login.passwordLabel')}
-                  </label>
-                  <button
-                    type="button"
-                    className="text-xs font-medium text-primary hover:text-primary-700 transition-colors"
-                    onClick={() => {
-                      setUserId('admin@hrmanagement.com')
-                      setPassword('admin123')
-                    }}
-                  >
-                    {t('login.demoLogin')}
-                  </button>
-                </div>
-                <div className="relative group">
-                  <KeyIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-primary transition-colors" />
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-11 pr-12 py-3.5 bg-white border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-                    placeholder={t('login.passwordPlaceholder')}
-                    required
-                    disabled={loading}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors"
-                  >
-                    {showPassword ? (
-                      <EyeSlashIcon className="h-5 w-5" />
-                    ) : (
-                      <EyeIcon className="h-5 w-5" />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              {/* Sign In Button with Glow Effect */}
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full relative group flex items-center justify-center gap-3 py-4 bg-primary text-white font-semibold rounded-xl hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed overflow-hidden"
+          <form
+            onSubmit={handleSubmit}
+            className={`mt-9 space-y-5 ${shake ? 'animate-shake' : ''}`}
+            noValidate
+          >
+            {error && (
+              <div
+                role="alert"
+                className="border-s-4 border-brand-red bg-[#FCEBEE] px-4 py-3 text-sm font-medium text-[#A8031D]"
               >
-                {/* Shimmer Effect */}
-                <div className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-                
-                {loading ? (
-                  <div className="flex items-center gap-3 relative z-10">
-                    <div className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    <span className="font-semibold">{t('login.authenticating')}</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-3 relative z-10">
-                    <span className="font-semibold">{t('login.signIn')}</span>
-                    <ArrowRightIcon className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                  </div>
-                )}
-              </button>
-            </form>
-          </div>
+                {error}
+              </div>
+            )}
 
+            <div>
+              <label htmlFor="login-user" className="mb-1.5 block text-sm font-semibold text-slate-800">
+                {t('login.userId')}
+              </label>
+              <div className="relative">
+                <UserIcon className="pointer-events-none absolute start-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-slate-400" strokeWidth={1.75} />
+                <input
+                  id="login-user"
+                  type="text"
+                  autoComplete="username"
+                  value={userId}
+                  onChange={(e) => setUserId(e.target.value)}
+                  className="field !py-3 !ps-11"
+                  placeholder={t('login.userIdPlaceholder')}
+                  disabled={loading}
+                />
+              </div>
+            </div>
+
+            <div>
+              <div className="mb-1.5 flex items-center justify-between">
+                <label htmlFor="login-password" className="text-sm font-semibold text-slate-800">
+                  {t('login.passwordLabel')}
+                </label>
+                <button
+                  type="button"
+                  className="text-xs font-semibold text-primary underline-offset-4 hover:underline"
+                  onClick={() => {
+                    setUserId('admin@hrmanagement.com')
+                    setPassword('admin123')
+                  }}
+                >
+                  {t('login.demoLogin')}
+                </button>
+              </div>
+              <div className="relative">
+                <KeyIcon className="pointer-events-none absolute start-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-slate-400" strokeWidth={1.75} />
+                <input
+                  id="login-password"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="field !py-3 !pe-11 !ps-11"
+                  placeholder={t('login.passwordPlaceholder')}
+                  disabled={loading}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  className="absolute end-2 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+                >
+                  {showPassword ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
+                </button>
+              </div>
+            </div>
+
+            <button type="submit" disabled={loading} className="btn-primary group w-full !py-3.5 text-[15px]">
+              {loading ? (
+                <>
+                  <CubeLoader size="h-2.5 w-2.5" />
+                  {t('login.authenticating')}
+                </>
+              ) : (
+                <>
+                  {t('login.signIn')}
+                  <Arrow className="h-4 w-4 transition-transform group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5" />
+                </>
+              )}
+            </button>
+
+            <p className="flex items-center justify-center gap-2 text-xs text-slate-400">
+              <Kbd>↵</Kbd>
+              {t('login.enterHint')}
+            </p>
+          </form>
         </div>
-      </div>
+      </main>
     </div>
   )
 }

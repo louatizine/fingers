@@ -1,7 +1,7 @@
 import { Fragment } from 'react'
 import { Menu, Transition } from '@headlessui/react'
 import { useTranslation } from 'react-i18next'
-import { ChevronDownIcon, CheckIcon, GlobeAltIcon } from '@heroicons/react/24/outline'
+import { ChevronDownIcon, CheckIcon, GlobeAltIcon } from './ui/icons'
 
 const languages = [
   {
@@ -48,16 +48,14 @@ export default function LanguageSwitcher() {
 
   return (
     <Menu as="div" className="relative inline-block">
-      <Menu.Button className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-sm font-semibold text-neutral-charcoal border border-white/70 bg-white/80 shadow-sm backdrop-blur hover:-translate-y-0.5 hover:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-primary/30">
-        <span className="relative inline-flex h-6 w-9 items-center justify-center overflow-hidden rounded-full border border-neutral-medium/60 bg-gradient-to-r from-neutral-light via-white to-neutral-light shadow-inner">
-          <img
-            src={currentLanguage.flag}
-            alt={currentLanguage.flagAlt}
-            className="h-5 w-5 rounded object-cover"
-          />
-        </span>
-        <span className="hidden md:inline text-sm font-medium">{currentLanguage.name}</span>
-        <ChevronDownIcon className="h-4 w-4 text-neutral-dark" aria-hidden="true" />
+      <Menu.Button className="inline-flex h-10 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-800 transition-colors hover:border-primary-200 hover:bg-primary-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30">
+        <img
+          src={currentLanguage.flag}
+          alt={currentLanguage.flagAlt}
+          className="h-4 w-4 rounded-full object-cover ring-1 ring-slate-200"
+        />
+        <span className="hidden text-sm font-medium md:inline">{currentLanguage.name}</span>
+        <ChevronDownIcon className="h-4 w-4 text-slate-400" aria-hidden="true" />
       </Menu.Button>
 
       <Transition
@@ -69,8 +67,8 @@ export default function LanguageSwitcher() {
         leaveFrom="transform opacity-100 scale-100"
         leaveTo="transform opacity-0 scale-95"
       >
-        <Menu.Items className="absolute right-0 z-50 mt-2 w-60 origin-top-right rounded-xl bg-white/95 shadow-2xl ring-1 ring-black/5 border border-neutral-medium/40 focus:outline-none overflow-hidden backdrop-blur">
-          <div className="px-4 py-3 bg-neutral-light/60 border-b border-neutral-medium/50 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-neutral-charcoal">
+        <Menu.Items className="absolute end-0 z-50 mt-2 w-60 origin-top-right overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl focus:outline-none">
+          <div className="kicker flex items-center gap-2 border-b border-slate-100 bg-slate-50 px-4 py-3">
             <GlobeAltIcon className="h-4 w-4 text-primary" />
             {i18n.t('nav.languageSelector', { defaultValue: 'Select Language' })}
           </div>

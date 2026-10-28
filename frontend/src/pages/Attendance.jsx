@@ -29,8 +29,10 @@ import {
   InformationCircleIcon,
   ExclamationTriangleIcon,
   QuestionMarkCircleIcon
-} from '@heroicons/react/24/outline';
-import dynLogo from '../assets/dynlogo.jpg';
+} from '../components/ui/icons';
+import PageHeader from '../components/ui/PageHeader';
+import LoadingSpinner from '../components/LoadingSpinner';
+import { CubeLoader } from '../components/ui/CubeBar';
 
 const formatDateInput = (date) => {
   const year = date.getFullYear();
@@ -537,7 +539,11 @@ function Attendance() {
       const response = await apiClient.post('/device-sync/trigger', payload || {});
 
       if (response.data.success) {
-        setSyncStatus({ type: 'success', message: startedMessage });
+        setSyncStatus({
+          type: 'warning',
+          title: t('attendance:sync.inProgressTitle'),
+          message: startedMessage,
+        });
 
         const pollInterval = setInterval(async () => {
           try {
@@ -551,9 +557,16 @@ function Attendance() {
                 setSyncLoading(false);
 
                 if (status.last_result.success) {
+                  const syncStats = status.last_result.stats || {};
+                  const attendanceStats = syncStats.attendance || {};
                   setSyncStatus({
                     type: 'success',
+                    title: t('attendance:sync.completedTitle'),
                     message: t('attendance:sync.completed'),
+                    detail: t('attendance:sync.completedDetail', {
+                      events: attendanceStats.events_processed ?? 0,
+                      summaries: attendanceStats.summaries_created ?? 0,
+                    }),
                   });
 
                   setTimeout(() => {
@@ -563,6 +576,7 @@ function Attendance() {
                 } else {
                   setSyncStatus({
                     type: 'error',
+                    title: t('attendance:sync.failed'),
                     message: `${t('attendance:sync.failed')}: ${status.last_result.error || t('attendance:errors.unknown')}`,
                   });
                 }
@@ -577,8 +591,12 @@ function Attendance() {
           clearInterval(pollInterval);
           setSyncLoading(false);
           setSyncStatus((prev) =>
-            prev?.type === 'success' && prev?.message === startedMessage
-              ? { type: 'warning', message: t('attendance:sync.timeout') }
+            prev?.type === 'warning' && prev?.message === startedMessage
+              ? {
+                  type: 'warning',
+                  title: t('attendance:sync.timeoutTitle'),
+                  message: t('attendance:sync.timeout'),
+                }
               : prev
           );
         }, 300000);
@@ -941,16 +959,20 @@ const formatTimestamp = (timestamp) => {
     );
   };
 
-  const StatCard = ({ icon: Icon, label, value, color = 'indigo' }) => {
+  const StatCard = ({ icon: Icon, label, value, color = 'indigo', onClick, active = false }) => {
     const colorClasses = {
       indigo: { bg: 'bg-primary-50', text: 'text-primary' },
       emerald: { bg: 'bg-[#E7F6EA]', text: 'text-brand-green' },
       blue: { bg: 'bg-[#E7EEF8]', text: 'text-brand-blue' }
     };
     const colors = colorClasses[color] || colorClasses.indigo;
-    
-    return (
-      <div className="group relative overflow-hidden rounded-2xl border border-white/80 bg-white/85 p-4 shadow-lg shadow-slate-200/35 backdrop-blur transition-all hover:-translate-y-0.5 hover:shadow-xl">
+
+    const cardClassName = `group relative w-full overflow-hidden rounded-2xl border bg-white/85 p-4 text-left shadow-lg shadow-slate-200/35 backdrop-blur transition-all ${
+      active ? 'border-primary ring-2 ring-primary/20' : 'border-white/80'
+    } ${onClick ? 'cursor-pointer hover:-translate-y-0.5 hover:shadow-xl' : ''}`;
+
+    const content = (
+      <>
         <div className="absolute -right-5 -top-5 h-20 w-20 rounded-full bg-primary/[0.04] transition-transform group-hover:scale-125" />
         <div className="relative flex items-center gap-4">
           <div className={`h-11 w-11 rounded-xl ${colors.bg} flex items-center justify-center`}>
@@ -961,104 +983,98 @@ const formatTimestamp = (timestamp) => {
             <p className="text-xl font-black text-slate-800">{value}</p>
           </div>
         </div>
-      </div>
+      </>
+    );
+
+    if (!onClick) {
+      return <div className={cardClassName}>{content}</div>;
+    }
+
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        aria-pressed={active}
+        className={cardClassName}
+      >
+        {content}
+      </button>
     );
   };
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_right,_rgba(74,106,173,0.12),_transparent_32%),linear-gradient(135deg,_#f8f7fc_0%,_#f4f6fb_52%,_#f9fafb_100%)] px-3 py-4 md:px-5 md:py-5">
-      <div className="mx-auto max-w-[1600px] space-y-5 pb-8 animate-in fade-in duration-700">
-      
+    <div>
+      <div className="mx-auto max-w-[1600px] space-y-6 pb-8 animate-fadeIn">
+
       {/* --- HEADER SECTION --- */}
-      <header className="relative overflow-hidden rounded-[1.5rem] bg-gradient-to-br from-primary-900 via-primary-700 to-brand-blue px-5 py-5 text-white shadow-xl shadow-primary-900/15 md:px-7 md:py-6">
-        <div className="absolute -right-16 -top-20 h-64 w-64 rounded-full border border-white/10" />
-        <div className="absolute right-16 -bottom-28 h-56 w-56 rounded-full border border-white/10" />
-        <div className="relative flex flex-col justify-between gap-4 md:flex-row md:items-center">
-          <div className="flex items-start gap-4">
-{/*             <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white p-1.5 shadow-lg shadow-black/15">
-              <img src={dynLogo} alt="Dynamix Services" className="h-full w-full object-contain" />
-            </div> */}
-            <div>
-              <div className="mb-1.5 flex items-center gap-2">
-                <ClockIcon className="h-4 w-4 text-primary-100" />
-                <span className="text-xs font-bold uppercase tracking-[0.2em] text-primary-100">
-                  {t('attendance:tabs.logs')}
-                </span>
-              </div>
-              <h1 className="text-2xl font-black tracking-tight md:text-3xl">
-                {t('attendance:title')}
-              </h1>
-              <p className="mt-1 text-sm text-white/70">{t('attendance:subtitle')}</p>
+      <PageHeader
+        icon={ClockIcon}
+        kicker={t('attendance:tabs.logs')}
+        title={t('attendance:title')}
+        subtitle={t('attendance:subtitle')}
+        meta={
+          <span className="flex flex-col gap-1">
             {syncInfo?.last_sync ? (
-              <p className="mt-1 text-xs text-white/55">
+              <span className="font-mono text-xs">
                 {t('attendance:sync.lastSync', { time: formatSyncTime(syncInfo.last_sync) })}
-              </p>
+              </span>
             ) : syncInfo?.sync_schedule_label ? (
-              <p className="mt-1 text-xs text-white/55">
+              <span className="font-mono text-xs">
                 {t('attendance:sync.scheduleHint', {
                   schedule: syncInfo.sync_schedule_label,
                 })}
-              </p>
+              </span>
             ) : null}
-          </div>
-          </div>
-
-          {/* Stats */}
-          <div className="relative flex flex-col items-stretch gap-2 sm:items-end">
             {canSelectEmployee && (
-              <>
-                <div className="flex flex-wrap items-end gap-2">
-                  <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-wide text-white/70">
-                    {t('attendance:sync.from')}
-                    <input
-                      type="date"
-                      value={syncRangeStart}
-                      max={getLocalToday()}
-                      onChange={(e) => setSyncRangeStart(e.target.value)}
-                      className="rounded-xl border border-white/20 bg-white px-3 py-2.5 text-sm font-medium normal-case tracking-normal text-slate-800"
-                    />
-                  </label>
-                  <label className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-wide text-white/70">
-                    {t('attendance:sync.to')}
-                    <input
-                      type="date"
-                      value={syncRangeEnd}
-                      max={getLocalToday()}
-                      onChange={(e) => setSyncRangeEnd(e.target.value)}
-                      className="rounded-xl border border-white/20 bg-white px-3 py-2.5 text-sm font-medium normal-case tracking-normal text-slate-800"
-                    />
-                  </label>
-                  <button
-                    type="button"
-                    onClick={handleSync}
-                    disabled={syncLoading}
-                    className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all ${
-                      syncLoading
-                        ? 'bg-slate-400 text-white cursor-not-allowed'
-                        : 'border border-white/20 bg-white/15 text-white backdrop-blur-sm hover:bg-white/25 hover:shadow-lg'
-                    }`}
-                  >
-                    {syncLoading ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                        {t('attendance:sync.syncing')}
-                      </>
-                    ) : (
-                      <>
-                        <ArrowPathIcon className="h-5 w-5" />
-                        {t('attendance:sync.button')}
-                      </>
-                    )}
-                  </button>
-                </div>
-                <p className="max-w-md text-xs text-white/60">
-                  {t('attendance:sync.syncDaysHint')}
-                </p>
-              </>
+              <span className="max-w-md text-xs text-slate-500">{t('attendance:sync.syncDaysHint')}</span>
             )}
-          </div>
-        </div>
-      </header>
+          </span>
+        }
+        actions={
+          canSelectEmployee && (
+            <div className="flex flex-wrap items-end gap-2.5">
+              <label className="kicker flex flex-col gap-1">
+                {t('attendance:sync.from')}
+                <input
+                  type="date"
+                  value={syncRangeStart}
+                  max={getLocalToday()}
+                  onChange={(e) => setSyncRangeStart(e.target.value)}
+                  className="field !w-auto !py-2 font-sans normal-case tracking-normal"
+                />
+              </label>
+              <label className="kicker flex flex-col gap-1">
+                {t('attendance:sync.to')}
+                <input
+                  type="date"
+                  value={syncRangeEnd}
+                  max={getLocalToday()}
+                  onChange={(e) => setSyncRangeEnd(e.target.value)}
+                  className="field !w-auto !py-2 font-sans normal-case tracking-normal"
+                />
+              </label>
+              <button
+                type="button"
+                onClick={handleSync}
+                disabled={syncLoading}
+                className="btn-primary"
+              >
+                {syncLoading ? (
+                  <>
+                    <CubeLoader size="h-2.5 w-2.5" />
+                    {t('attendance:sync.syncing')}
+                  </>
+                ) : (
+                  <>
+                    <ArrowPathIcon className="h-5 w-5" />
+                    {t('attendance:sync.button')}
+                  </>
+                )}
+              </button>
+            </div>
+          )
+        }
+      />
 
         {/* Sync Status Alert */}
         {syncStatus && (
@@ -1076,7 +1092,11 @@ const formatTimestamp = (timestamp) => {
             ) : (
               <InformationCircleIcon className="h-5 w-5 flex-shrink-0" />
             )}
-            <span className="font-medium">{syncStatus.message}</span>
+            <div className="min-w-0 flex-1">
+              <p className="font-bold">{syncStatus.title || syncStatus.message}</p>
+              {syncStatus.title && <p className="text-sm">{syncStatus.message}</p>}
+              {syncStatus.detail && <p className="mt-1 text-sm opacity-80">{syncStatus.detail}</p>}
+            </div>
             <button 
               onClick={() => setSyncStatus(null)}
               className="ml-auto p-1 hover:bg-black/5 rounded"
@@ -1110,7 +1130,7 @@ const formatTimestamp = (timestamp) => {
         )}
 
         {/* --- TABS NAVIGATION --- */}
-        <div className="rounded-2xl border border-white/80 bg-white/85 p-2 shadow-lg shadow-slate-200/30 backdrop-blur-xl">
+        <div className="rounded-2xl border border-white/80 bg-white/85 p-2 shadow-lg shadow-slate-200/30">
           <nav className="flex flex-wrap gap-2">
             <TabButton 
               id="daily" 
@@ -1135,7 +1155,7 @@ const formatTimestamp = (timestamp) => {
           /* --- DAILY VIEW TAB --- */
           <div className="space-y-5">
             {/* Date picker toolbar */}
-            <div className="rounded-2xl border border-white/80 bg-white/85 p-4 shadow-lg shadow-slate-200/30 backdrop-blur-xl">
+            <div className="rounded-2xl border border-white/80 bg-white/85 p-4 shadow-lg shadow-slate-200/30">
               <div className="flex flex-col gap-4 mb-4 lg:flex-row lg:items-start lg:justify-between">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
@@ -1230,9 +1250,23 @@ const formatTimestamp = (timestamp) => {
             </div>
 
             {dailyTotals && !dailyLoading && (
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                <StatCard icon={UsersIcon} label="attendance:daily.present" value={dailyTotals.present ?? 0} color="emerald" />
-                <StatCard icon={XCircleIcon} label="attendance:daily.absent" value={dailyTotals.absent ?? 0} color="blue" />
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <StatCard
+                  icon={CheckCircleIcon}
+                  label="attendance:daily.present"
+                  value={dailyTotals.present ?? 0}
+                  color="emerald"
+                  onClick={() => setDailyStatusFilter('present')}
+                  active={dailyStatusFilter === 'present'}
+                />
+                <StatCard
+                  icon={XCircleIcon}
+                  label="attendance:daily.absent"
+                  value={dailyTotals.absent ?? 0}
+                  color="blue"
+                  onClick={() => setDailyStatusFilter('absent')}
+                  active={dailyStatusFilter === 'absent'}
+                />
                 {(dailyTotals.online > 0 || dailyAttendance?.is_online_day) && (
                   <StatCard icon={CheckCircleIcon} label="attendance:daily.online" value={dailyTotals.online ?? 0} color="indigo" />
                 )}
@@ -1241,11 +1275,8 @@ const formatTimestamp = (timestamp) => {
 
             {/* Table */}
             {dailyLoading ? (
-              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8">
-                <div className="flex flex-col items-center justify-center">
-                  <div className="h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-                  <p className="mt-4 text-slate-500 font-medium animate-pulse">{t('attendance:daily.loading')}</p>
-                </div>
+              <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <LoadingSpinner compact message={t('attendance:daily.loading')} />
               </div>
             ) : dailyAttendance ? (
               <div className="overflow-hidden rounded-2xl border border-white/80 bg-white shadow-lg shadow-slate-200/25">
@@ -1374,7 +1405,7 @@ const formatTimestamp = (timestamp) => {
           /* --- ATTENDANCE SUMMARY TAB --- */
           <div className="space-y-5">
             {/* --- SUMMARY FILTERS TOOLBAR --- */}
-            <div className="rounded-2xl border border-white/80 bg-white/85 p-4 shadow-lg shadow-slate-200/30 backdrop-blur-xl">
+            <div className="rounded-2xl border border-white/80 bg-white/85 p-4 shadow-lg shadow-slate-200/30">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-2">
                   <ChartBarIcon className="h-5 w-5 text-slate-400" />
@@ -1494,14 +1525,8 @@ const formatTimestamp = (timestamp) => {
 
             {/* --- SUMMARY CONTENT --- */}
             {summaryLoading ? (
-              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8">
-                <div className="flex flex-col items-center justify-center">
-                  <div className="relative flex items-center justify-center">
-                    <div className="absolute animate-ping h-8 w-8 rounded-full bg-primary-300 opacity-20"></div>
-                    <div className="h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-                  </div>
-                  <p className="mt-4 text-slate-500 font-medium animate-pulse">{t('attendance:summary.loading')}</p>
-                </div>
+              <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <LoadingSpinner compact message={t('attendance:summary.loading')} />
               </div>
             ) : attendanceSummary ? (
               <div className="space-y-6">
@@ -1721,7 +1746,7 @@ const formatTimestamp = (timestamp) => {
           </div>
         ) : activeTab === 'userStats' ? (
           <div className="space-y-5">
-            <div className="rounded-2xl border border-white/80 bg-white/85 p-4 shadow-lg shadow-slate-200/30 backdrop-blur-xl">
+            <div className="rounded-2xl border border-white/80 bg-white/85 p-4 shadow-lg shadow-slate-200/30">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
                 <div>
                   <div className="flex items-center gap-2">
@@ -1823,10 +1848,7 @@ const formatTimestamp = (timestamp) => {
               </div>
 
             {statsLoading ? (
-              <div className="p-12 text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-                <p className="mt-4 text-slate-600">{t('attendance:userStats.loading')}</p>
-              </div>
+              <LoadingSpinner compact message={t('attendance:userStats.loading')} />
             ) : filteredUserStats.length > 0 ? (
                 <div className="overflow-x-auto">
                   <table className={`w-full ${isRTL ? 'text-right' : 'text-left'}`}>

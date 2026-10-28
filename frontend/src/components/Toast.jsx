@@ -1,11 +1,12 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { 
   CheckCircleIcon, 
   XCircleIcon, 
   ExclamationTriangleIcon, 
   InformationCircleIcon 
-} from '@heroicons/react/24/solid'
-import { XMarkIcon } from '@heroicons/react/24/outline'
+} from './ui/icons'
+import { XMarkIcon } from './ui/icons'
 
 const ToastContext = createContext()
 
@@ -46,7 +47,7 @@ export const ToastProvider = ({ children }) => {
 }
 
 const ToastContainer = ({ toasts, removeToast }) => (
-  <div className="fixed top-6 right-6 z-[9999] space-y-4 w-full max-w-[380px] pointer-events-none">
+  <div className="pointer-events-none fixed top-6 end-6 z-[9999] w-full max-w-[380px] space-y-4">
     {toasts.map(toast => (
       <Toast key={toast.id} toast={toast} onClose={() => removeToast(toast.id)} />
     ))}
@@ -54,6 +55,7 @@ const ToastContainer = ({ toasts, removeToast }) => (
 )
 
 const Toast = ({ toast, onClose }) => {
+  const { t } = useTranslation()
   const { message, type, duration } = toast
   const [isExiting, setIsExiting] = useState(false)
   const [progress, setProgress] = useState(100)
@@ -76,38 +78,36 @@ const Toast = ({ toast, onClose }) => {
 
   const themes = {
     success: {
-      bg: 'bg-emerald-50/90',
-      border: 'border-emerald-100',
+      bg: 'bg-white',
+      border: 'border-slate-200',
       icon: CheckCircleIcon,
-      iconColor: 'text-emerald-500',
-      title: 'Success',
-      accent: 'bg-emerald-500'
+      iconColor: 'text-brand-green',
+      title: t('toast.success'),
+      accent: 'bg-brand-green'
     },
     error: {
-      bg: 'bg-rose-50/90',
-      border: 'border-rose-100',
+      bg: 'bg-white',
+      border: 'border-slate-200',
       icon: XCircleIcon,
-      iconColor: 'text-rose-500',
-      title: 'Action Failed',
-      accent: 'bg-rose-500'
+      iconColor: 'text-brand-red',
+      title: t('toast.error'),
+      accent: 'bg-brand-red'
     },
     warning: {
-      bg: 'bg-amber-50/90',
-      border: 'border-amber-100',
+      bg: 'bg-white',
+      border: 'border-slate-200',
       icon: ExclamationTriangleIcon,
-      iconColor: 'text-amber-500',
-      title: 'Attention',
-      accent: 'bg-amber-500'
+      iconColor: 'text-[#C89600]',
+      title: t('toast.warning'),
+      accent: 'bg-brand-yellow'
     },
     info: {
-      bg: 'bg-slate-900/95', // Chic dark mode for info
-      border: 'border-slate-800',
+      bg: 'bg-white',
+      border: 'border-slate-200',
       icon: InformationCircleIcon,
-      iconColor: 'text-primary-300',
-      title: 'Notification',
-      accent: 'bg-primary-400',
-      text: 'text-slate-300',
-      titleText: 'text-white'
+      iconColor: 'text-brand-blue',
+      title: t('toast.info'),
+      accent: 'bg-brand-blue'
     }
   }
 
@@ -117,8 +117,8 @@ const Toast = ({ toast, onClose }) => {
     <div
       className={`
         relative overflow-hidden pointer-events-auto
-        ${theme.bg} ${theme.border} border backdrop-blur-md
-        rounded-[1.5rem] shadow-[0_15px_30px_rgba(0,0,0,0.08)]
+        ${theme.bg} ${theme.border} border
+        rounded-xl shadow-lg
         transition-all duration-500 cubic-bezier(0.175, 0.885, 0.32, 1.275)
         ${isExiting ? 'translate-x-12 opacity-0 scale-90' : 'translate-x-0 opacity-100 animate-in slide-in-from-right-8'}
       `}
@@ -126,21 +126,19 @@ const Toast = ({ toast, onClose }) => {
       {/* Subtle Progress Bar at the Top */}
       {duration > 0 && (
         <div 
-          className={`absolute top-0 left-0 h-[3px] ${theme.accent} transition-all duration-100 ease-linear opacity-40`}
+          className={`absolute bottom-0 left-0 h-[3px] ${theme.accent} transition-all duration-100 ease-linear`}
           style={{ width: `${progress}%` }}
         />
       )}
 
-      <div className="p-5 flex items-start gap-4">
-        <div className={`flex-shrink-0 p-2 rounded-xl bg-white/50 shadow-sm`}>
-          <theme.icon className={`h-6 w-6 ${theme.iconColor}`} />
-        </div>
+      <div className="flex items-start gap-3.5 p-4">
+        <theme.icon className={`h-6 w-6 shrink-0 ${theme.iconColor}`} />
 
         <div className="flex-1 pt-0.5">
-          <h4 className={`text-sm font-black uppercase tracking-widest ${theme.titleText || 'text-slate-900'}`}>
+          <h4 className="kicker !text-slate-500">
             {theme.title}
           </h4>
-          <p className={`text-sm font-medium mt-1 leading-relaxed ${theme.text || 'text-slate-600'}`}>
+          <p className="mt-1 text-sm font-medium leading-relaxed text-slate-900">
             {message}
           </p>
         </div>

@@ -16,7 +16,7 @@ import { leaveAPI, settingsAPI } from '../services/api'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../components/Toast'
 import { useTranslation } from 'react-i18next'  // ← Changed from uiText
-import { PlusIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { PlusIcon, CheckIcon, XMarkIcon } from '../components/ui/icons'
 
 export default function Leaves() {
   const { user } = useAuth()
@@ -125,7 +125,11 @@ export default function Leaves() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="inline-flex items-end gap-1.5" aria-hidden="true">
+          {['#3B2176', '#4A6AAD', '#22B135', '#F1CA15', '#D10424'].map((c, i) => (
+            <span key={c} className="h-4 w-4 animate-cube-hop rounded-[3px]" style={{ backgroundColor: c, animationDelay: `${i * 120}ms` }} />
+          ))}
+        </div>
       </div>
     )
   }

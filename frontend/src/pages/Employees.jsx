@@ -13,7 +13,7 @@ import {
   FunnelIcon,
   ArrowUpTrayIcon,
   KeyIcon,
-} from '@heroicons/react/24/outline';
+} from '../components/ui/icons';
 
 // Hooks & API
 import { useEmployees } from '../hooks/useEmployees';
@@ -23,14 +23,15 @@ import { settingsAPI, companyAPI } from '../services/api';
 
 // Components
 import EmployeeTableRow from '../components/employees/EmployeeTableRow';
-import SkeletonLoader from '../components/employees/SkeletonLoader';
 import EmptyState from '../components/employees/EmptyState';
 import EmployeeDrawer from '../components/employees/EmployeeDrawer';
 import AddEmployeeModal from '../components/employees/AddEmployeeModal';
 import SortableHeader from '../components/employees/SortableHeader';
 import BulkActions from '../components/employees/BulkActions';
 import CreateAccountsModal from '../components/employees/CreateAccountsModal';
-import dynLogo from '../assets/dynlogo.jpg';
+import PageHeader from '../components/ui/PageHeader';
+import StatCard from '../components/StatCard';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const Employees = () => {
   const { t } = useTranslation();
@@ -110,8 +111,8 @@ const Employees = () => {
   }, [settings]);
 
   const statsConfig = useMemo(() => [
-    { label: t('employees.stats.total'), value: stats.total, icon: UsersIcon, color: 'bg-primary-400' },
-    { label: t('employees.stats.active'), value: stats.active, icon: IdentificationIcon, color: 'bg-emerald-500' },
+    { label: t('employees.stats.total'), value: stats.total, icon: UsersIcon, color: 'purple' },
+    { label: t('employees.stats.active'), value: stats.active, icon: IdentificationIcon, color: 'green' },
 /*     { label: t('employees.stats.departments'), value: stats.departments, icon: BuildingOfficeIcon, color: 'bg-amber-500' },
  */  ], [stats, t]);
 
@@ -139,36 +140,25 @@ const Employees = () => {
     [filteredEmployees],
   );
 
-  if (hookLoading) return <div className="p-10"><SkeletonLoader /></div>;
+  if (hookLoading) return <LoadingSpinner message={t('common.loading')} />;
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_right,_rgba(74,106,173,0.12),_transparent_32%),linear-gradient(135deg,_#f8f7fc_0%,_#f4f6fb_52%,_#f9fafb_100%)] px-3 py-4 md:px-5 md:py-5">
-      <div className="mx-auto max-w-[1600px] space-y-5 animate-in fade-in duration-700">
-      
-      {/* 1. CHIC HEADER SECTION */}
-      <div className="relative overflow-hidden rounded-[1.5rem] bg-gradient-to-br from-primary-900 via-primary-700 to-brand-blue px-5 py-5 text-white shadow-xl shadow-primary-900/15 md:px-7 md:py-6">
-        <div className="absolute -right-16 -top-20 h-64 w-64 rounded-full border border-white/10" />
-        <div className="absolute right-16 -bottom-28 h-56 w-56 rounded-full border border-white/10" />
-        <div className="relative flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-start gap-4">
-{/*             <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-white p-1.5 shadow-lg shadow-black/15">
-              <img src={dynLogo} alt="Dynamix Services" className="h-full w-full object-contain" />
-            </div> */}
-            <div>
-              <span className="mb-2 block text-xs font-bold uppercase tracking-[0.22em] text-primary-100">
-                {t('employees.workforceManagement')}
-              </span>
-              <h1 className="text-3xl font-black tracking-tight md:text-4xl">
-                {t('employees.title')}
-              </h1>
-              <p className="mt-2 max-w-xl text-sm leading-6 text-white/70 md:text-base">{t('employees.subtitle')}</p>
-            </div>
-          </div>
-          <div className="hidden items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-white/60 md:flex">
-            <span className="h-2 w-2 rounded-full bg-brand-green shadow-[0_0_0_4px_rgba(34,177,53,0.18)]" />
+    <div>
+      <div className="space-y-6 animate-fadeIn">
+
+      <PageHeader
+        icon={UsersIcon}
+        kicker={t('employees.workforceManagement')}
+        title={t('employees.title')}
+        subtitle={t('employees.subtitle')}
+        meta={
+          <span className="inline-flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-brand-green" aria-hidden="true" />
+            <span className="font-mono tabular-nums text-slate-700">{stats.active}</span>
             {t('employees.stats.active')}
-          </div>
-        </div>
+          </span>
+        }
+      />
    {/*      
         <div className="flex items-center gap-3">
           <button className="p-2.5 text-slate-400 hover:text-primary hover:bg-primary-50 rounded-xl transition-all border border-slate-200 bg-white">
@@ -197,26 +187,16 @@ const Employees = () => {
             {t('employees.addButton')}
           </button>
         </div> */}
-      </div>
 
       {/* 2. DASHBOARD STATS */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {statsConfig.map((s, i) => (
-          <div key={i} className="group relative overflow-hidden rounded-2xl border border-white/80 bg-white/85 p-4 shadow-lg shadow-slate-200/45 backdrop-blur transition-all hover:-translate-y-1 hover:shadow-xl">
-            <div className={`absolute -right-4 -top-4 h-24 w-24 text-primary opacity-[0.06] transition-transform duration-500 group-hover:scale-125`}>
-               <s.icon className="w-full h-full" />
-            </div>
-            <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-xl ${s.color} text-white shadow-lg shadow-primary-900/10`}>
-              <s.icon className="h-6 w-6" />
-            </div>
-            <p className="text-xs font-bold uppercase tracking-[0.12em] text-slate-500">{s.label}</p>
-            <h3 className="mt-1 text-3xl font-black text-slate-900">{s.value}</h3>
-          </div>
+          <StatCard key={i} title={s.label} value={s.value} icon={s.icon} color={s.color} />
         ))}
       </div>
 
       {/* 3. TABLE CONTROLS & TABS */}
-      <div className="overflow-hidden rounded-[1.5rem] border border-white/80 bg-white shadow-xl shadow-slate-300/30">
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-soft">
         
         {/* Navigation & Search Bar */}
         <div className="flex flex-col items-center justify-between gap-4 border-b border-brand-border bg-brand-surface/45 p-4 xl:flex-row">

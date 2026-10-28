@@ -15,7 +15,9 @@ import {
   UserGroupIcon,
   Cog6ToothIcon,
   ExclamationTriangleIcon
-} from '@heroicons/react/24/outline'
+} from '../components/ui/icons'
+import PageHeader from '../components/ui/PageHeader'
+import StatCard from '../components/StatCard'
 
 /**
  * Settings Management Page - Modern Professional Design
@@ -228,10 +230,10 @@ export default function Settings() {
     <button
       onClick={() => setActiveTab(id)}
       className={`
-        flex items-center gap-3 rounded-xl border-b-2 px-4 py-3.5 font-semibold text-sm transition-all duration-200
-        ${activeTab === id 
-          ? 'border-primary bg-primary-50 text-primary'
-          : 'border-transparent text-slate-500 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700'
+        flex items-center gap-2.5 border-b-2 px-4 py-3.5 text-sm font-semibold transition-colors duration-150
+        ${activeTab === id
+          ? 'border-[var(--section)] text-[var(--section-ink)]'
+          : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-800'
         }
       `}
     >
@@ -240,39 +242,14 @@ export default function Settings() {
     </button>
   )
 
-  const StatCard = ({ icon: Icon, label, value, color = 'indigo', unit = '' }) => {
-    const colorClasses = {
-      indigo: { bg: 'bg-primary-50', text: 'text-primary' },
-      emerald: { bg: 'bg-[#E7F6EA]', text: 'text-brand-green' },
-      blue: { bg: 'bg-[#E7EEF8]', text: 'text-brand-blue' }
-    }
-    const colors = colorClasses[color] || colorClasses.indigo
-    
-    return (
-      <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white to-slate-50 p-4 shadow-soft transition-all hover:-translate-y-0.5 hover:shadow-medium">
-        <div className="flex items-center gap-4">
-          <div className={`h-12 w-12 rounded-xl ${colors.bg} flex items-center justify-center`}>
-            <Icon className={`h-6 w-6 ${colors.text}`} />
-          </div>
-          <div>
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{label}</p>
-            <p className="text-xl font-black text-slate-800">{value}<span className="text-sm text-slate-500 ml-1">{unit}</span></p>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
   const SettingCard = ({ title, subtitle, icon: Icon, children }) => (
-    <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-soft">
-      <div className="border-b border-slate-100 bg-gradient-to-r from-slate-50/80 to-white px-6 py-5">
-        <div className="flex items-center">
-          <div className={`h-10 w-10 rounded-xl bg-primary-50 flex items-center justify-center mr-4`}>
-            <Icon className="h-5 w-5 text-primary" />
-          </div>
+    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-soft">
+      <div className="border-b border-slate-200 px-6 py-5">
+        <div className="flex items-center gap-4">
+          <Icon className="h-6 w-6 shrink-0 text-primary" strokeWidth={1.5} />
           <div>
-            <h3 className="text-lg font-semibold text-slate-900">{title}</h3>
-            <p className="text-sm text-slate-500 mt-0.5">{subtitle}</p>
+            <h3 className="font-display text-xl font-medium text-slate-900">{title}</h3>
+            <p className="mt-0.5 text-sm text-slate-500">{subtitle}</p>
           </div>
         </div>
       </div>
@@ -286,48 +263,35 @@ export default function Settings() {
     <div className="space-y-6 animate-fadeIn">
       
       {/* --- HEADER SECTION --- */}
-      <header className="relative overflow-hidden rounded-[1.5rem] bg-gradient-to-br from-primary-900 via-primary-700 to-brand-blue px-5 py-5 text-white shadow-xl shadow-primary-900/15 md:px-7 md:py-6">
-        <div className="absolute -right-16 -top-20 h-64 w-64 rounded-full border border-white/10" />
-        <div className="absolute right-16 -bottom-28 h-56 w-56 rounded-full border border-white/10" />
-        <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="rounded-2xl bg-white/15 p-3 shadow-lg shadow-black/15">
-                <Cog6ToothIcon className="h-7 w-7 text-white" />
-              </div>
-              <h1 className="text-3xl font-black tracking-tight md:text-4xl">
-                {t('settings.title')}
-              </h1>
-            </div>
-            <p className={`font-medium text-white/70 ${isRTL ? 'mr-1' : 'ml-1'}`}>
-              {t('settings.subtitle') || 'Configure system settings and policies'}
-            </p>
-          </div>
+      <PageHeader
+        icon={Cog6ToothIcon}
+        kicker={t('nav.settings')}
+        title={t('settings.title')}
+        subtitle={t('settings.subtitle') || 'Configure system settings and policies'}
+      />
 
-          {/* Stats Cards */}
-          <div className="flex flex-wrap gap-4">
-            <StatCard 
-              icon={BuildingOfficeIcon} 
-              label={t('settings.stats.companies')} 
-              value={companies.length} 
-              color="indigo" 
-            />
-            <StatCard 
-              icon={UserGroupIcon} 
-              label={t('settings.stats.employeesTracked')} 
-              value={employeeVacations.length} 
-              color="emerald" 
-            />
-            <StatCard 
-              icon={CalculatorIcon} 
-              label={t('settings.stats.monthlyVacation')} 
-              value={settings.monthlyVacationDays} 
-              unit={t('time.days')}
-              color="blue" 
-            />
-          </div>
-        </div>
-        </header>
+      {/* Key figures */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <StatCard
+          icon={BuildingOfficeIcon}
+          title={t('settings.stats.companies')}
+          value={companies.length}
+          color="purple"
+        />
+        <StatCard
+          icon={UserGroupIcon}
+          title={t('settings.stats.employeesTracked')}
+          value={employeeVacations.length}
+          color="green"
+        />
+        <StatCard
+          icon={CalculatorIcon}
+          title={t('settings.stats.monthlyVacation')}
+          value={settings.monthlyVacationDays}
+          subtitle={t('time.days')}
+          color="blue"
+        />
+      </div>
 
         {/* --- TABS NAVIGATION --- */}
         <div className="rounded-2xl border border-slate-200 bg-white px-4 shadow-soft md:px-6">

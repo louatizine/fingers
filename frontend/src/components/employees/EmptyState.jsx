@@ -1,5 +1,5 @@
 import React from 'react';
-import { UserGroupIcon } from '@heroicons/react/24/outline';
+import { UserGroupIcon } from '../ui/icons';
 import { useTranslation } from 'react-i18next';
 
 const EmptyState = ({ hasFilters, onResetFilters }) => {

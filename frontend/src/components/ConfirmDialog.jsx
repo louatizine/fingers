@@ -5,7 +5,7 @@ import {
   CheckCircleIcon, 
   XCircleIcon, 
   InformationCircleIcon 
-} from '@heroicons/react/24/outline'
+} from './ui/icons'
 
 const ConfirmDialogContext = createContext()
 
@@ -75,24 +75,24 @@ const ConfirmDialog = ({
   const config = {
     warning: {
       icon: ExclamationTriangleIcon,
-      themeColor: 'amber',
-      btnClass: 'bg-amber-500 hover:bg-amber-600 shadow-amber-200'
+      wrap: 'bg-[#FDF6D6] text-[#7A5C00]',
+      confirm: 'bg-brand-yellow text-slate-900 hover:bg-[#e3bc12]',
     },
     danger: {
       icon: XCircleIcon,
-      themeColor: 'rose',
-      btnClass: 'bg-rose-500 hover:bg-rose-600 shadow-rose-200'
+      wrap: 'bg-[#FCEBEE] text-brand-red',
+      confirm: 'bg-brand-red text-white hover:bg-[#b40320]',
     },
     success: {
       icon: CheckCircleIcon,
-      themeColor: 'emerald',
-      btnClass: 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-200'
+      wrap: 'bg-[#EAF7EC] text-[#17802a]',
+      confirm: 'bg-brand-green text-white hover:bg-[#1a962c]',
     },
     info: {
       icon: InformationCircleIcon,
-      themeColor: 'indigo',
-      btnClass: 'bg-slate-900 hover:bg-slate-800 shadow-slate-200'
-    }
+      wrap: 'bg-primary-50 text-primary',
+      confirm: 'bg-primary text-white hover:bg-primary-600',
+    },
   }
 
   const style = config[type] || config.warning
@@ -101,7 +101,6 @@ const ConfirmDialog = ({
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-[100]" onClose={onCancel}>
-        {/* Modern Glass Overlay */}
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
@@ -125,56 +124,30 @@ const ConfirmDialog = ({
               leaveFrom="opacity-100 translate-y-0 scale-100"
               leaveTo="opacity-0 translate-y-8 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-[2rem] bg-white p-8 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.25)] border border-slate-100 transition-all">
-                
+              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl border border-slate-200 bg-white p-8 shadow-xl transition-all">
                 <div className="flex items-start gap-5">
-                  {/* Chic Icon Container */}
-                  <div className={`flex-shrink-0 flex h-14 w-14 items-center justify-center rounded-2xl bg-${style.themeColor}-50`}>
-                    <Icon className={`h-7 w-7 text-${style.themeColor}-600`} aria-hidden="true" />
+                  <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${style.wrap}`}>
+                    <Icon className="h-6 w-6" aria-hidden="true" />
                   </div>
 
                   <div className="flex-1">
-                    {/* Title with Executive Tracking */}
-                    <Dialog.Title
-                      as="h3"
-                      className="text-xl font-black text-slate-900 tracking-tight"
-                    >
+                    <Dialog.Title as="h3" className="font-display text-xl font-medium tracking-tight text-slate-900">
                       {title}
                     </Dialog.Title>
-
-                    {/* Sophisticated Message Styling */}
-                    <div className="mt-3">
-                      <p className="text-sm font-medium text-slate-500 leading-relaxed">
-                        {message}
-                      </p>
-                    </div>
+                    <p className="mt-2 text-sm leading-relaxed text-slate-600">{message}</p>
                   </div>
                 </div>
 
-                {/* Refined Actions */}
-                <div className="mt-10 flex flex-col sm:flex-row-reverse gap-3">
-                  <button
-                    type="button"
-                    className={`
-                      flex-1 inline-flex justify-center items-center px-6 py-3.5 
-                      text-sm font-bold text-white rounded-xl shadow-lg
-                      transition-all duration-200 active:scale-95
-                      ${style.btnClass}
-                    `}
-                    onClick={onConfirm}
-                  >
-                    {confirmText}
+                <div className="mt-8 flex flex-col-reverse gap-2.5 sm:flex-row sm:justify-end">
+                  <button type="button" className="btn-secondary" onClick={onCancel}>
+                    {cancelText}
                   </button>
                   <button
                     type="button"
-                    className="
-                      flex-1 inline-flex justify-center items-center px-6 py-3.5 
-                      text-sm font-bold text-slate-500 bg-slate-50 rounded-xl
-                      hover:bg-slate-100 hover:text-slate-700 transition-all duration-200
-                    "
-                    onClick={onCancel}
+                    className={`btn ${style.confirm}`}
+                    onClick={onConfirm}
                   >
-                    {cancelText}
+                    {confirmText}
                   </button>
                 </div>
               </Dialog.Panel>

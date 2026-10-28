@@ -32,7 +32,15 @@
     "noHoliday": "Pas de jour férié"
   },
   "weekdays": {
-    "short": ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"]
+    "short": [
+      "Dim",
+      "Lun",
+      "Mar",
+      "Mer",
+      "Jeu",
+      "Ven",
+      "Sam"
+    ]
   },
   "months": {
     "january": "Janvier",
@@ -59,7 +67,7 @@
     "cancel": "Annuler",
     "empty": "Aucune fête religieuse planifiée pour {{year}}.",
     "readOnlyHint": "Seuls les superviseurs et administrateurs peuvent planifier les fêtes religieuses.",
-    "confirmDelete": "Supprimer cette fête religieuse ?",
+    "confirmDelete": "Supprimer cette fête religieuse ?",
     "saved": "Fête religieuse enregistrée",
     "deleted": "Fête religieuse supprimée",
     "failed": "Impossible d'enregistrer la fête religieuse",

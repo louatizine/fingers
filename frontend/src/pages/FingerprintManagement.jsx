@@ -15,7 +15,9 @@ import {
   InformationCircleIcon,
   MagnifyingGlassIcon,
   FunnelIcon
-} from '@heroicons/react/24/outline';
+} from '../components/ui/icons';
+import { avatarFor } from '../config/brand';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -209,14 +211,8 @@ function FingerprintManagement() {
               <tbody className="divide-y divide-slate-100">
                 {loading ? (
                   <tr>
-                    <td colSpan="5" className="py-20 text-center">
-                      <div className="flex flex-col items-center">
-                        <div className="relative flex items-center justify-center">
-                          <div className="absolute animate-ping h-8 w-8 rounded-full bg-primary-300 opacity-20"></div>
-                          <div className="h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-                        </div>
-                        <p className="mt-4 text-slate-500 font-medium animate-pulse">{t('fingerprint:loading')}</p>
-                      </div>
+                    <td colSpan="5">
+                      <LoadingSpinner compact message={t('fingerprint:loading')} />
                     </td>
                   </tr>
                 ) : currentUsers.length === 0 ? (
@@ -245,7 +241,10 @@ function FingerprintManagement() {
                   <tr key={user.employee_id} className="group hover:bg-primary-50/30 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-4">
-                        <div className="relative h-11 w-11 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-primary font-bold shadow-sm group-hover:from-primary-100 group-hover:to-primary-200 transition-all">
+                        <div
+                          className="relative h-11 w-11 rounded-xl flex items-center justify-center font-bold shadow-sm transition-all"
+                          style={{ backgroundColor: avatarFor(fullName).tint, color: avatarFor(fullName).ink }}
+                        >
                           {fullName.charAt(0) || 'U'}
                           {hasFingerprint ? (
                             <div className="absolute -bottom-1 -right-1 h-4 w-4 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
@@ -364,7 +363,7 @@ function FingerprintManagement() {
       {showRemoveModal && selectedUser && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setShowRemoveModal(false)} />
-          <div className="relative bg-white rounded-[2rem] shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in duration-200">
+          <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in duration-200">
             <div className="p-8 text-center">
               <div className="mx-auto w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center mb-6">
                 <ExclamationTriangleIcon className="h-8 w-8 text-red-500" />

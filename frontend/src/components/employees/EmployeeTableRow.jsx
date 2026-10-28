@@ -2,6 +2,7 @@ import React, { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getEmploymentTypeBadge, getInitials } from '../../hooks/useEmployees';
 import { useDirection } from '../../hooks/useDirection';
+import { avatarFor } from '../../config/brand';
 
 const EmployeeTableRow = memo(({ 
   employee, 
@@ -15,6 +16,7 @@ const EmployeeTableRow = memo(({
   const { isRTL } = useDirection();
   
   const employmentType = getEmploymentTypeBadge(employee.employment_type);
+  const tone = avatarFor(`${employee.first_name || ''} ${employee.last_name || ''}`);
   
   return (
     <tr className="group hover:bg-slate-50/80 transition-all duration-150">
@@ -31,7 +33,10 @@ const EmployeeTableRow = memo(({
       {/* Employee Identity - The truncate Fix */}
       <td className="px-4 py-4 min-w-0 overflow-hidden">
         <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''} min-w-0`}>
-          <div className="h-10 w-10 rounded-xl bg-[#190E32] text-white flex items-center justify-center flex-shrink-0 font-bold text-xs shadow-sm">
+          <div
+            className="h-10 w-10 rounded-xl flex items-center justify-center flex-shrink-0 font-bold text-xs shadow-sm"
+            style={{ backgroundColor: tone.color, color: tone.on }}
+          >
             {getInitials(employee.first_name, employee.last_name)}
           </div>
 

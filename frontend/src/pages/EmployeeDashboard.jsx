@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
 import { dashboardAPI, settingsAPI } from '../services/api'
@@ -6,22 +7,120 @@ import { dashboardAPI, settingsAPI } from '../services/api'
 import {
   CalendarIcon,
   CurrencyDollarIcon,
-  ClockIcon,
-  CheckCircleIcon,
-  XCircleIcon,
   BriefcaseIcon,
-  ChevronRightIcon,
-  UserCircleIcon,
-  BuildingOfficeIcon
-} from '@heroicons/react/24/outline'
+  FlagIcon,
+  ArrowRightIcon,
+  ArrowLeftIcon,
+  ArrowUpRightIcon
+} from '../components/ui/icons'
 
-import StatCard from '../components/StatCard'
+import { getAttendanceLocale } from '../utils/attendanceI18n'
+import { BRAND } from '../config/brand'
+import { greetingPeriod } from '../utils/greeting'
+import useCountUp from '../hooks/useCountUp'
 import LoadingSpinner from '../components/LoadingSpinner'
-import RecentRequestsList from '../components/RecentRequestsList'
+import PageHeader from '../components/ui/PageHeader'
+import StatusBadge from '../components/StatusBadge'
+import LiveClock from '../components/ui/LiveClock'
+
+const TICKS = 28
+
+/** A row of small ticks instead of a gradient progress bar: reads like a ruler / gauge. */
+function TickGauge({ ratio }) {
+  const filled = Math.round(Math.min(Math.max(ratio, 0), 1) * TICKS)
+  return (
+    <div className="flex h-8 items-end gap-[3px]" role="img" aria-label={`${Math.round(ratio * 100)}%`}>
+      {Array.from({ length: TICKS }).map((_, i) => {
+        const on = i < filled
+        const tall = i % 7 === 0
+        return (
+          <span
+            key={i}
+            className="grow-y flex-1 rounded-full"
+            style={{
+              height: tall ? '100%' : '62%',
+              backgroundColor: on ? BRAND.violet : '#E5E0D5',
+              animationDelay: `${i * 18}ms`
+            }}
+          />
+        )
+      })}
+    </div>
+  )
+}
+
+function Tally({ label, value, tone }) {
+  const tones = {
+    default: 'text-slate-900',
+    green: 'text-[#17802a]',
+    yellow: 'text-[#7A5C00]',
+    red: 'text-brand-red'
+  }
+  return (
+    <div className="rounded-lg bg-slate-50 px-4 py-3">
+      <p className={`font-display text-3xl font-light leading-none tabular-nums ${tones[tone || 'default']}`}>{value}</p>
+      <p className="kicker mt-2">{label}</p>
+    </div>
+  )
+}
+
+function RequestPanel({ title, subtitle, icon: Icon, accent, counts, footer }) {
+  return (
+    <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-soft">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h3 className="font-display text-2xl font-medium text-slate-900">{title}</h3>
+          <p className="kicker mt-1.5">{subtitle}</p>
+        </div>
+        <Icon className="h-6 w-6" style={{ color: accent }} strokeWidth={1.5} />
+      </div>
+      <div className="mt-6 grid grid-cols-2 gap-3">{counts}</div>
+      <p className="mt-5 border-t border-slate-100 pt-4 text-sm text-slate-500">{footer}</p>
+    </section>
+  )
+}
+
+function ActivityList({ title, subtitle, items, renderMeta, emptyLabel, viewAllLabel, to, isRTL }) {
+  const Arrow = isRTL ? ArrowLeftIcon : ArrowRightIcon
+  const list = items?.slice(0, 3) || []
+  return (
+    <section className="rounded-xl border border-slate-200 bg-white shadow-soft">
+      <div className="border-b border-slate-100 px-6 pb-4 pt-6">
+        <h3 className="font-display text-xl font-medium text-slate-900">{title}</h3>
+        <p className="kicker mt-1.5">{subtitle}</p>
+      </div>
+
+      {list.length === 0 ? (
+        <p className="px-6 py-10 text-center text-sm text-slate-400">{emptyLabel}</p>
+      ) : (
+        <ul className="divide-y divide-slate-100">
+          {list.map((item, index) => (
+            <li key={index} className="flex items-center justify-between gap-3 px-6 py-3.5">
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold text-slate-900">{item.reason}</p>
+                <p className="mt-0.5 font-mono text-xs text-slate-500">{renderMeta(item)}</p>
+              </div>
+              <StatusBadge status={item.status} />
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <Link
+        to={to}
+        className="group flex items-center justify-between border-t border-slate-100 px-6 py-3.5 text-sm font-semibold text-primary hover:bg-primary-50"
+      >
+        {viewAllLabel}
+        <Arrow className="h-4 w-4 transition-transform group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5" />
+      </Link>
+    </section>
+  )
+}
 
 export default function EmployeeDashboard() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { user } = useAuth()
+  const isRTL = i18n.language === 'ar'
 
   const [statistics, setStatistics] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -54,337 +153,181 @@ export default function EmployeeDashboard() {
     }
   }
 
+  const balance = vacationBalance || statistics?.vacation_balance || 0
+  const earned = statistics?.vacation_earned || 0
+  const ratio = (vacationBalance || 0) / (statistics?.vacation_earned || 1)
+  const animatedBalance = useCountUp(Number(balance) || 0, 1100)
+
   if (loading) return <LoadingSpinner message={t('common.loading_message')} />
 
   const leaves = statistics?.leaves || {}
   const salaryAdvances = statistics?.salary_advances || {}
+  const name = statistics?.employee_name || user?.first_name
+
+  const period = greetingPeriod()
+
+  const quickActions = [
+    { label: t('dashboard:request_leave'), to: '/leaves', icon: CalendarIcon, color: BRAND.green },
+    { label: t('dashboard:request_advance'), to: '/salary-advances', icon: CurrencyDollarIcon, color: BRAND.yellow },
+    { label: t('dashboard:view_schedule'), to: '/holidays', icon: FlagIcon, color: '#F0536C' }
+  ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-primary-50/30 pb-12 px-4 md:px-6 max-w-[1600px] mx-auto animate-in fade-in duration-700">
-      
-      {/* Glass Morphism Header */}
-      <div className="sticky top-6 z-10 mb-8 pt-6">
-        <div className="backdrop-blur-xl bg-white/80 border border-white/20 shadow-lg shadow-primary-100/50 rounded-3xl p-6 md:p-8">
-          <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
-            <div className="flex items-start gap-4">
-              <div className="relative">
-                <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-primary-400 to-brand-blue flex items-center justify-center shadow-lg">
-                  <UserCircleIcon className="h-10 w-10 text-white" />
-                </div>
-                <div className="absolute -bottom-2 -right-2 h-6 w-6 bg-emerald-500 rounded-full border-2 border-white flex items-center justify-center">
-                  <div className="h-2 w-2 bg-white rounded-full"></div>
-                </div>
-              </div>
-              <div>
-                <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">
-                  {t('common.welcome')}, <span className="bg-gradient-to-r from-primary to-brand-blue bg-clip-text text-transparent">{statistics?.employee_name || user?.first_name}</span>!
-                </h1>
-                <div className="flex flex-wrap items-center gap-3 mt-2">
-                  <div className="flex items-center gap-2 text-slate-600">
-                    <BriefcaseIcon className="h-4 w-4" />
-                    <span className="text-sm font-medium">{statistics?.position}</span>
-                  </div>
-                  <span className="text-slate-300">•</span>
-                  <div className="flex items-center gap-2 text-slate-600">
-                    <BuildingOfficeIcon className="h-4 w-4" />
-                    <span className="text-sm font-medium">{statistics?.department}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-4">
-              <div className="hidden md:flex items-center gap-2 text-slate-500 text-sm">
-                <ClockIcon className="h-4 w-4" />
-                <span className="font-medium">{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
-              </div>
-              <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white px-5 py-2.5 rounded-xl shadow-lg flex items-center gap-2 group hover:from-primary hover:to-brand-blue transition-all duration-300 cursor-pointer">
-                <span className="text-sm font-bold">{t('dashboard:view_profile')}</span>
-                <ChevronRightIcon className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div className="space-y-8 pb-8">
+      <PageHeader
+        kicker={<LiveClock />}
+        title={
+          <>
+            {t(`dashboard:greeting.${period}`)}
+            {name ? (
+              <>
+                , <em className="font-normal italic text-primary">{name}</em>
+              </>
+            ) : null}
+          </>
+        }
+        meta={
+          (statistics?.position || statistics?.department) && (
+            <span className="inline-flex flex-wrap items-center gap-x-3 gap-y-1">
+              {statistics?.position && (
+                <span className="inline-flex items-center gap-1.5">
+                  <BriefcaseIcon className="h-4 w-4" />
+                  {statistics.position}
+                </span>
+              )}
+              {statistics?.position && statistics?.department && <span className="text-slate-300">/</span>}
+              {statistics?.department && <span>{statistics.department}</span>}
+            </span>
+          )
+        }
+        actions={
+          <Link to="/profile" className="btn-secondary">
+            {t('dashboard:view_profile')}
+            <ArrowUpRightIcon className="h-4 w-4" />
+          </Link>
+        }
+      />
 
-      {/* Main Dashboard Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Vacation Balance Card - Left Column */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Vacation Balance - Premium Card */}
-          <div className="relative overflow-hidden group">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-brand-blue"></div>
-            <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=%2260%22 height=%2260%22 viewBox=%220 0 60 60%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cg fill=%22none%22 fill-rule=%22evenodd%22%3E%3Cg fill=%22%23ffffff%22 fill-opacity=%220.05%22%3E%3Cpath d=%22M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-20"></div>
-            <div className="relative p-8 rounded-3xl border border-white/20 backdrop-blur-sm">
-              <div className="flex items-start justify-between mb-8">
-                <div>
-                  <p className="text-primary-100/80 font-semibold text-sm uppercase tracking-widest mb-2">
-                    {t('dashboard:vacation_balance')}
-                  </p>
-                  <h2 className="text-6xl font-black text-white tracking-tight">
-                    {vacationBalance || statistics?.vacation_balance || 0}
-                    <span className="text-2xl text-primary-100/60 ml-2">{t('dashboard:days')}</span>
-                  </h2>
-                  <p className="text-primary-100/60 mt-3 text-sm font-medium">{t('dashboard:days_available')}</p>
-                </div>
-                <div className="relative">
-                  <CalendarIcon className="h-24 w-24 text-white/30" />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="h-16 w-16 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center">
-                      <CalendarIcon className="h-8 w-8 text-white" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Stats Grid */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-5 border border-white/10 group hover:bg-white/15 transition-all duration-300">
-                  <p className="text-primary-100/70 text-sm font-medium mb-2">{t('dashboard:vacation_earned')}</p>
-                  <div className="flex items-end justify-between">
-                    <p className="text-3xl font-bold text-white">{statistics?.vacation_earned || 0}</p>
-                    <div className="h-10 w-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                      <CheckCircleIcon className="h-5 w-5 text-emerald-300" />
-                    </div>
-                  </div>
-                </div>
-                <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-5 border border-white/10 group hover:bg-white/15 transition-all duration-300">
-                  <p className="text-primary-100/70 text-sm font-medium mb-2">{t('dashboard:vacation_used')}</p>
-                  <div className="flex items-end justify-between">
-                    <p className="text-3xl font-bold text-white">{statistics?.vacation_used || 0}</p>
-                    <div className="h-10 w-10 rounded-full bg-rose-500/20 flex items-center justify-center">
-                      <XCircleIcon className="h-5 w-5 text-rose-300" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Progress Bar */}
-              <div className="mt-8">
-                <div className="flex justify-between text-sm text-white/70 mb-2">
-                  <span>{t('dashboard:balance_progress')}</span>
-                  <span>{Math.round(((vacationBalance || 0) / (statistics?.vacation_earned || 1)) * 100)}%</span>
-                </div>
-                <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-gradient-to-r from-emerald-400 to-cyan-400 rounded-full transition-all duration-1000"
-                    style={{ width: `${Math.min(((vacationBalance || 0) / (statistics?.vacation_earned || 1)) * 100, 100)}%` }}
-                  ></div>
-                </div>
-              </div>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="space-y-6 lg:col-span-2">
+          {/* Balance */}
+          <section className="relative overflow-hidden rounded-xl border border-slate-200 bg-white p-6 shadow-soft md:p-8">
+            <img
+              src="/cube.png"
+              alt=""
+              aria-hidden="true"
+              className="pointer-events-none absolute -top-4 end-4 h-28 w-auto opacity-[0.07]"
+            />
+            <p className="kicker">{t('dashboard:vacation_balance')}</p>
+            <div className="mt-4 flex items-baseline gap-3">
+              <span className="font-display text-7xl font-light leading-none tracking-tight tabular-nums text-slate-900 md:text-8xl">
+                {animatedBalance}
+              </span>
+              <span className="font-display text-2xl italic text-slate-400">{t('dashboard:days')}</span>
             </div>
-          </div>
+            <p className="mt-2 text-sm text-slate-500">{t('dashboard:days_available')}</p>
 
-          {/* Quick Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Leave Requests */}
-            <div className="bg-white rounded-3xl border border-slate-200/60 shadow-lg shadow-slate-200/30 p-6">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h3 className="text-lg font-bold text-slate-900">{t('dashboard:my_leave_requests')}</h3>
-                  <p className="text-slate-500 text-sm mt-1">{t('dashboard:current_status_overview')}</p>
-                </div>
-                <div className="h-12 w-12 rounded-xl bg-primary-50 flex items-center justify-center">
-                  <CalendarIcon className="h-6 w-6 text-primary" />
-                </div>
+            <div className="mt-8">
+              <div className="mb-2 flex items-center justify-between text-xs text-slate-500">
+                <span className="kicker">{t('dashboard:balance_progress')}</span>
+                <span className="font-mono tabular-nums">{Math.round(Math.min(Math.max(ratio, 0), 1) * 100)}%</span>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="text-center p-4 rounded-2xl bg-slate-50/50">
-                  <p className="text-3xl font-black text-slate-900">{leaves.total || 0}</p>
-                  <p className="text-slate-600 text-sm font-medium mt-1">{t('status.total')}</p>
-                </div>
-                <div className="text-center p-4 rounded-2xl bg-emerald-50">
-                  <p className="text-3xl font-black text-emerald-600">{leaves.approved || 0}</p>
-                  <p className="text-emerald-600 text-sm font-medium mt-1">{t('status.approved')}</p>
-                </div>
-                <div className="text-center p-4 rounded-2xl bg-amber-50">
-                  <p className="text-3xl font-black text-amber-600">{leaves.pending || 0}</p>
-                  <p className="text-amber-600 text-sm font-medium mt-1">{t('status.pending')}</p>
-                </div>
-                <div className="text-center p-4 rounded-2xl bg-rose-50">
-                  <p className="text-3xl font-black text-rose-600">{leaves.rejected || 0}</p>
-                  <p className="text-rose-600 text-sm font-medium mt-1">{t('status.rejected')}</p>
-                </div>
-              </div>
-              <div className="mt-6 pt-6 border-t border-slate-100">
-                <p className="text-slate-500 text-sm">
-                  <span className="font-bold text-slate-900">{leaves.total_approved_days || 0}</span> {t('dashboard:approved_days')}
-                </p>
-              </div>
+              <TickGauge ratio={ratio} />
             </div>
 
-            {/* Salary Advances */}
-            <div className="bg-white rounded-3xl border border-slate-200/60 shadow-lg shadow-slate-200/30 p-6">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h3 className="text-lg font-bold text-slate-900">{t('dashboard:my_salary_advances')}</h3>
-                  <p className="text-slate-500 text-sm mt-1">{t('dashboard:financial_requests_summary')}</p>
-                </div>
-                <div className="h-12 w-12 rounded-xl bg-emerald-50 flex items-center justify-center">
-                  <CurrencyDollarIcon className="h-6 w-6 text-emerald-600" />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="text-center p-4 rounded-2xl bg-slate-50/50">
-                  <p className="text-3xl font-black text-slate-900">{salaryAdvances.total || 0}</p>
-                  <p className="text-slate-600 text-sm font-medium mt-1">{t('status.total')}</p>
-                </div>
-                <div className="text-center p-4 rounded-2xl bg-emerald-50">
-                  <p className="text-3xl font-black text-emerald-600">{salaryAdvances.approved || 0}</p>
-                  <p className="text-emerald-600 text-sm font-medium mt-1">{t('status.approved')}</p>
-                </div>
-                <div className="text-center p-4 rounded-2xl bg-amber-50">
-                  <p className="text-3xl font-black text-amber-600">{salaryAdvances.pending || 0}</p>
-                  <p className="text-amber-600 text-sm font-medium mt-1">{t('status.pending')}</p>
-                </div>
-                <div className="text-center p-4 rounded-2xl bg-rose-50">
-                  <p className="text-3xl font-black text-rose-600">{salaryAdvances.rejected || 0}</p>
-                  <p className="text-rose-600 text-sm font-medium mt-1">{t('status.rejected')}</p>
-                </div>
-              </div>
-              <div className="mt-6 pt-6 border-t border-slate-100">
-                <p className="text-slate-500 text-sm">
-                  {t('dashboard:total_approved_amount')}: <span className="font-bold text-slate-900">{salaryAdvances.total_approved_amount?.toFixed(2) || 0} {t('common.currency')}</span>
-                </p>
-              </div>
+            <div className="mt-8 grid grid-cols-2 gap-3">
+              <Tally label={t('dashboard:vacation_earned')} value={earned} tone="green" />
+              <Tally label={t('dashboard:vacation_used')} value={statistics?.vacation_used || 0} tone="red" />
             </div>
+          </section>
+
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <RequestPanel
+              title={t('dashboard:my_leave_requests')}
+              subtitle={t('dashboard:current_status_overview')}
+              icon={CalendarIcon}
+              accent={BRAND.violet}
+              counts={
+                <>
+                  <Tally label={t('status.total')} value={leaves.total || 0} />
+                  <Tally label={t('status.approved')} value={leaves.approved || 0} tone="green" />
+                  <Tally label={t('status.pending')} value={leaves.pending || 0} tone="yellow" />
+                  <Tally label={t('status.rejected')} value={leaves.rejected || 0} tone="red" />
+                </>
+              }
+              footer={
+                <>
+                  <span className="font-semibold text-slate-900 tabular-nums">{leaves.total_approved_days || 0}</span>{' '}
+                  {t('dashboard:approved_days')}
+                </>
+              }
+            />
+            <RequestPanel
+              title={t('dashboard:my_salary_advances')}
+              subtitle={t('dashboard:financial_requests_summary')}
+              icon={CurrencyDollarIcon}
+              accent={BRAND.green}
+              counts={
+                <>
+                  <Tally label={t('status.total')} value={salaryAdvances.total || 0} />
+                  <Tally label={t('status.approved')} value={salaryAdvances.approved || 0} tone="green" />
+                  <Tally label={t('status.pending')} value={salaryAdvances.pending || 0} tone="yellow" />
+                  <Tally label={t('status.rejected')} value={salaryAdvances.rejected || 0} tone="red" />
+                </>
+              }
+              footer={
+                <>
+                  {t('dashboard:total_approved_amount')}:{' '}
+                  <span className="font-semibold text-slate-900 tabular-nums">
+                    {salaryAdvances.total_approved_amount?.toFixed(2) || 0} {t('common.currency')}
+                  </span>
+                </>
+              }
+            />
           </div>
         </div>
 
-        {/* Right Sidebar - Recent Activity */}
+        {/* Side column */}
         <div className="space-y-6">
-          {/* Recent Leave Requests */}
-          <div className="bg-white rounded-3xl border border-slate-200/60 shadow-lg shadow-slate-200/30 p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h3 className="text-lg font-bold text-slate-900">{t('dashboard:recent.leave_requests')}</h3>
-                <p className="text-slate-500 text-sm mt-1">{t('dashboard:latest_activities')}</p>
-              </div>
-              <div className="h-10 w-10 rounded-lg bg-primary-50 flex items-center justify-center">
-                <ClockIcon className="h-5 w-5 text-primary" />
-              </div>
-            </div>
-            <div className="space-y-4">
-              {statistics?.recent_leaves?.slice(0, 3).map((item, index) => (
-                <div key={index} className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50/50 transition-all group">
-                  <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${
-                    item.status === 'approved' ? 'bg-emerald-50' :
-                    item.status === 'pending' ? 'bg-amber-50' : 'bg-rose-50'
-                  }`}>
-                    {item.status === 'approved' ? <CheckCircleIcon className="h-5 w-5 text-emerald-600" /> :
-                     item.status === 'pending' ? <ClockIcon className="h-5 w-5 text-amber-600" /> :
-                     <XCircleIcon className="h-5 w-5 text-rose-600" />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-slate-900 truncate">{item.reason}</p>
-                    <p className="text-xs text-slate-500">
-                      {new Date(item.date).toLocaleDateString()} • {item.days} {t('dashboard:days')}
-                    </p>
-                  </div>
-                  <ChevronRightIcon className="h-4 w-4 text-slate-400 group-hover:text-primary transition-colors" />
-                </div>
-              )) || (
-                <div className="text-center py-8 text-slate-400">
-                  <CalendarIcon className="h-12 w-12 mx-auto mb-3 opacity-30" />
-                  <p className="text-sm">{t('dashboard:no_recent_leave_requests')}</p>
-                </div>
-              )}
-            </div>
-            <button className="w-full mt-6 py-3 text-center text-sm font-medium text-primary hover:text-primary-600 hover:bg-primary-50 rounded-xl transition-all">
-              {t('dashboard:view_all_requests')}
-            </button>
-          </div>
+          <ActivityList
+            title={t('dashboard:recent.leave_requests')}
+            subtitle={t('dashboard:latest_activities')}
+            items={statistics?.recent_leaves}
+            renderMeta={(item) => `${new Date(item.date).toLocaleDateString(getAttendanceLocale(i18n.language))} · ${item.days} ${t('dashboard:days')}`}
+            emptyLabel={t('dashboard:no_recent_leave_requests')}
+            viewAllLabel={t('dashboard:view_all_requests')}
+            to="/leaves"
+            isRTL={isRTL}
+          />
 
-          {/* Recent Salary Advances */}
-          <div className="bg-white rounded-3xl border border-slate-200/60 shadow-lg shadow-slate-200/30 p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h3 className="text-lg font-bold text-slate-900">{t('dashboard:recent.salary_advances')}</h3>
-                <p className="text-slate-500 text-sm mt-1">{t('dashboard:financial_activities')}</p>
-              </div>
-              <div className="h-10 w-10 rounded-lg bg-emerald-50 flex items-center justify-center">
-                <CurrencyDollarIcon className="h-5 w-5 text-emerald-600" />
-              </div>
-            </div>
-            <div className="space-y-4">
-              {statistics?.recent_salary_advances?.slice(0, 3).map((item, index) => (
-                <div key={index} className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50/50 transition-all group">
-                  <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${
-                    item.status === 'approved' ? 'bg-emerald-50' :
-                    item.status === 'pending' ? 'bg-amber-50' : 'bg-rose-50'
-                  }`}>
-                    {item.status === 'approved' ? <CheckCircleIcon className="h-5 w-5 text-emerald-600" /> :
-                     item.status === 'pending' ? <ClockIcon className="h-5 w-5 text-amber-600" /> :
-                     <XCircleIcon className="h-5 w-5 text-rose-600" />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-slate-900 truncate">{item.reason}</p>
-                    <p className="text-xs text-slate-500">
-                      {new Date(item.date).toLocaleDateString()} • {item.amount} {t('common.currency')}
-                    </p>
-                  </div>
-                  <ChevronRightIcon className="h-4 w-4 text-slate-400 group-hover:text-primary transition-colors" />
-                </div>
-              )) || (
-                <div className="text-center py-8 text-slate-400">
-                  <CurrencyDollarIcon className="h-12 w-12 mx-auto mb-3 opacity-30" />
-                  <p className="text-sm">{t('dashboard:no_recent_salary_advances')}</p>
-                </div>
-              )}
-            </div>
-            <button className="w-full mt-6 py-3 text-center text-sm font-medium text-primary hover:text-primary-600 hover:bg-primary-50 rounded-xl transition-all">
-              {t('dashboard:view_all_advances')}
-            </button>
-          </div>
+          <ActivityList
+            title={t('dashboard:recent.salary_advances')}
+            subtitle={t('dashboard:financial_activities')}
+            items={statistics?.recent_salary_advances}
+            renderMeta={(item) => `${new Date(item.date).toLocaleDateString(getAttendanceLocale(i18n.language))} · ${item.amount} ${t('common.currency')}`}
+            emptyLabel={t('dashboard:no_recent_salary_advances')}
+            viewAllLabel={t('dashboard:view_all_advances')}
+            to="/salary-advances"
+            isRTL={isRTL}
+          />
 
-          {/* Quick Actions */}
-          <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-6 text-white">
-            <h3 className="text-lg font-bold mb-4">{t('dashboard:quick_actions')}</h3>
-            <div className="space-y-3">
-              <button className="w-full flex items-center justify-between p-3 rounded-xl bg-white/10 hover:bg-white/15 transition-all group">
-                <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-lg bg-primary/20 flex items-center justify-center">
-                    <CalendarIcon className="h-4 w-4" />
-                  </div>
-                  <span className="text-sm font-medium">{t('dashboard:request_leave')}</span>
-                </div>
-                <ChevronRightIcon className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-              </button>
-              <button className="w-full flex items-center justify-between p-3 rounded-xl bg-white/10 hover:bg-white/15 transition-all group">
-                <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-                    <CurrencyDollarIcon className="h-4 w-4" />
-                  </div>
-                  <span className="text-sm font-medium">{t('dashboard:request_advance')}</span>
-                </div>
-                <ChevronRightIcon className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-              </button>
-              <button className="w-full flex items-center justify-between p-3 rounded-xl bg-white/10 hover:bg-white/15 transition-all group">
-                <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-lg bg-purple-500/20 flex items-center justify-center">
-                    <BriefcaseIcon className="h-4 w-4" />
-                  </div>
-                  <span className="text-sm font-medium">{t('dashboard:view_schedule')}</span>
-                </div>
-                <ChevronRightIcon className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-              </button>
-            </div>
-          </div>
+          {/* Quick actions */}
+          <section className="rounded-xl bg-slate-900 p-6 text-white">
+            <h3 className="font-display text-xl font-medium">{t('dashboard:quick_actions')}</h3>
+            <ul className="mt-4 divide-y divide-white/10">
+              {quickActions.map(({ label, to, icon: Icon, color }, index) => (
+                <li key={to}>
+                  <Link to={to} className="group flex items-center gap-4 py-3.5">
+                    <span className="font-mono text-xs text-white/40">{String(index + 1).padStart(2, '0')}</span>
+                    <Icon className="h-5 w-5 shrink-0" style={{ color }} strokeWidth={1.75} />
+                    <span className="flex-1 text-sm font-medium">{label}</span>
+                    <ArrowUpRightIcon className="h-4 w-4 text-white/40 transition-all group-hover:-translate-y-0.5 group-hover:text-brand-yellow rtl:-scale-x-100" />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
         </div>
-      </div>
-
-      {/* Bottom Stats - Optional if you want to keep original StatCard components */}
-      <div className="hidden">
-        <RecentRequestsList
-          title={t('dashboard:recent.leave_requests')}
-          items={statistics?.recent_leaves}
-          type="leave"
-        />
-        <RecentRequestsList
-          title={t('dashboard:recent.salary_advances')}
-          items={statistics?.recent_salary_advances}
-          type="advance"
-        />
       </div>
     </div>
   )

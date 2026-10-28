@@ -1,5 +1,5 @@
 import React from 'react';
-import { XMarkIcon, ArrowDownTrayIcon, NoSymbolIcon, KeyIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, ArrowDownTrayIcon, NoSymbolIcon, KeyIcon } from '../ui/icons';
 import { useTranslation } from 'react-i18next';
 import { useDirection } from '../../hooks/useDirection';
 

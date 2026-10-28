@@ -18,7 +18,7 @@ export function RequestsDonutChart({ title, subtitle, data = [] }) {
   const totalValue = useMemo(() => data.reduce((acc, curr) => acc + curr.value, 0), [data]);
 
   return (
-    <div className="bg-white/70 backdrop-blur-xl rounded-[2.5rem] border border-white p-8 shadow-[0_20px_50px_rgba(0,0,0,0.04)] h-full flex flex-col">
+    <div className="bg-white/70 rounded-2xl border border-white p-8 shadow-[0_20px_50px_rgba(0,0,0,0.04)] h-full flex flex-col">
       <div className={`mb-6 ${isRTL ? 'text-right' : 'text-left'}`}>
         <h3 className="text-xl font-black text-slate-900 tracking-tight leading-none">{title}</h3>
         <p className="text-[10px] font-black text-slate-400 mt-2 uppercase tracking-[0.2em]">{subtitle || 'Status Overview'}</p>
@@ -75,7 +75,7 @@ export function RequestsRadialChart({ title, subtitle, data = [] }) {
   const isRTL = i18n.language === 'ar';
 
   return (
-    <div className="bg-slate-900 rounded-[2.5rem] p-8 shadow-2xl flex flex-col h-full text-white overflow-hidden relative">
+    <div className="bg-slate-900 rounded-2xl p-8 shadow-2xl flex flex-col h-full text-white overflow-hidden relative">
       <div className="absolute -top-24 -right-24 w-64 h-64 bg-brand-yellow/10 blur-[100px] rounded-full" />
       
       <div className={`mb-6 relative z-10 ${isRTL ? 'text-right' : 'text-left'}`}>

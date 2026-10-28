@@ -1,27 +1,19 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Familjen+Grotesk:ital,wght@0,400..700;1,400..700&family=Schibsted+Grotesk:ital,wght@0,400..800;1,400..800&family=DM+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Modern Creative Design System */
-body {
-  margin: 0;
-  font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background: linear-gradient(135deg, #F7F5FB 0%, #F4F6FA 50%, #F7F5FB 100%);
-  background-attachment: fixed;
-  color: #212529;
-  letter-spacing: -0.01em;
-}
-
-code {
-  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-}
-
-/* Modern Theme Variables */
+/* ------------------------------------------------------------------ */
+/*  Design tokens: "paper & violet ink"                                */
+/* ------------------------------------------------------------------ */
 :root {
+  --paper: #F5F2EB;
+  --paper-deep: #ECE8DE;
+  --ink: #161128;
+  --ink-soft: #524B65;
+  --hairline: #E5E0D5;
+
   --primary: #3B2176;
   --primary-light: #4A6AAD;
   --brand-violet: #3B2176;
@@ -31,26 +23,95 @@ code {
   --brand-yellow: #F1CA15;
   --accent-purple: #3B2176;
   --accent-blue: #4A6AAD;
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.3);
 }
 
-/* Glassmorphism utility */
-.glass {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+html {
+  -webkit-text-size-adjust: 100%;
 }
 
-.glass-dark {
-  background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+body {
+  margin: 0;
+  font-family: 'Schibsted Grotesk', 'IBM Plex Sans Arabic', 'Segoe UI', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--paper);
+  color: var(--ink);
 }
 
-/* Toast Animations */
+/* A whisper of paper grain so flat surfaces don't feel sterile */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.09 0 0 0 0 0.07 0 0 0 0 0.16 0 0 0 0.035 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+}
+
+::selection {
+  background: #F1CA15;
+  color: #161128;
+}
+
+h1,
+h2,
+h3 {
+  font-family: 'Familjen Grotesk', 'IBM Plex Sans Arabic', 'Segoe UI', system-ui, sans-serif;
+  letter-spacing: -0.02em;
+}
+
+h1 {
+  letter-spacing: -0.025em;
+}
+
+code {
+  font-family: 'DM Mono', 'Consolas', 'Monaco', monospace;
+}
+
+/* Arabic script has no use for tight tracking or uppercase micro-labels */
+[dir='rtl'] h1,
+[dir='rtl'] h2,
+[dir='rtl'] h3 {
+  letter-spacing: 0;
+}
+
+:focus-visible {
+  outline: 2px solid var(--section, #3B2176);
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Scrollbars                                                         */
+/* ------------------------------------------------------------------ */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CEC8BA;
+  border-radius: 999px;
+  border: 3px solid var(--paper);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--section, #3B2176);
+}
+
+/* ------------------------------------------------------------------ */
+/*  Keyframes                                                          */
+/* ------------------------------------------------------------------ */
 @keyframes slideIn {
   from {
     transform: translateX(100%) scale(0.95);
@@ -89,6 +150,28 @@ code {
   }
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes growX {
+  from {
+    transform: scaleX(0);
+  }
+
+  to {
+    transform: scaleX(1);
+  }
+}
+
 .animate-slideIn {
   animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -101,53 +184,187 @@ code {
   animation: progress linear forwards;
 }
 
-/* Fade In Animation for Page Loads */
-@keyframes fadeIn {
+.animate-fadeIn {
+  animation: fadeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes growY {
   from {
-    opacity: 0;
-    transform: translateY(10px);
+    transform: scaleY(0);
   }
 
   to {
-    opacity: 1;
-    transform: translateY(0);
+    transform: scaleY(1);
   }
 }
 
-.animate-fadeIn {
-  animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+.grow-y {
+  transform-origin: bottom center;
+  animation: growY 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* Smooth scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+.grow-x {
+  transform-origin: left center;
+  animation: growX 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
+[dir='rtl'] .grow-x {
+  transform-origin: right center;
 }
 
-::-webkit-scrollbar-thumb {
-  background: #3B2176;
-  border-radius: 4px;
+/* Staggered entrance: set --i on children (style={{ '--i': n }}) */
+.stagger > * {
+  animation: fadeIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--i, 0) * 60ms);
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #4A6AAD;
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
-/* Page Container Utility */
-@layer utilities {
+/* ------------------------------------------------------------------ */
+/*  Component layer                                                    */
+/* ------------------------------------------------------------------ */
+@layer components {
+
+  /* Flat surface with a hairline: the base "card" of the whole app */
+  .surface {
+    @apply rounded-xl border border-slate-200 bg-white shadow-soft;
+  }
+
+  /* Tiny mono label used above titles, on table heads, etc. */
+  .kicker {
+    @apply font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-slate-500;
+  }
+
+  [dir='rtl'] .kicker {
+    @apply font-sans tracking-normal;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-paper disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .btn-primary {
+    @apply btn bg-primary text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.14),0_1px_2px_rgba(22,17,40,0.25)] hover:bg-primary-600 active:translate-y-px;
+  }
+
+  .btn-secondary {
+    @apply btn border border-slate-300 bg-white text-slate-800 hover:border-primary-300 hover:bg-primary-50 hover:text-primary active:translate-y-px;
+  }
+
+  .btn-ghost {
+    @apply btn text-slate-600 hover:bg-slate-100 hover:text-slate-900;
+  }
+
+  .field {
+    @apply w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 transition-colors focus:outline-none;
+  }
+
+  /* Focus picks up the colour of the section you're in (set by Layout) */
+  .field:focus {
+    border-color: var(--section, #3B2176);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--section, #3B2176) 18%, transparent);
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--section, #3B2176);
+  }
+
+  /* Legacy helpers kept for compatibility */
   .page-container {
     @apply space-y-6;
   }
-  
+
   .page-section {
-    @apply bg-white shadow-sm border border-neutral-medium rounded-sm;
+    @apply rounded-xl border border-slate-200 bg-white shadow-soft;
   }
-  
+
   .table-container {
-    @apply bg-white rounded-sm border border-neutral-medium shadow-sm overflow-hidden;
+    @apply overflow-hidden rounded-xl border border-slate-200 bg-white shadow-soft;
   }
+}
+
+/* Table heads carry the colour of the section they belong to */
+main table thead th {
+  border-bottom: 2px solid var(--section, #CEC8BA) !important;
+}
+
+/* Kept so older markup that still references them degrades gracefully */
+.glass {
+  background: #fff;
+  border: 1px solid var(--hairline);
+}
+
+.glass-dark {
+  background: rgba(22, 17, 40, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Skip link: visible only when focused from the keyboard */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 1rem;
+  z-index: 100;
+  padding: 0.6rem 1rem;
+  border-radius: 0.5rem;
+  background: var(--ink);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  top: 1rem;
+}
+
+[dir='rtl'] .skip-link {
+  left: auto;
+  right: 1rem;
+}
+
+/* Keyboard chips used outside the Kbd component (login hint, etc.) */
+kbd {
+  font-family: 'DM Mono', ui-monospace, monospace;
+}
+
+/* Pending status: a quiet pulse on the badge dot */
+.pending-dot {
+  animation: pendingPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes pendingPulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.45;
+    transform: scale(0.75);
+  }
+}
+
+/* Tables feel like a ledger: row hover picks up the section colour */
+main tbody tr {
+  transition: background-color 150ms ease;
+}
+
+main tbody tr:hover {
+  background-color: color-mix(in srgb, var(--section-tint, #EDE7F6) 65%, white);
+}
+
+/* Focus the main landmark after skip-link without a flash of outline */
+#main-content:focus {
+  outline: none;
 }

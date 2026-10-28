@@ -4,11 +4,12 @@ import App from './App.jsx'
 import './index.css'
 import { AuthProvider } from './context/AuthContext'
 import './i18n/index.js' // Initialize i18n
+import { CubeLoader } from './components/ui/CubeBar'
 
 function AppLoading() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#f3f2f1]">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#3B2176]" />
+    <div className="flex min-h-screen items-center justify-center bg-paper">
+      <CubeLoader size="h-4 w-4" />
     </div>
   )
 }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
+import { ChevronUpIcon, ChevronDownIcon } from '../ui/icons';
 import { useDirection } from '../../hooks/useDirection';
 
 const SortableHeader = ({ label, sortKey, sortConfig, onSort }) => {

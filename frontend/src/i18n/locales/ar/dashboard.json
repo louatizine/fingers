@@ -73,5 +73,16 @@
   "attendance_shortcut": "الحضور",
   "check_attendance": "عرض سجلات الحضور",
   "attendance_shortcut_desc": "افتح السجلات اليومية والملخصات وحالة مزامنة الجهاز من مكان واحد.",
-  "open_attendance": "فتح الحضور"
+  "open_attendance": "فتح الحضور",
+  "greeting": {
+    "morning": "صباح الخير",
+    "afternoon": "طاب يومك",
+    "evening": "مساء الخير"
+  },
+  "inbox": {
+    "clear": "لا يوجد شيء بانتظارك. أنت على اطلاع.",
+    "leaves": "{{count}} طلب إجازة بانتظار قرارك.",
+    "advances": "{{count}} سلفة مالية بانتظار قرارك.",
+    "both": "{{leaves}} إجازات و {{advances}} سلف تحتاج إلى قرار."
+  }
 }

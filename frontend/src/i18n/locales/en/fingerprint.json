@@ -26,7 +26,8 @@
     "name": "Name",
     "templateId": "Template ID",
     "enrolledAt": "Enrolled At",
-    "actions": "Actions"
+    "actions": "Actions",
+    "id": "ID: {{id}}"
   },
   "remove": "Remove",
   "removeDialog": {
@@ -44,5 +45,20 @@
   },
   "loading": "Loading enrolled users...",
   "noUsers": "No enrolled users found",
-  "notAvailable": "N/A"
+  "notAvailable": "N/A",
+  "empty": {
+    "noUsersFound": "No users found",
+    "noEnrolled": "No fingerprints enrolled",
+    "noMatch": "No results for “{{term}}”",
+    "noEnrolledDesc": "Enrol employees on the terminal to see them here."
+  },
+  "pendingEnrollment": "Enrolment pending",
+  "notEnrolledYet": "Not enrolled yet",
+  "removeFingerprint": "Remove fingerprint",
+  "noAction": "No action",
+  "showing": "Showing {{from}} to {{to}} of {{total}}",
+  "revokeTitle": "Remove this fingerprint?",
+  "revokeDesc": "{{name}}’s fingerprint will be removed from the terminal. This cannot be undone.",
+  "keepIt": "Keep it",
+  "yesRemove": "Yes, remove"
 }

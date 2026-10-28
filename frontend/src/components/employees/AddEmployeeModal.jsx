@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon } from '../ui/icons';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { useDirection } from '../../hooks/useDirection';

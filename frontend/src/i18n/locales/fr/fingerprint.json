@@ -6,15 +6,15 @@
     "enrolled": "Inscrits",
     "pending": "En attente",
     "checkIns": "Enregistrements",
-    "total": "Total Utilisateurs"
+    "total": "Total utilisateurs"
   },
   "filters": {
-    "searchPlaceholder": "Rechercher par nom, ID ou département..."
+    "searchPlaceholder": "Rechercher par nom, ID ou département…"
   },
   "show": "Afficher",
   "note": {
-    "title": "Remarque :",
-    "description": "Inscrivez les employés sur le terminal ZKTeco (écran de l'appareil ou logiciel ZKTeco). Le backend synchronise automatiquement les utilisateurs et les présences aux horaires prévus — les administrateurs peuvent aussi synchroniser à tout moment depuis la page Présences."
+    "title": "Remarque :",
+    "description": "Inscrivez les employés sur le terminal ZKTeco (écran de l'appareil ou logiciel ZKTeco). Le backend synchronise automatiquement les utilisateurs et les présences aux horaires prévus — les administrateurs peuvent aussi synchroniser à tout moment depuis la page présences."
   },
   "table": {
     "userIdentity": "Identité de l'utilisateur",
@@ -26,7 +26,8 @@
     "name": "Nom",
     "templateId": "ID de modèle",
     "enrolledAt": "Inscrit le",
-    "actions": "Actions"
+    "actions": "Actions",
+    "id": "ID : {{id}}"
   },
   "remove": "Supprimer",
   "removeDialog": {
@@ -42,7 +43,22 @@
   "error": {
     "removeFailed": "Échec de la suppression de l'empreinte digitale"
   },
-  "loading": "Chargement des utilisateurs inscrits...",
+  "loading": "Chargement des utilisateurs inscrits…",
   "noUsers": "Aucun utilisateur inscrit trouvé",
-  "notAvailable": "N/D"
+  "notAvailable": "N/D",
+  "empty": {
+    "noUsersFound": "Aucun utilisateur trouvé",
+    "noEnrolled": "Aucune empreinte enregistrée",
+    "noMatch": "Aucun résultat pour « {{term}} »",
+    "noEnrolledDesc": "Inscrivez les employés sur le terminal pour les voir ici."
+  },
+  "pendingEnrollment": "Inscription en attente",
+  "notEnrolledYet": "Pas encore inscrit",
+  "removeFingerprint": "Supprimer l'empreinte",
+  "noAction": "Aucune action",
+  "showing": "Affichage de {{from}} à {{to}} sur {{total}}",
+  "revokeTitle": "Supprimer l'empreinte ?",
+  "revokeDesc": "L'empreinte de {{name}} sera supprimée du terminal. Cette action est irréversible.",
+  "keepIt": "Conserver",
+  "yesRemove": "Oui, supprimer"
 }

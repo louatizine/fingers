@@ -11,7 +11,11 @@ import {
   ChevronLeftIcon, 
   ChevronRightIcon, 
   CalendarDaysIcon
-} from '@heroicons/react/24/outline';
+} from '../components/ui/icons';
+import PageHeader from '../components/ui/PageHeader';
+import LoadingSpinner from '../components/LoadingSpinner';
+import StatusBadge from '../components/StatusBadge';
+import { BRAND } from '../config/brand';
 
 export default function Leaves() {
   const { t, i18n } = useTranslation();
@@ -200,83 +204,45 @@ export default function Leaves() {
   };
 
   if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center h-96">
-        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-        <p className="mt-4 text-slate-400 font-bold text-xs uppercase tracking-widest">{t('leaves.loading')}</p>
-      </div>
-    );
+    return <LoadingSpinner message={t('leaves.loading')} />;
   }
 
   return (
     <div className="space-y-6 animate-fadeIn">
 
       {/* Header */}
-      <div className={`relative overflow-hidden rounded-[1.5rem] bg-gradient-to-br from-primary-900 via-primary-700 to-brand-blue px-5 py-5 text-white shadow-xl shadow-primary-900/15 md:px-7 md:py-6 ${isRTL ? 'md:flex-row-reverse' : ''}`}>
-        <div className="absolute -right-16 -top-20 h-64 w-64 rounded-full border border-white/10" />
-        <div className="absolute right-16 -bottom-28 h-56 w-56 rounded-full border border-white/10" />
-        <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-5">
-          <div>
-            <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.22em] text-primary-100">
-              <CalendarDaysIcon className="h-4 w-4" />
-              <span>{t('leaves.table.title')}</span>
-            </div>
-            <h1 className="text-3xl font-black tracking-tight md:text-4xl">{t('leaves.title')}</h1>
-            <p className="mt-2 max-w-2xl text-sm font-medium leading-6 text-white/70 md:text-base">{t('leaves.subtitle')}</p>
-          </div>
-
-          {user.role === 'employee' && (
-            <button
-              onClick={() => setShowModal(true)}
-              className={`inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold text-primary shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary-50 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary-800 active:translate-y-0 ${isRTL ? 'flex-row-reverse' : ''}`}
-            >
+      <PageHeader
+        icon={CalendarDaysIcon}
+        kicker={t('leaves.table.title')}
+        title={t('leaves.title')}
+        subtitle={t('leaves.subtitle')}
+        actions={
+          user.role === 'employee' && (
+            <button onClick={() => setShowModal(true)} className="btn-primary">
               <PlusIcon className="h-5 w-5" aria-hidden="true" />
               <span>{t('leaves.new_request')}</span>
             </button>
-          )}
-        </div>
-      </div>
+          )
+        }
+      />
 
       {/* Balance Cards (Employee Only) */}
       {user.role === 'employee' && (
         <div className={`w-full mx-auto grid grid-cols-1 md:grid-cols-3 gap-4 ${isRTL ? 'direction-rtl' : ''}`}>
           {[
-            {
-              label: t('leaves.annual_leave'),
-              val: vacationBalance,
-              icon: '🏖️',
-              bgColor: 'bg-gradient-to-br from-primary-50 to-primary-100/30',
-              textColor: 'text-primary-600',
-              borderColor: 'border-primary-200'
-            },
-            {
-              label: t('leaves.sick_leave'),
-              val: user.leave_balance?.sick || 0,
-              icon: '🤒',
-              bgColor: 'bg-gradient-to-br from-emerald-50 to-emerald-100/30',
-              textColor: 'text-emerald-700',
-              borderColor: 'border-emerald-200'
-            },
-            {
-              label: t('leaves.unpaid_leave'),
-              val: user.leave_balance?.unpaid || 0,
-              icon: '💼',
-              bgColor: 'bg-gradient-to-br from-amber-50 to-amber-100/30',
-              textColor: 'text-amber-700',
-              borderColor: 'border-amber-200'
-            }
+            { label: t('leaves.annual_leave'), val: vacationBalance, accent: BRAND.violet },
+            { label: t('leaves.sick_leave'), val: user.leave_balance?.sick || 0, accent: BRAND.green },
+            { label: t('leaves.unpaid_leave'), val: user.leave_balance?.unpaid || 0, accent: BRAND.yellow }
           ].map((card, i) => (
             <div
               key={i}
-              className={`${card.bgColor} relative overflow-hidden p-6 rounded-2xl border ${card.borderColor} shadow-soft hover:shadow-medium transition-all duration-300 group hover:-translate-y-0.5`}
+              className="relative overflow-hidden rounded-xl border border-slate-200 bg-white p-6 shadow-soft"
             >
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-xs font-bold uppercase tracking-wider text-slate-500">{card.label}</p>
-                <span className="text-lg opacity-80 group-hover:scale-110 transition-transform">{card.icon}</span>
-              </div>
-              <div className={`flex items-baseline gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                <span className={`text-3xl font-black ${card.textColor}`}>{Number(card.val).toFixed(1)}</span>
-                <span className="text-xs font-bold text-slate-400 uppercase">{t('time.days')}</span>
+              <span className="absolute inset-x-0 top-0 h-[3px]" style={{ backgroundColor: card.accent }} aria-hidden="true" />
+              <p className="kicker">{card.label}</p>
+              <div className="mt-5 flex items-baseline gap-2">
+                <span className="font-display text-5xl font-light leading-none tabular-nums text-slate-900">{Number(card.val).toFixed(1)}</span>
+                <span className="font-display text-lg italic text-slate-400">{t('time.days')}</span>
               </div>
             </div>
           ))}
@@ -284,14 +250,14 @@ export default function Leaves() {
       )}
 
       {/* Table Container */}
-      <div className="w-full mx-auto overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-soft">
+      <div className="w-full mx-auto overflow-hidden rounded-xl border border-slate-200 bg-white shadow-soft">
         {/* Table Header */}
-        <div className="flex flex-col gap-1 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white px-6 py-5 md:flex-row md:items-center md:justify-between md:px-8">
+        <div className="flex flex-col gap-1 border-b border-slate-200 px-6 py-5 md:flex-row md:items-end md:justify-between md:px-8">
           <div>
-            <h2 className="text-lg font-black text-slate-800">{t('leaves.table.title')}</h2>
+            <h2 className="font-display text-2xl font-medium text-slate-900">{t('leaves.table.title')}</h2>
             <p className="mt-1 text-sm text-slate-500">{t('leaves.table.subtitle')}</p>
           </div>
-          <span className="w-fit rounded-full bg-primary-50 px-3 py-1 text-xs font-bold text-primary">
+          <span className="kicker w-fit tabular-nums">
             {leaves.length} {t('leaves.table.title')}
           </span>
         </div>
@@ -299,13 +265,13 @@ export default function Leaves() {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="bg-slate-50/80">
-                {user.role !== 'employee' && <th className="px-6 py-4 text-xs font-bold uppercase text-slate-500 tracking-wider">{t('leaves.table.employee')}</th>}
-                <th className="px-6 py-4 text-xs font-bold uppercase text-slate-500 tracking-wider">{t('leaves.table.type')}</th>
-                <th className="px-6 py-4 text-xs font-bold uppercase text-slate-500 tracking-wider">{t('leaves.table.dates')}</th>
-                <th className="px-6 py-4 text-xs font-bold uppercase text-slate-500 tracking-wider">{t('leaves.table.days')}</th>
-                <th className="px-6 py-4 text-xs font-bold uppercase text-slate-500 tracking-wider">{t('leaves.table.status')}</th>
-                {user.role !== 'employee' && <th className="px-6 py-4 text-right text-xs font-bold uppercase text-slate-500 tracking-wider">{t('leaves.table.actions')}</th>}
+              <tr className="border-b border-slate-200 bg-slate-50">
+                {user.role !== 'employee' && <th className="kicker px-6 py-3.5 text-start">{t('leaves.table.employee')}</th>}
+                <th className="kicker px-6 py-3.5 text-start">{t('leaves.table.type')}</th>
+                <th className="kicker px-6 py-3.5 text-start">{t('leaves.table.dates')}</th>
+                <th className="kicker px-6 py-3.5 text-start">{t('leaves.table.days')}</th>
+                <th className="kicker px-6 py-3.5 text-start">{t('leaves.table.status')}</th>
+                {user.role !== 'employee' && <th className="kicker px-6 py-3.5 text-end">{t('leaves.table.actions')}</th>}
               </tr>
             </thead>
 
@@ -333,25 +299,17 @@ export default function Leaves() {
                   </td>
 
                   <td className="px-6 py-4">
-                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 font-bold text-slate-900 text-sm">
+                    <span className="font-mono text-sm font-medium tabular-nums text-slate-900">
                       {leave.days}
                     </span>
                   </td>
 
                   <td className="px-6 py-4">
-                    <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider ${
-                      leave.status === 'approved'
-                        ? 'bg-emerald-100 text-emerald-800'
-                        : leave.status === 'rejected'
-                        ? 'bg-rose-100 text-rose-800'
-                        : 'bg-amber-100 text-amber-800'
-                    }`}>
-                      {t(`status.${leave.status}`)}
-                    </span>
+                    <StatusBadge status={leave.status} />
                   </td>
 
                   {user.role !== 'employee' && (
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-6 py-4 text-end">
                       <ActionButtons leave={leave} />
                     </td>
                   )}

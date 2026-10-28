@@ -1,4 +1,4 @@
-import { CalendarIcon, ChevronRightIcon } from '@heroicons/react/24/outline'
+import { CalendarIcon, ChevronRightIcon } from './ui/icons'
 
 export default function UpcomingTimeOffCard() {
   const upcomingTimeOff = [

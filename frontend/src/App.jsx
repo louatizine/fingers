@@ -15,14 +15,15 @@ import Attendance from './pages/Attendance'
 import PublicHolidays from './pages/PublicHolidays'
 import FingerprintManagement from './pages/FingerprintManagement'
 import NotFound from './pages/NotFound'
+import { CubeLoader } from './components/ui/CubeBar'
 
 function ProtectedRoute({ children, allowedRoles }) {
   const { user, loading } = useAuth()
   
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f3f2f1]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#3B2176]"></div>
+      <div className="flex min-h-screen items-center justify-center">
+        <CubeLoader size="h-4 w-4" />
       </div>
     )
   }

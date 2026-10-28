@@ -38,7 +38,13 @@
     "days": "days",
     "filters": "Filters",
     "thisYear": "This Year",
-    "previousYear": "Previous Year"
+    "previousYear": "Previous Year",
+    "creating": "Creating…",
+    "clearSelection": "Clear selection",
+    "unknown": "Unknown",
+    "general": "General",
+    "na": "N/A",
+    "remove": "Remove"
   },
   "currency": {
     "dinar": "DT"
@@ -54,84 +60,43 @@
     "fingerprint": "Fingerprint",
     "settings": "Settings",
     "profile": "Profile",
-    "logout": "Logout"
+    "logout": "Logout",
+    "languageSelector": "Select language",
+    "closeMenu": "Close menu",
+    "openMenu": "Open menu",
+    "main": "Main navigation",
+    "skipToContent": "Skip to content",
+    "collapseSidebar": "Collapse sidebar",
+    "expandSidebar": "Expand sidebar",
+    "searchJump": "Search or jump to…"
+  },
+  "command": {
+    "placeholder": "Search pages, people, actions…",
+    "pages": "Pages",
+    "people": "People",
+    "actions": "Actions",
+    "empty": "Nothing matches that search",
+    "hint": "to navigate",
+    "open": "Open",
+    "logout": "Sign out",
+    "profile": "Open my profile",
+    "requestLeave": "Request leave",
+    "requestAdvance": "Request a salary advance"
+  },
+  "toast": {
+    "success": "Success",
+    "error": "Something went wrong",
+    "warning": "Attention",
+    "info": "Notice"
   },
   "branding": {
     "title": "HR Management",
     "subtitle": "Enterprise System"
   },
   "dashboard": {
-    "title_employee": "My Dashboard",
-    "title_admin": "Admin Dashboard",
-    "title_supervisor": "Supervisor Dashboard",
-    "welcome": "Welcome back",
-    "subtitle_employee": "Here's an overview of your activity.",
-    "subtitle_admin": "System-wide Overview & Analytics",
-    "subtitle_supervisor": "Company Operations & Team Management",
-    "request_leave": "Request Leave",
-    "request_advance": "Request Advance",
-    "view_calendar": "View Calendar",
-    "view_schedule": "View Schedule",
-    "vacation_balance": "Vacation Balance",
-    "days_available": "Days Available",
-    "vacation_earned": "Earned",
-    "vacation_used": "Used",
-    "my_leave_requests": "My Leave Requests",
-    "my_salary_advances": "My Salary Advances",
-    "total_requests": "Total Requests",
-    "recentActivity": "Recent Activity",
-    "days": "days",
-    "balance_progress": "Balance Progress",
-    "current_status_overview": "Current status overview",
-    "financial_requests_summary": "Financial requests summary",
-    "approved_days": "approved days",
-    "total_approved_amount": "Total approved amount",
-    "latest_activities": "Latest activities",
-    "financial_activities": "Financial activities",
-    "no_recent_leave_requests": "No recent leave requests",
-    "no_recent_salary_advances": "No recent salary advances",
-    "view_all_requests": "View All Requests",
-    "view_all_advances": "View All Advances",
-    "view_profile": "View Profile",
-    "quick_actions": "Quick Actions",
-    "active": "active",
-    "stats": {
-      "annual_leave": "Annual Leave",
-      "sick_leave": "Sick Leave",
-      "pending_requests": "Pending Requests",
-      "approved_leaves": "Approved Leaves",
-      "total_employees": "Total Employees",
-      "pending_leaves": "Pending Leaves",
-      "pending_advances": "Pending Advances",
-      "active_projects": "Active Projects",
-      "days_remaining": "days remaining",
-      "days_available": "days available",
-      "awaiting_approval": "awaiting approval",
-      "this_year": "this year",
-      "active_employees": "active employees",
-      "in_progress": "in progress"
-    },
-    "charts": {
-      "leave_requests": "Leave Requests Overview",
-      "leave_requests_subtitle": "Distribution by status",
-      "salary_advances": "Salary Advance Requests",
-      "salary_advances_subtitle": "Current month status",
-      "leave_balance": "Leave Balance",
-      "recent_activity": "Recent Activity",
-      "leave_trends": "Leave Trends",
-      "upcoming_timeoff": "Upcoming Time Off",
-      "system_health": "System Health"
-    },
-    "recent": {
-      "leave_requests": "Recent Leave Requests",
-      "leave_requests_subtitle": "Latest submissions",
-      "salary_advances": "Recent Salary Advances",
-      "salary_advances_subtitle": "Financial requests"
-    },
     "companyLeaveStatus": "Company Leave Status Overview",
     "salaryAdvanceRequests": "Salary Advance Requests",
-    "advanceRequestOverview": "Advance Request Overview",
-    "companyWideLeaveDistribution": "Company-wide Leave Distribution"
+    "advanceRequestOverview": "Advance Request Overview"
   },
   "leaves": {
     "title": "Leave Requests",
@@ -155,26 +120,19 @@
       "maternity": "Maternity Leave"
     },
     "table": {
-      "title": "Leave Requests",
+      "employee": "Employee",
+      "type": "Type",
+      "balance": "Balance",
+      "dates": "Dates",
+      "days": "Days",
+      "reason": "Reason",
+      "status": "Status",
+      "actions": "Actions",
+      "title": "Leave requests",
       "subtitle": "Manage and track all leave requests",
-      "employee": "Employee",
-      "type": "Type",
-      "balance": "Balance",
-      "dates": "Dates",
-      "days": "Days",
-      "reason": "Reason",
-      "status": "Status",
-      "actions": "Actions"
-    },
-    "table": {
-      "employee": "Employee",
-      "type": "Type",
-      "balance": "Balance",
-      "dates": "Dates",
-      "days": "Days",
-      "reason": "Reason",
-      "status": "Status",
-      "actions": "Actions"
+      "showing": "Showing {{from}} to {{to}} of {{total}}",
+      "noRequests": "No leave requests",
+      "noRequestsDesc": "Your requests will appear here once submitted."
     },
     "modal": {
       "title": "New Leave Request",
@@ -184,7 +142,13 @@
       "number_of_days": "Number of Days",
       "reason": "Reason",
       "submit": "Submit Request",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "leaveType": "Leave type",
+      "reasonPlaceholder": "Tell us the reason for your request…",
+      "rejectionReasonPlaceholder": "Reason for rejection (optional)",
+      "submitButton": "Submit request"
     },
     "messages": {
       "insufficient_warning": "⚠️ Warning: Insufficient balance! Available: {{available}} days, Requested: {{requested}} days. Your request has been submitted for approval.",
@@ -193,8 +157,10 @@
       "rejected": "Leave request rejected",
       "failed": "Failed to submit request",
       "confirm_approve": "Approve this leave request?",
-      "rejection_reason": "Enter rejection reason (optional):"
-    }
+      "rejection_reason": "Enter rejection reason (optional):",
+      "invalid_days": "The number of days is invalid"
+    },
+    "loading": "Loading requests…"
   },
   "employees": {
     "title": "Employee Management",
@@ -316,7 +282,8 @@
       "birthday": "Birthday",
       "yearsOfService": "Years of Service",
       "address": "Address",
-      "teamMates": "Team Mates"
+      "teamMates": "Team Mates",
+      "title": "Employee details"
     },
     "messages": {
       "createSuccess": "Employee created successfully",
@@ -327,7 +294,9 @@
       "activateError": "Failed to activate employee",
       "confirmDeactivate": "Are you sure you want to deactivate this employee? They will lose access to the system.",
       "confirmActivate": "Are you sure you want to activate this employee? They will regain access to the system."
-    }
+    },
+    "noResults": "No results",
+    "clearFilters": "Clear filters"
   },
   "profile": {
     "title": "My Profile",
@@ -407,7 +376,8 @@
       "usedVacationDays": "Used Vacation Days",
       "formulaNote": "This formula will be applied to all employees during recalculation",
       "recalculating": "Recalculating...",
-      "saveButton": "Save Settings"
+      "saveButton": "Save Settings",
+      "changesAffectAll": "Changes apply to all employees"
     },
     "employeeBalances": {
       "title": "Employee Vacation Balances",
@@ -497,6 +467,17 @@
     "totalProjects": "Total Projects",
     "active_projects": "Active Projects",
     "activeMembers": "Active Members",
+    "unassignedProjects": "Unassigned",
+    "searchPlaceholder": "Search projects by name or description…",
+    "searchEmployees": "Search employees…",
+    "noSearchResults": "No projects match your search",
+    "noSearchResultsSubtitle": "Try a different name or clear the filters.",
+    "clearFilters": "Clear filters",
+    "filters": {
+      "all": "All",
+      "withMembers": "With team",
+      "unassigned": "Unassigned"
+    },
     "description": "Description",
     "noDescription": "No description provided",
     "teamMembers": "Team Members",
@@ -590,7 +571,8 @@
     "footer": {
       "employeeNote": "You are assigned to the projects shown above",
       "managerNote": "Managing {{count}} active project"
-    }
+    },
+    "hasDeactivatedUsers": "This project includes deactivated members"
   },
   "salaryAdvances": {
     "title": "Salary Advances",
@@ -639,6 +621,9 @@
   "login": {
     "title": "HR Management",
     "subtitle": "Enterprise Resource Planning System",
+    "heroEyebrow": "HR platform",
+    "heroLine1": "Every team,",
+    "heroLine2": "every day, at a glance.",
     "welcomeBack": "Welcome Back",
     "signInMessage": "Sign in to access your account",
     "pleaseSignIn": "Please sign in to continue",
@@ -655,7 +640,8 @@
     "signingIn": "Signing in...",
     "authenticating": "Authenticating...",
     "demoCredentials": "Demo Credentials",
-    "footer": "© 2026 HR Management System. All rights reserved.",
+    "footer": "© 2026 Dynamix Services",
+    "enterHint": "Press Enter to continue",
     "loginError": "Login failed",
     "validation": {
       "requiredFields": "Please fill in all fields"
@@ -693,7 +679,8 @@
     "download": "Download",
     "print": "Print",
     "activate": "Activate",
-    "deactivate": "Deactivate"
+    "deactivate": "Deactivate",
+    "export": "Export"
   },
   "time": {
     "days": "days",
@@ -738,12 +725,8 @@
       "deactivated": "Deactivated"
     }
   },
-  "dashboard": {
-    "companyLeaveStatus": "Company Leave Status Overview",
-    "salaryAdvanceRequests": "Salary Advance Requests",
-    "advanceRequestOverview": "Advance Request Overview"
-  },
-  "notifications": {    "title": "Notifications",
+  "notifications": {
+    "title": "Notifications",
     "allRead": "All caught up",
     "unreadCount": "{{count}} unread",
     "markAllAsRead": "Mark all as read",
@@ -753,8 +736,26 @@
     "viewAll": "View all notifications",
     "minutesAgo": "{{count}} minutes ago",
     "hoursAgo": "{{count}} hours ago",
-    "recently": "Recently",    "policyUpdate": "Leave Policy Update",
+    "recently": "Recently",
+    "policyUpdate": "Leave Policy Update",
     "maternityPolicyUpdate": "New maternity leave policy effective from July 1st.",
-    "referenceId": "Reference ID"
+    "referenceId": "Reference ID",
+    "markAsRead": "Mark as read",
+    "delete": "Delete notification"
+  },
+  "validation": {
+    "required": "This field is required",
+    "invalidEmail": "Invalid email address",
+    "passwordLength": "Password must be at least 8 characters"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "description": "The page you are looking for does not exist or has been moved.",
+    "goBackDashboard": "Back to dashboard"
+  },
+  "roles": {
+    "admin": "Administrator",
+    "supervisor": "Supervisor",
+    "employee": "Employee"
   }
 }

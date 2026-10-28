@@ -14,9 +14,10 @@ import {
   PlusIcon,
   PencilIcon,
   TrashIcon,
-} from '@heroicons/react/24/outline';
+} from '../components/ui/icons';
 import { fetchTunisiaPublicHolidays } from '../services/holidaysApi';
-import dynLogo from '../assets/dynlogo.jpg';
+import PageHeader from '../components/ui/PageHeader';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const MONTH_KEYS = [
   'january', 'february', 'march', 'april', 'may', 'june',
@@ -594,9 +595,7 @@ function ReligiousHolidaysSection({
       )}
 
       {loading ? (
-        <div className="flex justify-center py-8">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-violet-500 border-t-transparent" />
-        </div>
+        <LoadingSpinner compact message={null} />
       ) : religiousHolidays.length === 0 ? (
         <p className={`py-8 text-center text-sm text-slate-500 ${isRTL ? 'text-right' : ''}`}>
           {t('religious.empty', { year })}
@@ -829,52 +828,62 @@ export default function PublicHolidays() {
   const dayItems = selectedItem?.date ? dayMap[selectedItem.date]?.items || [] : [];
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_right,_rgba(74,106,173,0.12),_transparent_32%),linear-gradient(135deg,_#f8f7fc_0%,_#f4f6fb_52%,_#f9fafb_100%)] px-3 py-4 md:px-5 md:py-5" dir={isRTL ? 'rtl' : 'ltr'}>
+    <div className="" dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="mx-auto max-w-[1600px] space-y-5">
-        <header className="relative overflow-hidden rounded-[1.5rem] bg-gradient-to-br from-primary-900 via-primary-700 to-brand-blue px-5 py-5 text-white shadow-xl shadow-primary-900/15 md:px-7 md:py-6">
-          <div className="absolute -right-16 -top-20 h-64 w-64 rounded-full border border-white/10" />
-          <div className="absolute right-16 -bottom-28 h-56 w-56 rounded-full border border-white/10" />
-          <div className={`flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
-            <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
-{/*               <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white p-1.5 shadow-lg shadow-black/15">
-                <img src={dynLogo} alt="Dynamix Services" className="h-full w-full object-contain" />
-              </div> */}
-              <div>
-                <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.2em] text-primary-100">
-                  {t('calendar.title')}
+        <PageHeader
+          icon={FlagIcon}
+          kicker={t('calendar.title')}
+          title={t('title')}
+          subtitle={t('subtitle')}
+          meta={
+            !loadingPublic && !error && (
+              <span className="flex flex-wrap items-center gap-x-5 gap-y-2">
+                <span className="font-mono text-xs tabular-nums">
+                  {t('totalCount', { public: publicHolidays.length, religious: religiousHolidays.length })}
                 </span>
-                <h1 className="text-2xl font-black tracking-tight md:text-3xl">{t('title')}</h1>
-                <p className="text-sm text-white/70">{t('subtitle')}</p>
-              </div>
-            </div>
-
-            <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                <span className="flex flex-wrap items-center gap-4 text-xs text-slate-600">
+                  <span className="inline-flex items-center gap-1.5">
+                    <span className="h-2.5 w-2.5 rounded-[3px] bg-amber-400" />
+                    {t('legend.public')}
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <span className="h-2.5 w-2.5 rounded-[3px] bg-violet-500" />
+                    {t('legend.religious')}
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <span className="h-2.5 w-2.5 rounded-[3px] bg-gradient-to-br from-amber-400 to-violet-500" />
+                    {t('legend.both')}
+                  </span>
+                </span>
+              </span>
+            )
+          }
+          actions={
+            <>
               <button
                 type="button"
                 onClick={() => handleYearStep(-1)}
-                className="rounded-xl border border-white/20 bg-white/90 p-2 text-slate-600 transition hover:bg-white"
+                aria-label={t('year')}
+                className="btn-secondary !px-2.5"
               >
                 <ChevronLeftIcon className={`h-5 w-5 ${isRTL ? 'rotate-180' : ''}`} />
               </button>
 
-              <div className="min-w-[120px] rounded-xl border border-white/20 bg-white/90 px-4 py-2 text-center">
-                <span className="text-xs font-medium uppercase tracking-wide text-slate-400">{t('year')}</span>
-                <p className="text-xl font-bold text-slate-900">{year}</p>
+              <div className="min-w-[110px] rounded-lg border border-slate-300 bg-white px-4 py-1.5 text-center">
+                <span className="kicker block !text-[10px] leading-none">{t('year')}</span>
+                <p className="mt-1 font-display text-xl font-medium leading-none tabular-nums text-slate-900">{year}</p>
               </div>
 
               <button
                 type="button"
                 onClick={() => handleYearStep(1)}
-                className="rounded-xl border border-white/20 bg-white/90 p-2 text-slate-600 transition hover:bg-white"
+                aria-label={t('year')}
+                className="btn-secondary !px-2.5"
               >
                 <ChevronRightIcon className={`h-5 w-5 ${isRTL ? 'rotate-180' : ''}`} />
               </button>
 
-              <button
-                type="button"
-                onClick={handleGoToToday}
-                className="rounded-xl border border-white/20 bg-white/15 px-3 py-2 text-sm font-bold text-white hover:bg-white/25"
-              >
+              <button type="button" onClick={handleGoToToday} className="btn-secondary">
                 {t('today')}
               </button>
 
@@ -882,43 +891,16 @@ export default function PublicHolidays() {
                 type="button"
                 onClick={() => { loadPublicHolidays(); loadReligiousHolidays(); }}
                 disabled={loading}
-                className="rounded-xl border border-white/20 bg-white/90 p-2 text-slate-600 disabled:opacity-50"
+                className="btn-secondary !px-2.5"
               >
                 <ArrowPathIcon className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
               </button>
-            </div>
-          </div>
-
-          {!loadingPublic && !error && (
-            <div className={`mt-3 flex flex-wrap items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <p className="text-sm text-white/70">
-                {t('totalCount', { public: publicHolidays.length, religious: religiousHolidays.length })}
-              </p>
-              <div className={`flex gap-3 text-xs text-white/80 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="h-2.5 w-2.5 rounded-full bg-amber-400" />
-                  {t('legend.public')}
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="h-2.5 w-2.5 rounded-full bg-violet-500" />
-                  {t('legend.religious')}
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="h-2.5 w-2.5 rounded-full bg-gradient-to-br from-amber-400 to-violet-500" />
-                  {t('legend.both')}
-                </span>
-              </div>
-            </div>
-          )}
-        </header>
+            </>
+          }
+        />
 
         {loadingPublic && (
-          <div className="flex items-center justify-center py-24">
-            <div className="flex flex-col items-center gap-3">
-              <div className="h-10 w-10 animate-spin rounded-full border-2 border-primary-500 border-t-transparent" />
-              <p className="text-sm text-slate-500">{t('loading')}</p>
-            </div>
-          </div>
+          <LoadingSpinner compact message={t('loading')} />
         )}
 
         {error && !loadingPublic && (
