@@ -72,7 +72,7 @@ function Shell() {
         <Navbar />
         <main id="main-content" tabIndex={-1} className="w-full flex-1 px-4 pb-12 pt-8 sm:px-6 lg:px-10">
           <div className="mx-auto w-full max-w-[1400px] animate-fadeIn">
-            <Outlet key={location.pathname} />
+            <Outlet />
           </div>
         </main>
       </div>

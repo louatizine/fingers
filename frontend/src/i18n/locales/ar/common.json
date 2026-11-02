@@ -44,7 +44,8 @@
     "unknown": "غير معروف",
     "general": "عام",
     "na": "غير متوفر",
-    "remove": "إزالة"
+    "remove": "إزالة",
+    "apply": "تطبيق"
   },
   "currency": {
     "dinar": "د.ت"
@@ -59,6 +60,7 @@
     "projects": "المشاريع",
     "salary_advances": "السلف المالية",
     "fleet": "إدارة الأسطول",
+    "workedHours": "ساعات العمل",
     "attendance": "الحضور",
     "fingerprint": "بصمة الإصبع",
     "audit": "سجل التدقيق",
@@ -635,6 +637,15 @@
     "noVehicles": "لا توجد مركبات",
     "noDrivers": "لا توجد ملفات سائقين",
     "noAssignments": "لا توجد تكليفات",
+    "noClients": "لا يوجد عملاء",
+    "addClient": "إضافة عميل",
+    "editClient": "تعديل العميل",
+    "deleteClient": "حذف العميل",
+    "deleteClientConfirm": "أرشفة هذا العميل؟",
+    "clientCreated": "تم إنشاء العميل",
+    "clientUpdated": "تم تحديث العميل",
+    "clientDeleted": "تم أرشفة العميل",
+    "inactive": "غير نشط",
     "noPurchases": "لا توجد مشتريات وقود",
     "noLimits": "لا توجد حدود وقود مهيأة",
     "noDocuments": "لا توجد مستندات",
@@ -675,6 +686,7 @@
       "drivers": "السائقون",
       "fuelLimits": "حدود الوقود",
       "assignments": "التكليفات",
+      "clients": "العملاء",
       "fuel": "الوقود",
       "maintenance": "الصيانة"
     },
@@ -708,6 +720,9 @@
       "currentMileage": "المسافة",
       "status": "الحالة",
       "driver": "السائق",
+      "client": "العميل",
+      "contact": "جهة الاتصال",
+      "phone": "الهاتف",
       "period": "الفترة",
       "limit": "الحد",
       "effectiveFrom": "ساري من",
@@ -813,6 +828,12 @@
       "multiSelectHint": "اضغط Ctrl/Cmd لاختيار أكثر من فئة",
       "vehicle": "المركبة",
       "driver": "السائق",
+      "client": "العميل",
+      "clientName": "اسم العميل",
+      "clientCode": "رمز العميل",
+      "contactName": "اسم جهة الاتصال",
+      "address": "العنوان",
+      "active": "نشط",
       "purpose": "الغرض",
       "purchaseDate": "تاريخ الشراء",
       "station": "المحطة",
@@ -1049,7 +1070,7 @@
     "name": "اسم القسم",
     "managers": "المديرون",
     "noManagers": "لا يوجد مديرون معيّنون",
-    "multiHint": "Ctrl/Cmd+نقرة للاختيار المتعدد",
+    "multiHint": "اختر مديرًا نشطًا واحدًا أو أكثر",
     "empty": "لا توجد أقسام بعد. أنشئ قسمًا لتحديد نطاق الموافقات.",
     "created": "تم إنشاء القسم",
     "updated": "تم تحديث القسم",
@@ -1067,7 +1088,9 @@
     "scopeCompany": "الشركة بأكملها",
     "scopeTeam": "فريقي",
     "allDepartments": "جميع الأقسام",
-    "empty": "لا يوجد شيء مجدول في هذه الفترة."
+    "empty": "لا يوجد شيء مجدول في هذه الفترة.",
+    "startDate": "تاريخ البداية",
+    "endDate": "تاريخ النهاية"
   },
   "audit": {
     "kicker": "الامتثال",
@@ -1076,7 +1099,19 @@
     "loading": "جاري تحميل سجل التدقيق...",
     "loadFailed": "فشل تحميل سجل التدقيق",
     "allTypes": "جميع الأنواع",
-    "empty": "لا توجد إدخالات تدقيق بعد."
+    "empty": "لا توجد إدخالات تدقيق بعد.",
+    "entityTypes": {
+      "leave": "إجازة",
+      "salary_advance": "سلفة مالية",
+      "department": "قسم",
+      "comment": "تعليق"
+    },
+    "table": {
+      "when": "التاريخ",
+      "action": "الإجراء",
+      "entity": "الكيان",
+      "actor": "المنفذ"
+    }
   },
   "comments": {
     "title": "التعليقات",
@@ -1086,5 +1121,55 @@
     "empty": "لا توجد تعليقات بعد.",
     "loadFailed": "فشل تحميل التعليقات",
     "saveFailed": "تعذر نشر التعليق"
+  },
+  "workedHours": {
+    "kicker": "الوقت والمهام",
+    "title": "ساعات العمل",
+    "subtitle": "تصريح الساعات اليومية وربط المهام والعملاء واحتساب الإضافي",
+    "loading": "جاري تحميل ساعات العمل...",
+    "loadFailed": "تعذر تحميل ساعات العمل",
+    "saveFailed": "تعذر حفظ ساعات العمل",
+    "created": "تم إرسال ساعات العمل",
+    "approved": "تمت الموافقة على الإدخال",
+    "rejected": "تم رفض الإدخال",
+    "deleted": "تمت أرشفة الإدخال",
+    "delete": "حذف الإدخال",
+    "deleteConfirm": "أرشفة إدخال ساعات العمل هذا؟",
+    "attachmentFailed": "تعذر تنزيل المرفق",
+    "add": "إضافة ساعات",
+    "allDrivers": "كل السائقين",
+    "allStatuses": "كل الحالات",
+    "selectDriver": "اختر سائقاً",
+    "optionalClient": "العميل (اختياري)",
+    "totalHours": "إجمالي الساعات",
+    "notes": "ملاحظات",
+    "attachment": "مرفق",
+    "approve": "موافقة",
+    "reject": "رفض",
+    "rejectReason": "سبب الرفض",
+    "empty": "لا توجد إدخالات لساعات العمل",
+    "missionFound": "مهمة لهذا التاريخ",
+    "noMission": "لا توجد مهمة لهذا التاريخ — يمكنك اختيار عميل يدوياً",
+    "noClient": "بدون عميل",
+    "noPurpose": "بدون غرض",
+    "standardLabel": "اليوم القياسي: {{hours}} س",
+    "extrasPreview": "الإضافي: {{hours}} س",
+    "status": {
+      "draft": "مسودة",
+      "submitted": "مُرسل",
+      "approved": "موافق عليه",
+      "rejected": "مرفوض"
+    },
+    "table": {
+      "date": "التاريخ",
+      "driver": "السائق",
+      "client": "العميل",
+      "mission": "المهمة",
+      "total": "الإجمالي",
+      "standard": "القياسي",
+      "extras": "الإضافي",
+      "status": "الحالة",
+      "actions": "إجراءات"
+    }
   }
 }

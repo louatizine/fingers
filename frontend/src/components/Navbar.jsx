@@ -90,49 +90,72 @@ export default function Navbar() {
   useEffect(() => {
     fetchUnreadCount()
     const interval = setInterval(fetchUnreadCount, 30000)
+    const onFocus = () => fetchUnreadCount()
+    window.addEventListener('focus', onFocus)
+    return () => {
+      clearInterval(interval)
+      window.removeEventListener('focus', onFocus)
+    }
+  }, [])
+
+  // SSE is optional; polling remains the source of truth. Reconnect with backoff
+  // and never restart the stream when the dropdown opens (that was thrashing workers).
+  useEffect(() => {
     let aborted = false
     let reader
+    let retryTimer
+    let delayMs = 2000
+
+    const sleep = (ms) => new Promise((resolve) => {
+      retryTimer = setTimeout(resolve, ms)
+    })
 
     const startStream = async () => {
-      const token = localStorage.getItem('token')
-      if (!token) return
-      try {
-        const base = import.meta.env.VITE_API_URL || '/api'
-        const response = await fetch(`${base}/notifications/stream`, {
-          headers: { Authorization: `Bearer ${token}`, Accept: 'text/event-stream' },
-        })
-        if (!response.ok || !response.body) return
-        reader = response.body.getReader()
-        const decoder = new TextDecoder()
-        let buffer = ''
-        while (!aborted) {
-          const { value, done } = await reader.read()
-          if (done) break
-          buffer += decoder.decode(value, { stream: true })
-          const chunks = buffer.split('\n\n')
-          buffer = chunks.pop() || ''
-          for (const chunk of chunks) {
-            if (chunk.includes('event: notification')) {
-              fetchUnreadCount()
-              if (showNotifications) fetchNotifications()
+      while (!aborted) {
+        const token = localStorage.getItem('token')
+        if (!token) return
+        try {
+          const base = import.meta.env.VITE_API_URL || '/api'
+          const response = await fetch(`${base}/notifications/stream`, {
+            headers: { Authorization: `Bearer ${token}`, Accept: 'text/event-stream' },
+          })
+          if (!response.ok || !response.body) {
+            await sleep(delayMs)
+            delayMs = Math.min(delayMs * 2, 60000)
+            continue
+          }
+          delayMs = 2000
+          reader = response.body.getReader()
+          const decoder = new TextDecoder()
+          let buffer = ''
+          while (!aborted) {
+            const { value, done } = await reader.read()
+            if (done) break
+            buffer += decoder.decode(value, { stream: true })
+            const chunks = buffer.split('\n\n')
+            buffer = chunks.pop() || ''
+            for (const chunk of chunks) {
+              if (chunk.includes('event: notification')) {
+                fetchUnreadCount()
+              }
             }
           }
+        } catch {
+          /* polling remains active */
         }
-      } catch {
-        /* polling remains active */
+        if (aborted) break
+        await sleep(delayMs)
+        delayMs = Math.min(delayMs * 2, 60000)
       }
     }
 
     startStream()
-    const onFocus = () => fetchUnreadCount()
-    window.addEventListener('focus', onFocus)
     return () => {
       aborted = true
-      clearInterval(interval)
-      window.removeEventListener('focus', onFocus)
+      clearTimeout(retryTimer)
       try { reader?.cancel?.() } catch { /* ignore */ }
     }
-  }, [showNotifications])
+  }, [])
 
   useEffect(() => {
     if (showNotifications) fetchNotifications()

@@ -42,6 +42,7 @@ export const SECTION_COLORS = {
   '/holidays': 'red',
   '/salary-advances': 'yellow',
   '/fleet': 'blue',
+  '/worked-hours': 'yellow',
   '/projects': 'violet',
   '/attendance': 'blue',
   '/fingerprint': 'green',

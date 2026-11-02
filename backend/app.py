@@ -63,6 +63,7 @@ def create_app(config_class=Config):
     from routes.audit_routes import audit_bp
     from routes.comment_routes import comment_bp
     from routes.calendar_routes import calendar_bp
+    from routes.worked_hours_routes import worked_hours_bp
     
     # Register the IN-APP notification routes (for navbar)
     from routes.notif_routes import notif_bp  # This should have /unread-count route
@@ -91,6 +92,7 @@ def create_app(config_class=Config):
     app.register_blueprint(audit_bp, url_prefix='/api/audit')
     app.register_blueprint(comment_bp, url_prefix='/api/comments')
     app.register_blueprint(calendar_bp, url_prefix='/api/calendar')
+    app.register_blueprint(worked_hours_bp, url_prefix='/api/worked-hours')
 
     from migrations.migration_runner import run_migrations
     run_migrations()

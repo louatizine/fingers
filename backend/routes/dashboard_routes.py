@@ -3,10 +3,13 @@ Dashboard Routes
 """
 from flask import Blueprint, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models.user_model import find_user_by_id, get_all_users
+from models.user_model import find_user_by_id, count_users
 from models.leave_model import get_leave_statistics, get_all_leaves
-from models.salary_advance_model import get_salary_advance_statistics, get_all_salary_advances
-from models.project_model import get_all_projects
+from models.salary_advance_model import (
+    get_salary_advance_statistics,
+    get_all_salary_advances,
+)
+from models.project_model import get_all_projects, count_projects
 from utils.auth_utils import admin_or_supervisor_required
 from bson import ObjectId
 import logging
@@ -43,112 +46,74 @@ def get_dashboard_statistics():
         logger.info(f"Loading dashboard for user {current_user_id} with role {role}")
         
         if role == 'employee':
-            # Employee dashboard - show only their own personalized data
-            my_leaves = get_all_leaves({'user_id': current_user_id})
-            my_salary_advances = get_all_salary_advances({'user_id': current_user_id})
-            
-            # Calculate leave request statistics by status
-            leaves_approved = len([l for l in my_leaves if l.get('status') == 'approved'])
-            leaves_pending = len([l for l in my_leaves if l.get('status') == 'pending'])
-            leaves_rejected = len([l for l in my_leaves if l.get('status') == 'rejected'])
-            
-            # Calculate salary advance statistics by status
-            advances_approved = len([a for a in my_salary_advances if a.get('status') == 'approved'])
-            advances_pending = len([a for a in my_salary_advances if a.get('status') == 'pending'])
-            advances_rejected = len([a for a in my_salary_advances if a.get('status') == 'rejected'])
-            
-            # Calculate total approved amounts
-            total_approved_leave_days = sum(l.get('days', 0) for l in my_leaves if l.get('status') == 'approved')
-            total_approved_advance_amount = 0
-            for a in my_salary_advances:
-                if a.get('status') == 'approved':
-                    amount = a.get('amount', 0)
-                    if isinstance(amount, str):
-                        try:
-                            total_approved_advance_amount += float(amount)
-                        except (ValueError, TypeError):
-                            pass
-                    else:
-                        total_approved_advance_amount += float(amount) if amount else 0
-            
+            leave_stats = get_leave_statistics(user_id=current_user_id)
+            advance_stats = get_salary_advance_statistics(user_id=current_user_id)
+            recent_leaves = get_all_leaves({'user_id': current_user_id}, limit=5)
+            recent_advances = get_all_salary_advances({'user_id': current_user_id}, limit=5)
+
             stats = {
-                # Personal information
                 'employee_name': f"{current_user.get('first_name', '')} {current_user.get('last_name', '')}",
                 'employee_id': current_user.get('employee_id', ''),
                 'department': current_user.get('department', ''),
                 'position': current_user.get('position', ''),
-                
-                # Leave balance information
                 'leave_balance': serialize_doc(current_user.get('leave_balance', {})),
                 'vacation_balance': current_user.get('vacation_balance', 0),
                 'vacation_earned': current_user.get('vacation_earned', 0),
                 'vacation_used': current_user.get('vacation_used', 0),
-                
-                # Leave requests statistics
                 'leaves': {
-                    'total': len(my_leaves),
-                    'approved': leaves_approved,
-                    'pending': leaves_pending,
-                    'rejected': leaves_rejected,
-                    'total_approved_days': total_approved_leave_days
+                    'total': leave_stats.get('total', 0),
+                    'approved': leave_stats.get('approved', 0),
+                    'pending': leave_stats.get('pending', 0),
+                    'rejected': leave_stats.get('rejected', 0),
+                    'total_approved_days': leave_stats.get('total_days', 0),
                 },
-                
-                # Salary advance statistics
                 'salary_advances': {
-                    'total': len(my_salary_advances),
-                    'approved': advances_approved,
-                    'pending': advances_pending,
-                    'rejected': advances_rejected,
-                    'total_approved_amount': total_approved_advance_amount
+                    'total': advance_stats.get('total', 0),
+                    'approved': advance_stats.get('approved', 0),
+                    'pending': advance_stats.get('pending', 0),
+                    'rejected': advance_stats.get('rejected', 0),
+                    'total_approved_amount': advance_stats.get('total_amount', 0),
                 },
-                
-                # Recent activity
-                'recent_leaves': serialize_doc(my_leaves[:5]),
-                'recent_salary_advances': serialize_doc(my_salary_advances[:5]),
-                
-                # Legacy stats for compatibility
-                'leave_stats': serialize_doc(get_leave_statistics(user_id=current_user_id)),
-                'salary_advance_stats': serialize_doc(get_salary_advance_statistics(user_id=current_user_id))
+                'recent_leaves': serialize_doc(recent_leaves),
+                'recent_salary_advances': serialize_doc(recent_advances),
+                'leave_stats': serialize_doc(leave_stats),
+                'salary_advance_stats': serialize_doc(advance_stats),
             }
         elif role == 'supervisor':
-            # Supervisor dashboard - company-wide data
             company_id = current_user.get('company_id')
             
             if not company_id:
                 logger.error(f"Supervisor {current_user_id} has no company_id")
                 return jsonify({'error': 'No company assigned'}), 400
             
-            # Get employees in same company
-            employees = get_all_users({'company_id': company_id})
-            company_leaves = get_all_leaves({'company_id': company_id})
-            company_advances = get_all_salary_advances({'company_id': company_id})
-            company_projects = get_all_projects({'company_id': company_id})
-            
+            leave_stats = get_leave_statistics(company_id=company_id)
+            advance_stats = get_salary_advance_statistics(company_id=company_id)
             stats = {
-                'total_employees': len(employees),
-                'leave_stats': serialize_doc(get_leave_statistics(company_id=company_id)),
-                'salary_advance_stats': serialize_doc(get_salary_advance_statistics(company_id=company_id)),
-                'pending_leaves': len([l for l in company_leaves if l.get('status') == 'pending']),
-                'pending_salary_advances': len([a for a in company_advances if a.get('status') == 'pending']),
-                'recent_leaves': serialize_doc(company_leaves[:10]),
-                'recent_salary_advances': serialize_doc(company_advances[:10]),
-                'projects': serialize_doc(company_projects),
-                'total_projects': len(company_projects)
+                'total_employees': count_users({'company_id': company_id}),
+                'leave_stats': serialize_doc(leave_stats),
+                'salary_advance_stats': serialize_doc(advance_stats),
+                'pending_leaves': leave_stats.get('pending', 0),
+                'pending_salary_advances': advance_stats.get('pending', 0),
+                'recent_leaves': serialize_doc(get_all_leaves({'company_id': company_id}, limit=10)),
+                'recent_salary_advances': serialize_doc(
+                    get_all_salary_advances({'company_id': company_id}, limit=10)
+                ),
+                'projects': serialize_doc(get_all_projects({'company_id': company_id}, limit=20)),
+                'total_projects': count_projects({'company_id': company_id}),
             }
         else:  # admin
-            # Admin dashboard
-            all_employees = get_all_users()
-            
+            leave_stats = get_leave_statistics()
+            advance_stats = get_salary_advance_statistics()
             stats = {
-                'total_employees': len(all_employees),
-                'active_employees': len([e for e in all_employees if e.get('is_active', True)]),
-                'leave_stats': serialize_doc(get_leave_statistics()),
-                'salary_advance_stats': serialize_doc(get_salary_advance_statistics()),
-                'pending_leaves': len(get_all_leaves({'status': 'pending'})),
-                'pending_salary_advances': len(get_all_salary_advances({'status': 'pending'})),
-                'recent_leaves': serialize_doc(get_all_leaves()[:10]),
-                'recent_salary_advances': serialize_doc(get_all_salary_advances()[:10]),
-                'total_projects': len(get_all_projects())
+                'total_employees': count_users(),
+                'active_employees': count_users({'is_active': True}),
+                'leave_stats': serialize_doc(leave_stats),
+                'salary_advance_stats': serialize_doc(advance_stats),
+                'pending_leaves': leave_stats.get('pending', 0),
+                'pending_salary_advances': advance_stats.get('pending', 0),
+                'recent_leaves': serialize_doc(get_all_leaves(limit=10)),
+                'recent_salary_advances': serialize_doc(get_all_salary_advances(limit=10)),
+                'total_projects': count_projects(),
             }
         
         return jsonify({'statistics': stats}), 200
@@ -171,11 +136,11 @@ def get_pending_approvals():
         
         if current_user['role'] == 'supervisor':
             company_id = current_user['company_id']
-            pending_leaves = get_all_leaves({'company_id': company_id, 'status': 'pending'})
-            pending_advances = get_all_salary_advances({'company_id': company_id, 'status': 'pending'})
+            pending_leaves = get_all_leaves({'company_id': company_id, 'status': 'pending'}, limit=100)
+            pending_advances = get_all_salary_advances({'company_id': company_id, 'status': 'pending'}, limit=100)
         else:
-            pending_leaves = get_all_leaves({'status': 'pending'})
-            pending_advances = get_all_salary_advances({'status': 'pending'})
+            pending_leaves = get_all_leaves({'status': 'pending'}, limit=100)
+            pending_advances = get_all_salary_advances({'status': 'pending'}, limit=100)
         
         return jsonify({
             'pending_leaves': serialize_doc(pending_leaves),
@@ -185,6 +150,3 @@ def get_pending_approvals():
     except Exception as e:
         logger.error(f"Pending approvals error: {e}")
         return jsonify({'error': 'An error occurred'}), 500
-
-# Import decorator
-from utils.auth_utils import admin_or_supervisor_required

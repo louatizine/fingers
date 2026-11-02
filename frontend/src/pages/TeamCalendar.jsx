@@ -83,8 +83,14 @@ export default function TeamCalendar() {
       />
 
       <div className="flex flex-wrap gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-soft">
-        <input type="date" value={range.start} onChange={(e) => setRange((current) => ({ ...current, start: e.target.value }))} className="rounded-xl border border-slate-200 px-3 py-2" />
-        <input type="date" value={range.end} onChange={(e) => setRange((current) => ({ ...current, end: e.target.value }))} className="rounded-xl border border-slate-200 px-3 py-2" />
+        <label className="flex items-center gap-2 text-sm font-bold text-slate-600">
+          {t('teamCalendar.startDate')}
+          <input type="date" aria-label={t('teamCalendar.startDate')} value={range.start} onChange={(e) => setRange((current) => ({ ...current, start: e.target.value }))} className="rounded-xl border border-slate-200 px-3 py-2 font-normal" />
+        </label>
+        <label className="flex items-center gap-2 text-sm font-bold text-slate-600">
+          {t('teamCalendar.endDate')}
+          <input type="date" aria-label={t('teamCalendar.endDate')} value={range.end} onChange={(e) => setRange((current) => ({ ...current, end: e.target.value }))} className="rounded-xl border border-slate-200 px-3 py-2 font-normal" />
+        </label>
         {(user?.role === 'supervisor' || user?.role === 'admin') && (
           <select value={scope} onChange={(e) => setScope(e.target.value)} className="rounded-xl border border-slate-200 px-3 py-2">
             <option value="company">{t('teamCalendar.scopeCompany')}</option>

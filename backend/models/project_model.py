@@ -40,9 +40,10 @@ def get_project_by_id(project_id):
         logger.error(f"Error getting project by ID: {e}")
         return None
 
-def get_all_projects(filters=None):
+def get_all_projects(filters=None, limit=None):
     """
-    Get all projects with optional filters
+    Get projects with optional filters.
+    Pass limit for dashboard-style summaries.
     """
     try:
         db = get_db()
@@ -54,13 +55,32 @@ def get_all_projects(filters=None):
             if 'status' in filters:
                 query['status'] = filters['status']
         
-        projects = list(db.projects.find(query).sort('created_at', -1))
+        cursor = db.projects.find(query).sort('created_at', -1)
+        if limit:
+            cursor = cursor.limit(int(limit))
+        projects = list(cursor)
         for project in projects:
             project['_id'] = str(project['_id'])
         return projects
     except Exception as e:
         logger.error(f"Error getting all projects: {e}")
         return []
+
+
+def count_projects(filters=None):
+    """Count projects matching filters without loading them."""
+    try:
+        db = get_db()
+        query = {}
+        if filters:
+            if 'company_id' in filters:
+                query['company_id'] = filters['company_id']
+            if 'status' in filters:
+                query['status'] = filters['status']
+        return db.projects.count_documents(query)
+    except Exception as e:
+        logger.error(f"Error counting projects: {e}")
+        return 0
 
 def get_user_projects(user_id):
     """

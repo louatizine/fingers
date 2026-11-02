@@ -13,6 +13,7 @@ import FleetVehicleDetail from './pages/FleetVehicleDetail'
 import Departments from './pages/Departments'
 import TeamCalendar from './pages/TeamCalendar'
 import AuditLog from './pages/AuditLog'
+import WorkedHours from './pages/WorkedHours'
 import Projects from './pages/Projects'
 import Profile from './pages/Profile'
 import Settings from './pages/Settings'
@@ -63,6 +64,7 @@ function App() {
               <Route path="salary-advances" element={<SalaryAdvances />} />
               <Route path="fleet" element={<Fleet />} />
               <Route path="fleet/vehicles/:vehicleId" element={<FleetVehicleDetail />} />
+              <Route path="worked-hours" element={<WorkedHours />} />
               <Route path="departments" element={<ProtectedRoute allowedRoles={['admin', 'supervisor']}><Departments /></ProtectedRoute>} />
               <Route path="team-calendar" element={<TeamCalendar />} />
               <Route path="audit" element={<ProtectedRoute allowedRoles={['admin', 'supervisor']}><AuditLog /></ProtectedRoute>} />

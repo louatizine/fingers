@@ -30,7 +30,9 @@ export default function Departments() {
         userAPI.getUsers(),
       ])
       setDepartments(deptRes.data.departments || [])
-      setUsers((userRes.data.users || userRes.data || []).filter((item) => item.role === 'supervisor' || item.role === 'admin'))
+      setUsers((userRes.data.users || userRes.data || []).filter((item) => (
+        (item.role === 'supervisor' || item.role === 'admin') && item.is_active !== false
+      )))
     } catch (error) {
       toast.error(error.response?.data?.error || t('departments.loadFailed'))
     } finally {
@@ -50,6 +52,21 @@ export default function Departments() {
     setEditing(department)
     setForm({ name: department.name, managerIds: department.managerIds || [] })
     setShowForm(true)
+  }
+
+  const userName = (item) => (
+    item?.first_name
+      ? `${item.first_name} ${item.last_name || ''}`.trim()
+      : `${item?.firstName || ''} ${item?.lastName || ''}`.trim() || item?._id
+  )
+
+  const toggleManager = (managerId) => {
+    setForm((current) => ({
+      ...current,
+      managerIds: current.managerIds.includes(managerId)
+        ? current.managerIds.filter((id) => id !== managerId)
+        : [...current.managerIds, managerId],
+    }))
   }
 
   const submit = async (event) => {
@@ -113,7 +130,7 @@ export default function Departments() {
               {t('departments.managers')}: {(department.managerIds || []).length
                 ? (department.managerIds || []).map((id) => {
                   const manager = users.find((item) => item._id === id)
-                  return manager ? `${manager.first_name} ${manager.last_name}` : id
+                  return manager ? userName(manager) : id
                 }).join(', ')
                 : t('departments.noManagers')}
             </p>
@@ -144,21 +161,20 @@ export default function Departments() {
             />
             <label className="block space-y-1 text-sm font-bold text-slate-600">
               {t('departments.managers')}
-              <select
-                multiple
-                value={form.managerIds}
-                onChange={(event) => setForm({
-                  ...form,
-                  managerIds: Array.from(event.target.selectedOptions).map((option) => option.value),
-                })}
-                className="min-h-[8rem] w-full rounded-xl border border-slate-200 px-3 py-2 font-normal"
-              >
+              <div className="max-h-52 space-y-2 overflow-y-auto rounded-xl border border-slate-200 p-3">
                 {users.map((item) => (
-                  <option key={item._id} value={item._id}>
-                    {item.first_name} {item.last_name} ({item.role})
-                  </option>
+                  <label key={item._id} className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-2 font-normal hover:bg-slate-50">
+                    <input
+                      type="checkbox"
+                      checked={form.managerIds.includes(item._id)}
+                      onChange={() => toggleManager(item._id)}
+                      className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
+                    />
+                    <span>{userName(item)} <span className="text-xs text-slate-400">({item.role})</span></span>
+                  </label>
                 ))}
-              </select>
+                {!users.length && <span className="text-sm font-normal text-slate-400">{t('departments.noManagers')}</span>}
+              </div>
               <span className="text-xs font-normal text-slate-400">{t('departments.multiHint')}</span>
             </label>
             <div className="flex justify-end gap-3">

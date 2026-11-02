@@ -24,7 +24,7 @@ class FleetStorage:
         self.root = Path(root or Path(__file__).resolve().parents[1] / 'uploads' / 'fleet')
 
     def _category_path(self, category):
-        if category not in {'vehicles', 'licenses', 'documents', 'invoices', 'maintenance'}:
+        if category not in {'vehicles', 'licenses', 'documents', 'invoices', 'maintenance', 'worked_hours'}:
             raise FleetStorageError('Invalid fleet upload category')
         path = (self.root / category).resolve()
         path.mkdir(parents=True, exist_ok=True)

@@ -16,4 +16,6 @@ COPY . .
 
 EXPOSE 5559
 
-CMD ["gunicorn", "--bind", "0.0.0.0:5559", "--workers", "1", "--timeout", "120", "app:create_app()"]
+# gthread: SSE / long requests occupy one thread, not the whole process.
+# Multiple workers keep /api responsive when notification streams are open.
+CMD ["gunicorn", "--bind", "0.0.0.0:5559", "--worker-class", "gthread", "--workers", "3", "--threads", "8", "--timeout", "120", "app:create_app()"]

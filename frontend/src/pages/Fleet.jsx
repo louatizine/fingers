@@ -11,6 +11,7 @@ import FleetDashboard from '../components/fleet/FleetDashboard'
 import {
   AssignmentActionModal,
   AssignmentFormModal,
+  ClientFormModal,
   DriverFormModal,
   FuelLimitFormModal,
   FuelPurchaseFormModal,
@@ -45,6 +46,7 @@ export default function Fleet() {
   const [vehicles, setVehicles] = useState([])
   const [vehicleOptions, setVehicleOptions] = useState([])
   const [drivers, setDrivers] = useState([])
+  const [clients, setClients] = useState([])
   const [assignments, setAssignments] = useState([])
   const [purchases, setPurchases] = useState([])
   const [fuelLimits, setFuelLimits] = useState([])
@@ -64,6 +66,8 @@ export default function Fleet() {
   const [showDriverForm, setShowDriverForm] = useState(false)
   const [editingDriver, setEditingDriver] = useState(null)
   const [showAssignmentForm, setShowAssignmentForm] = useState(false)
+  const [showClientForm, setShowClientForm] = useState(false)
+  const [editingClient, setEditingClient] = useState(null)
   const [showFuelForm, setShowFuelForm] = useState(false)
   const [showLimitForm, setShowLimitForm] = useState(false)
   const [showMaintenanceForm, setShowMaintenanceForm] = useState(false)
@@ -74,7 +78,7 @@ export default function Fleet() {
   const navGroups = useMemo(() => ([
     { id: 'overview', items: ['overview'] },
     { id: 'fleet', items: ['vehicles', ...(isManager ? ['drivers'] : [])] },
-    { id: 'operations', items: ['assignments'] },
+    { id: 'operations', items: ['assignments', ...(isManager ? ['clients'] : [])] },
     { id: 'fuel', items: ['fuel'] },
     { id: 'maintenance', items: ['maintenance'] },
   ]), [isManager])
@@ -88,6 +92,9 @@ export default function Fleet() {
     }
     if (tab === 'assignments' && isManager) {
       return { label: t('fleet.addAssignment'), onClick: () => setShowAssignmentForm(true) }
+    }
+    if (tab === 'clients' && isManager) {
+      return { label: t('fleet.addClient'), onClick: () => { setEditingClient(null); setShowClientForm(true) } }
     }
     if (tab === 'fuel') {
       if (fuelSubTab === 'limits' && isAdmin) {
@@ -125,6 +132,9 @@ export default function Fleet() {
       ])
       setMaintenanceRecords(maintRes.data.records || [])
       setSchedules(scheduleRes.data.schedules || [])
+
+      const clientsResponse = await fleetAPI.getClients({ activeOnly: false })
+      setClients(clientsResponse.data.clients || [])
 
       if (isManager) {
         const [driverResponse, limitResponse] = await Promise.all([
@@ -191,7 +201,11 @@ export default function Fleet() {
   const submitAssignment = async (form) => {
     setSaving(true)
     try {
-      await fleetAPI.createAssignment(form)
+      await fleetAPI.createAssignment({
+        ...form,
+        clientId: form.clientId || null,
+        endDate: form.endDate || null,
+      })
       toast.success(t('fleet.assignmentCreated'))
       setShowAssignmentForm(false)
       await load()
@@ -199,6 +213,38 @@ export default function Fleet() {
       toast.error(error.response?.data?.error || t('fleet.saveFailed'))
     } finally {
       setSaving(false)
+    }
+  }
+
+  const submitClient = async (form) => {
+    setSaving(true)
+    try {
+      if (editingClient?._id) {
+        await fleetAPI.updateClient(editingClient._id, form)
+        toast.success(t('fleet.clientUpdated'))
+      } else {
+        await fleetAPI.createClient(form)
+        toast.success(t('fleet.clientCreated'))
+      }
+      setShowClientForm(false)
+      setEditingClient(null)
+      await load()
+    } catch (error) {
+      toast.error(error.response?.data?.error || t('fleet.saveFailed'))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const removeClient = async (client) => {
+    const ok = await confirm({ title: t('fleet.deleteClient'), message: t('fleet.deleteClientConfirm'), type: 'danger' })
+    if (!ok) return
+    try {
+      await fleetAPI.deleteClient(client._id)
+      toast.success(t('fleet.clientDeleted'))
+      await load()
+    } catch (error) {
+      toast.error(error.response?.data?.error || t('fleet.saveFailed'))
     }
   }
 
@@ -487,13 +533,14 @@ export default function Fleet() {
           <div className="overflow-x-auto">
             <table className="w-full text-start">
               <thead className="border-b border-slate-200 bg-slate-50">
-                <tr>{['vehicle', 'driver', 'period', 'status', 'actions'].map((key) => <th key={key} className="kicker px-6 py-3 text-start">{t(`fleet.table.${key}`)}</th>)}</tr>
+                <tr>{['vehicle', 'driver', 'client', 'period', 'status', 'actions'].map((key) => <th key={key} className="kicker px-6 py-3 text-start">{t(`fleet.table.${key}`)}</th>)}</tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {assignments.map((assignment) => (
                   <tr key={assignment._id}>
                     <td className="px-6 py-4 text-sm font-bold text-slate-900">{vehicleLabel(assignment.vehicle || assignment.vehicleId)}</td>
                     <td className="px-6 py-4 text-sm text-slate-600">{driverLabel(assignment.driver || assignment.driverId)}</td>
+                    <td className="px-6 py-4 text-sm text-slate-600">{assignment.client?.name || '—'}</td>
                     <td className="px-6 py-4 text-sm text-slate-600">{assignment.startDate} – {assignment.endDate || '∞'}</td>
                     <td className="px-6 py-4"><span className={`rounded-full px-3 py-1 text-xs font-bold ${statusClass(assignment.status)}`}>{t(`fleet.assignmentStatus.${assignment.status}`)}</span></td>
                     <td className="px-6 py-4">
@@ -515,6 +562,42 @@ export default function Fleet() {
             </table>
           </div>
           {!assignments.length && <p className="p-8 text-center text-sm text-slate-500">{t('fleet.noAssignments')}</p>}
+        </section>
+      )}
+
+      {tab === 'clients' && isManager && (
+        <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-soft">
+          <div className="overflow-x-auto">
+            <table className="w-full text-start">
+              <thead className="border-b border-slate-200 bg-slate-50">
+                <tr>{['client', 'contact', 'phone', 'status', 'actions'].map((key) => <th key={key} className="kicker px-6 py-3 text-start">{t(`fleet.table.${key}`)}</th>)}</tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {clients.map((client) => (
+                  <tr key={client._id}>
+                    <td className="px-6 py-4 text-sm font-bold text-slate-900">
+                      {client.name}
+                      {client.code ? <span className="ms-2 text-xs font-normal text-slate-400">{client.code}</span> : null}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-slate-600">{client.contactName || '—'}</td>
+                    <td className="px-6 py-4 text-sm text-slate-600">{client.phone || '—'}</td>
+                    <td className="px-6 py-4">
+                      <span className={`rounded-full px-3 py-1 text-xs font-bold ${client.isActive ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+                        {client.isActive ? t('fleet.form.active') : t('fleet.inactive')}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <button type="button" onClick={() => { setEditingClient(client); setShowClientForm(true) }} className="text-xs font-bold text-primary">{t('common.edit')}</button>
+                        <button type="button" onClick={() => removeClient(client)} className="text-xs font-bold text-rose-600">{t('common.delete')}</button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {!clients.length && <p className="p-8 text-center text-sm text-slate-500">{t('fleet.noClients')}</p>}
         </section>
       )}
 
@@ -675,7 +758,8 @@ export default function Fleet() {
 
       <VehicleFormModal open={showVehicleForm} initial={editingVehicle} saving={saving} onClose={() => { setShowVehicleForm(false); setEditingVehicle(null) }} onSubmit={submitVehicle} />
       <DriverFormModal open={showDriverForm} initial={editingDriver} saving={saving} onClose={() => { setShowDriverForm(false); setEditingDriver(null) }} onSubmit={submitDriver} />
-      <AssignmentFormModal open={showAssignmentForm} vehicles={vehicleOptions} drivers={drivers} saving={saving} onClose={() => setShowAssignmentForm(false)} onSubmit={submitAssignment} />
+      <AssignmentFormModal open={showAssignmentForm} vehicles={vehicleOptions} drivers={drivers} clients={clients.filter((c) => c.isActive !== false)} saving={saving} onClose={() => setShowAssignmentForm(false)} onSubmit={submitAssignment} />
+      <ClientFormModal open={showClientForm} initial={editingClient} saving={saving} onClose={() => { setShowClientForm(false); setEditingClient(null) }} onSubmit={submitClient} />
       <AssignmentActionModal open={!!assignmentAction} action={assignmentAction?.action} assignment={assignmentAction?.assignment} saving={saving} onClose={() => setAssignmentAction(null)} onSubmit={submitAssignmentAction} />
       <FuelPurchaseFormModal open={showFuelForm} vehicles={vehicleOptions} drivers={drivers} isManager={isManager} saving={saving} onClose={() => setShowFuelForm(false)} onSubmit={submitFuelPurchase} />
       <FuelLimitFormModal open={showLimitForm} vehicles={vehicleOptions} drivers={drivers} saving={saving} onClose={() => setShowLimitForm(false)} onSubmit={submitFuelLimit} />

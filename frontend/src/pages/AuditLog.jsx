@@ -45,7 +45,7 @@ export default function AuditLog() {
         <select value={entityType} onChange={(e) => setEntityType(e.target.value)} className="rounded-xl border border-slate-200 px-3 py-2">
           <option value="">{t('audit.allTypes')}</option>
           {['leave', 'salary_advance', 'department', 'comment'].map((value) => (
-            <option key={value} value={value}>{value}</option>
+            <option key={value} value={value}>{t(`audit.entityTypes.${value}`)}</option>
           ))}
         </select>
         <button type="button" className="btn-secondary" onClick={load}>{t('common.refresh')}</button>
@@ -66,7 +66,7 @@ export default function AuditLog() {
                 <tr key={log._id}>
                   <td className="px-6 py-4 text-sm text-slate-600">{log.createdAt?.replace?.('T', ' ')?.slice(0, 19)}</td>
                   <td className="px-6 py-4 text-sm font-bold text-slate-900">{log.action}</td>
-                  <td className="px-6 py-4 text-sm text-slate-600">{log.entityType} · {log.entityId}</td>
+                  <td className="px-6 py-4 text-sm text-slate-600">{t(`audit.entityTypes.${log.entityType}`, { defaultValue: log.entityType })} · {log.entityId}</td>
                   <td className="px-6 py-4 text-sm text-slate-600">{log.actorId}</td>
                 </tr>
               ))}

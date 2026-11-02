@@ -7,6 +7,13 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 from pymongo.errors import DuplicateKeyError
 
 from database import get_db
+from models.fleet_client_model import (
+    create_client,
+    delete_client,
+    get_client,
+    list_clients,
+    update_client,
+)
 from models.fleet_model import (
     count_documents,
     create_assignment,
@@ -108,12 +115,24 @@ def _driver_label(driver):
     }
 
 
-def _enrich_with_labels(items, company_id, vehicle_key='vehicleId', driver_key='driverId'):
+def _client_label(client):
+    if not client:
+        return None
+    return {
+        '_id': client.get('_id'),
+        'name': client.get('name'),
+        'code': client.get('code'),
+    }
+
+
+def _enrich_with_labels(items, company_id, vehicle_key='vehicleId', driver_key='driverId', client_key='clientId'):
     db = get_db()
     vehicle_ids = {item.get(vehicle_key) for item in items if vehicle_key and item.get(vehicle_key)}
     driver_ids = {item.get(driver_key) for item in items if driver_key and item.get(driver_key)}
+    client_ids = {item.get(client_key) for item in items if client_key and item.get(client_key)}
     vehicles = {}
     drivers = {}
+    clients = {}
     for vehicle_id in vehicle_ids:
         if ObjectId.is_valid(vehicle_id):
             doc = db.fleet_vehicles.find_one({'_id': ObjectId(vehicle_id), 'companyId': company_id})
@@ -126,12 +145,86 @@ def _enrich_with_labels(items, company_id, vehicle_key='vehicleId', driver_key='
             if doc:
                 doc['_id'] = str(doc['_id'])
                 drivers[driver_id] = _driver_label(doc)
+    for client_id in client_ids:
+        if ObjectId.is_valid(client_id):
+            doc = db.fleet_clients.find_one({'_id': ObjectId(client_id), 'companyId': company_id})
+            if doc:
+                doc['_id'] = str(doc['_id'])
+                clients[client_id] = _client_label(doc)
     for item in items:
         if vehicle_key:
             item['vehicle'] = vehicles.get(item.get(vehicle_key))
         if driver_key:
             item['driver'] = drivers.get(item.get(driver_key))
+        if client_key:
+            item['client'] = clients.get(item.get(client_key))
     return items
+
+
+@fleet_bp.route('/clients', methods=['GET'])
+@jwt_required()
+@fleet_read_required
+def list_fleet_clients():
+    user = current_fleet_user()
+    company_id = fleet_company_id(user)
+    active_only = request.args.get('activeOnly', '').lower() in {'1', 'true', 'yes'}
+    clients = list_clients(company_id, active_only=active_only)
+    return jsonify({'clients': clients}), 200
+
+
+@fleet_bp.route('/clients/<client_id>', methods=['GET'])
+@jwt_required()
+@fleet_read_required
+def get_fleet_client(client_id):
+    user = current_fleet_user()
+    client = get_client(client_id, fleet_company_id(user))
+    if not client:
+        return jsonify({'error': 'Client not found'}), 404
+    return jsonify({'client': client}), 200
+
+
+@fleet_bp.route('/clients', methods=['POST'])
+@jwt_required()
+@fleet_manager_required
+def create_fleet_client():
+    user = current_fleet_user()
+    data = request.get_json() or {}
+    try:
+        client = create_client({**data, 'companyId': fleet_company_id(user)}, get_jwt_identity())
+    except ValueError as exc:
+        return jsonify({'error': str(exc)}), 400
+    write_audit(fleet_company_id(user), get_jwt_identity(), 'client.created', 'client', client['_id'], after=client)
+    return jsonify({'client': client}), 201
+
+
+@fleet_bp.route('/clients/<client_id>', methods=['PUT'])
+@jwt_required()
+@fleet_manager_required
+def update_fleet_client(client_id):
+    user = current_fleet_user()
+    company_id = fleet_company_id(user)
+    before = get_client(client_id, company_id)
+    if not before:
+        return jsonify({'error': 'Client not found'}), 404
+    try:
+        client = update_client(client_id, request.get_json() or {}, company_id)
+    except ValueError as exc:
+        return jsonify({'error': str(exc)}), 400
+    write_audit(company_id, get_jwt_identity(), 'client.updated', 'client', client_id, before=before, after=client)
+    return jsonify({'client': client}), 200
+
+
+@fleet_bp.route('/clients/<client_id>', methods=['DELETE'])
+@jwt_required()
+@fleet_manager_required
+def delete_fleet_client(client_id):
+    user = current_fleet_user()
+    company_id = fleet_company_id(user)
+    before = get_client(client_id, company_id)
+    if not delete_client(client_id, company_id):
+        return jsonify({'error': 'Client not found'}), 404
+    write_audit(company_id, get_jwt_identity(), 'client.deleted', 'client', client_id, before=before)
+    return jsonify({'message': 'Client archived'}), 200
 
 
 @fleet_bp.route('/vehicles', methods=['GET'])
@@ -681,6 +774,15 @@ def update_assignment(assignment_id):
         return jsonify({'error': 'Checked-out or returned assignments cannot be edited'}), 400
     data = request.get_json() or {}
     update = {key: data[key] for key in ('startDate', 'endDate', 'purpose') if key in data}
+    if 'clientId' in data:
+        client_id = data.get('clientId') or None
+        if client_id:
+            client = get_client(client_id, fleet_company_id(user))
+            if not client:
+                return jsonify({'error': 'Client not found'}), 400
+            update['clientId'] = client['_id']
+        else:
+            update['clientId'] = None
     if not update:
         return jsonify({'error': 'No editable fields supplied'}), 400
     update['updatedAt'] = datetime.utcnow()

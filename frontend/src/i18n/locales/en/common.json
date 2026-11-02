@@ -44,7 +44,8 @@
     "unknown": "Unknown",
     "general": "General",
     "na": "N/A",
-    "remove": "Remove"
+    "remove": "Remove",
+    "apply": "Apply"
   },
   "currency": {
     "dinar": "DT"
@@ -59,6 +60,7 @@
     "projects": "Projects",
     "salary_advances": "Salary Advances",
     "fleet": "Fleet Management",
+    "workedHours": "Worked hours",
     "attendance": "Attendance",
     "fingerprint": "Fingerprint",
     "audit": "Audit log",
@@ -635,6 +637,15 @@
     "noVehicles": "No vehicles found",
     "noDrivers": "No driver profiles found",
     "noAssignments": "No assignments found",
+    "noClients": "No clients found",
+    "addClient": "Add client",
+    "editClient": "Edit client",
+    "deleteClient": "Delete client",
+    "deleteClientConfirm": "Archive this client?",
+    "clientCreated": "Client created",
+    "clientUpdated": "Client updated",
+    "clientDeleted": "Client archived",
+    "inactive": "Inactive",
     "noPurchases": "No fuel purchases found",
     "noLimits": "No fuel limits configured",
     "noDocuments": "No documents uploaded",
@@ -675,6 +686,7 @@
       "drivers": "Drivers",
       "fuelLimits": "Fuel limits",
       "assignments": "Assignments",
+      "clients": "Clients",
       "fuel": "Fuel",
       "maintenance": "Maintenance"
     },
@@ -708,6 +720,9 @@
       "currentMileage": "Mileage",
       "status": "Status",
       "driver": "Driver",
+      "client": "Client",
+      "contact": "Contact",
+      "phone": "Phone",
       "period": "Period",
       "limit": "Limit",
       "effectiveFrom": "Effective from",
@@ -813,6 +828,12 @@
       "multiSelectHint": "Hold Ctrl/Cmd to select multiple categories",
       "vehicle": "Vehicle",
       "driver": "Driver",
+      "client": "Client",
+      "clientName": "Client name",
+      "clientCode": "Client code",
+      "contactName": "Contact name",
+      "address": "Address",
+      "active": "Active",
       "purpose": "Purpose",
       "purchaseDate": "Purchase date",
       "station": "Station",
@@ -1049,7 +1070,7 @@
     "name": "Department name",
     "managers": "Managers",
     "noManagers": "No managers assigned",
-    "multiHint": "Ctrl/Cmd+click to select multiple",
+    "multiHint": "Select one or more active managers",
     "empty": "No departments yet. Create one to scope approvals.",
     "created": "Department created",
     "updated": "Department updated",
@@ -1067,7 +1088,9 @@
     "scopeCompany": "Whole company",
     "scopeTeam": "My team",
     "allDepartments": "All departments",
-    "empty": "Nothing scheduled in this range."
+    "empty": "Nothing scheduled in this range.",
+    "startDate": "Start date",
+    "endDate": "End date"
   },
   "audit": {
     "kicker": "Compliance",
@@ -1076,7 +1099,19 @@
     "loading": "Loading audit log...",
     "loadFailed": "Failed to load audit log",
     "allTypes": "All entity types",
-    "empty": "No audit entries yet."
+    "empty": "No audit entries yet.",
+    "entityTypes": {
+      "leave": "Leave",
+      "salary_advance": "Salary advance",
+      "department": "Department",
+      "comment": "Comment"
+    },
+    "table": {
+      "when": "When",
+      "action": "Action",
+      "entity": "Entity",
+      "actor": "Actor"
+    }
   },
   "comments": {
     "title": "Comments",
@@ -1086,5 +1121,55 @@
     "empty": "No comments yet.",
     "loadFailed": "Failed to load comments",
     "saveFailed": "Could not post comment"
+  },
+  "workedHours": {
+    "kicker": "Time & missions",
+    "title": "Worked hours",
+    "subtitle": "Declare daily hours, link missions and clients, and track extras",
+    "loading": "Loading worked hours...",
+    "loadFailed": "Unable to load worked hours",
+    "saveFailed": "Unable to save worked hours",
+    "created": "Worked hours submitted",
+    "approved": "Entry approved",
+    "rejected": "Entry rejected",
+    "deleted": "Entry archived",
+    "delete": "Delete entry",
+    "deleteConfirm": "Archive this worked hours entry?",
+    "attachmentFailed": "Unable to download attachment",
+    "add": "Add hours",
+    "allDrivers": "All drivers",
+    "allStatuses": "All statuses",
+    "selectDriver": "Select driver",
+    "optionalClient": "Client (optional)",
+    "totalHours": "Total hours",
+    "notes": "Notes",
+    "attachment": "Attachment",
+    "approve": "Approve",
+    "reject": "Reject",
+    "rejectReason": "Rejection reason",
+    "empty": "No worked hours entries yet",
+    "missionFound": "Mission for this date",
+    "noMission": "No mission found for this date — you can pick a client manually",
+    "noClient": "No client",
+    "noPurpose": "No purpose",
+    "standardLabel": "Standard day: {{hours}} h",
+    "extrasPreview": "Extras: {{hours}} h",
+    "status": {
+      "draft": "Draft",
+      "submitted": "Submitted",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "table": {
+      "date": "Date",
+      "driver": "Driver",
+      "client": "Client",
+      "mission": "Mission",
+      "total": "Total",
+      "standard": "Standard",
+      "extras": "Extras",
+      "status": "Status",
+      "actions": "Actions"
+    }
   }
 }

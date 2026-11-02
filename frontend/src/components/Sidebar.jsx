@@ -32,6 +32,7 @@ export default function Sidebar() {
     { name: t('nav.holidays'), href: '/holidays', icon: FlagIcon, roles: ['admin', 'supervisor', 'employee'] },
     { name: t('nav.salary_advances'), href: '/salary-advances', icon: CurrencyDollarIcon, roles: ['admin', 'supervisor', 'employee'] },
     { name: t('nav.fleet'), href: '/fleet', icon: TruckIcon, roles: ['admin', 'supervisor', 'employee'] },
+    { name: t('nav.workedHours'), href: '/worked-hours', icon: ClockIcon, roles: ['admin', 'supervisor', 'employee'] },
     { name: t('nav.projects'), href: '/projects', icon: BriefcaseIcon, roles: ['admin', 'supervisor', 'employee'], employeeRequiresProjects: true },
     { name: t('nav.attendance'), href: '/attendance', icon: ClockIcon, roles: ['admin', 'supervisor'] },
     { name: t('nav.audit'), href: '/audit', icon: ClockIcon, roles: ['admin', 'supervisor'] },

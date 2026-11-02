@@ -688,24 +688,40 @@ def get_user_complete_profile(user_id):
         logger.error(f"Get user complete profile error: {e}")
         return {'success': False, 'error': str(e)}
 
+def _users_query(filters=None):
+    query = {'email': {'$ne': SYSTEM_ADMIN_EMAIL}}
+    if filters:
+        if 'company_id' in filters:
+            query['$or'] = [
+                {'company_id': filters['company_id']},
+                {'company_id': {'$exists': False}},
+                {'company_id': None},
+            ]
+        if 'role' in filters:
+            query['role'] = filters['role']
+        if 'is_active' in filters:
+            if filters['is_active']:
+                query['is_active'] = {'$ne': False}
+            else:
+                query['is_active'] = False
+    return query
+
+
+def count_users(filters=None):
+    """Count users matching filters without loading documents."""
+    try:
+        return get_db().users.count_documents(_users_query(filters))
+    except Exception as e:
+        logger.error(f"Error counting users: {e}")
+        return 0
+
+
 def get_all_users(filters=None):
     """
     Retrieve all users from the database with optional filtering.
     """
     db = get_db()
-    query = {}
-
-    # Apply filters if provided (e.g., company_id)
-    if filters:
-        if 'company_id' in filters:
-            # For company filter, include users with matching company_id OR no company_id
-            query['$or'] = [
-                {'company_id': filters['company_id']},
-                {'company_id': {'$exists': False}},
-                {'company_id': None}
-            ]
-        if 'role' in filters:
-            query['role'] = filters['role']
+    query = _users_query(filters)
 
     try:
         # Find all users matching the query

@@ -153,11 +153,11 @@ export function DriverFormModal({ open, initial, saving, onClose, onSubmit }) {
   )
 }
 
-export function AssignmentFormModal({ open, vehicles, drivers, saving, onClose, onSubmit }) {
+export function AssignmentFormModal({ open, vehicles, drivers, clients = [], saving, onClose, onSubmit }) {
   const { t } = useTranslation()
-  const [form, setForm] = useState({ vehicleId: '', driverId: '', startDate: '', endDate: '', purpose: '' })
+  const [form, setForm] = useState({ vehicleId: '', driverId: '', clientId: '', startDate: '', endDate: '', purpose: '' })
   useEffect(() => {
-    if (open) setForm({ vehicleId: '', driverId: '', startDate: '', endDate: '', purpose: '' })
+    if (open) setForm({ vehicleId: '', driverId: '', clientId: '', startDate: '', endDate: '', purpose: '' })
   }, [open])
   if (!open) return null
   return (
@@ -171,12 +171,53 @@ export function AssignmentFormModal({ open, vehicles, drivers, saving, onClose, 
           <option value="">{t('fleet.form.driver')}</option>
           {drivers.map((driver) => <option key={driver._id} value={driver._id}>{driverLabel(driver)}</option>)}
         </select>
+        <select value={form.clientId} onChange={(e) => setForm({ ...form, clientId: e.target.value })} className={fieldClass}>
+          <option value="">{t('fleet.form.client')}</option>
+          {clients.map((client) => (
+            <option key={client._id} value={client._id}>
+              {client.name}{client.code ? ` (${client.code})` : ''}
+            </option>
+          ))}
+        </select>
         <div className="grid gap-4 sm:grid-cols-2">
           {['startDate', 'endDate'].map((key) => (
             <input key={key} required={key === 'startDate'} type="date" value={form[key]} onChange={(e) => setForm({ ...form, [key]: e.target.value })} className={fieldClass} />
           ))}
         </div>
         <input value={form.purpose} onChange={(e) => setForm({ ...form, purpose: e.target.value })} placeholder={t('fleet.form.purpose')} className={fieldClass} />
+        <ModalActions saving={saving} onClose={onClose} />
+      </form>
+    </FleetModalShell>
+  )
+}
+
+export function ClientFormModal({ open, initial, saving, onClose, onSubmit }) {
+  const { t } = useTranslation()
+  const empty = { name: '', code: '', contactName: '', phone: '', email: '', address: '', notes: '', isActive: true }
+  const [form, setForm] = useState(empty)
+  useEffect(() => {
+    if (!open) return
+    setForm({ ...empty, ...(initial || {}), isActive: initial?.isActive !== false })
+  }, [open, initial])
+  if (!open) return null
+  return (
+    <FleetModalShell title={initial ? t('fleet.editClient') : t('fleet.addClient')} onClose={onClose}>
+      <form className="space-y-4" onSubmit={(event) => { event.preventDefault(); onSubmit(form) }}>
+        <input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder={t('fleet.form.clientName')} className={fieldClass} />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <input value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} placeholder={t('fleet.form.clientCode')} className={fieldClass} />
+          <input value={form.contactName} onChange={(e) => setForm({ ...form, contactName: e.target.value })} placeholder={t('fleet.form.contactName')} className={fieldClass} />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder={t('fleet.form.phone')} className={fieldClass} />
+          <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder={t('fleet.form.email')} className={fieldClass} />
+        </div>
+        <input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder={t('fleet.form.address')} className={fieldClass} />
+        <textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder={t('fleet.form.notes')} rows={3} className={fieldClass} />
+        <label className="flex items-center gap-2 text-sm font-bold text-slate-600">
+          <input type="checkbox" checked={form.isActive} onChange={(e) => setForm({ ...form, isActive: e.target.checked })} />
+          {t('fleet.form.active')}
+        </label>
         <ModalActions saving={saving} onClose={onClose} />
       </form>
     </FleetModalShell>

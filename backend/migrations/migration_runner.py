@@ -15,6 +15,7 @@ def run_migrations():
         ('003_create_fleet_fuel_indexes', 'migrations.versions.v003_fleet_fuel'),
         ('004_create_fleet_maintenance_indexes', 'migrations.versions.v004_fleet_maintenance'),
         ('005_create_multi_user_indexes', 'migrations.versions.v005_multi_user'),
+        ('006_create_worked_hours_indexes', 'migrations.versions.v006_worked_hours'),
     )
     for version, module_name in migrations:
         if db.schema_migrations.find_one({'version': version}):

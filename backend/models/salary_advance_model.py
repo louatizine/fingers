@@ -53,9 +53,10 @@ def get_salary_advances_by_user(user_id):
         logger.error(f"Error getting salary advances by user: {e}")
         return []
 
-def get_all_salary_advances(filters=None):
+def get_all_salary_advances(filters=None, limit=None):
     """
-    Get all salary advance requests with optional filters
+    Get salary advance requests with optional filters.
+    Pass limit to avoid loading the full collection (e.g. dashboard recent lists).
     """
     try:
         db = get_db()
@@ -69,13 +70,34 @@ def get_all_salary_advances(filters=None):
             if 'user_id' in filters:
                 query['user_id'] = filters['user_id']
         
-        advances = list(db.salary_advances.find(query).sort('created_at', -1))
+        cursor = db.salary_advances.find(query).sort('created_at', -1)
+        if limit:
+            cursor = cursor.limit(int(limit))
+        advances = list(cursor)
         for advance in advances:
             advance['_id'] = str(advance['_id'])
         return advances
     except Exception as e:
         logger.error(f"Error getting all salary advances: {e}")
         return []
+
+
+def count_salary_advances(filters=None):
+    """Count salary advance documents matching filters without loading them."""
+    try:
+        db = get_db()
+        query = {}
+        if filters:
+            if 'company_id' in filters:
+                query['company_id'] = filters['company_id']
+            if 'status' in filters:
+                query['status'] = filters['status']
+            if 'user_id' in filters:
+                query['user_id'] = filters['user_id']
+        return db.salary_advances.count_documents(query)
+    except Exception as e:
+        logger.error(f"Error counting salary advances: {e}")
+        return 0
 
 def update_salary_advance_status(advance_id, status, reviewed_by=None, review_notes=None):
     """
@@ -169,40 +191,64 @@ def delete_salary_advance(advance_id):
 
 def get_salary_advance_statistics(user_id=None, company_id=None):
     """
-    Get salary advance statistics
+    Get salary advance statistics via aggregation (no full-collection load).
     """
+    empty = {
+        'total': 0,
+        'pending': 0,
+        'approved': 0,
+        'rejected': 0,
+        'total_amount': 0,
+    }
     try:
         db = get_db()
-        query = {}
-        
+        match = {}
         if user_id:
-            query['user_id'] = user_id
+            match['user_id'] = user_id
         if company_id:
-            query['company_id'] = company_id
-        
-        advances = list(db.salary_advances.find(query))
-        
-        # Calculate total amount, ensuring all amounts are numbers
-        total_amount = 0
-        for a in advances:
-            if a.get('status') == 'approved':
-                amount = a.get('amount', 0)
-                # Convert to float if it's a string
-                if isinstance(amount, str):
-                    try:
-                        total_amount += float(amount)
-                    except (ValueError, TypeError):
-                        pass
-                else:
-                    total_amount += float(amount) if amount else 0
-        
-        stats = {
-            'total': len(advances),
-            'pending': len([a for a in advances if a.get('status') == 'pending']),
-            'approved': len([a for a in advances if a.get('status') == 'approved']),
-            'rejected': len([a for a in advances if a.get('status') == 'rejected']),
-            'total_amount': total_amount
-        }
+            match['company_id'] = company_id
+
+        pipeline = []
+        if match:
+            pipeline.append({'$match': match})
+        pipeline.extend([
+            {
+                '$addFields': {
+                    'amountNum': {
+                        '$convert': {
+                            'input': '$amount',
+                            'to': 'double',
+                            'onError': 0,
+                            'onNull': 0,
+                        }
+                    }
+                }
+            },
+            {
+                '$group': {
+                    '_id': '$status',
+                    'count': {'$sum': 1},
+                    'amount': {
+                        '$sum': {
+                            '$cond': [
+                                {'$eq': ['$status', 'approved']},
+                                '$amountNum',
+                                0,
+                            ]
+                        }
+                    },
+                }
+            }
+        ])
+        stats = dict(empty)
+        for row in db.salary_advances.aggregate(pipeline):
+            status = row.get('_id') or 'unknown'
+            count = int(row.get('count') or 0)
+            stats['total'] += count
+            if status in ('pending', 'approved', 'rejected'):
+                stats[status] = count
+            if status == 'approved':
+                stats['total_amount'] = float(row.get('amount') or 0)
         
         return stats
     except Exception as e:

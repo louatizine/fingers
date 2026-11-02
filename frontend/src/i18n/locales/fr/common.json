@@ -44,7 +44,8 @@
     "unknown": "Inconnu",
     "general": "Général",
     "na": "N/D",
-    "remove": "Retirer"
+    "remove": "Retirer",
+    "apply": "Appliquer"
   },
   "currency": {
     "dinar": "DT"
@@ -59,6 +60,7 @@
     "projects": "Projets",
     "salary_advances": "Avances sur salaire",
     "fleet": "Parc automobile",
+    "workedHours": "Heures travaillées",
     "attendance": "Présence",
     "fingerprint": "Empreintes digitales",
     "audit": "Journal d'audit",
@@ -715,6 +717,15 @@
     "noVehicles": "Aucun véhicule trouvé",
     "noDrivers": "Aucun profil conducteur trouvé",
     "noAssignments": "Aucune affectation trouvée",
+    "noClients": "Aucun client trouvé",
+    "addClient": "Ajouter un client",
+    "editClient": "Modifier le client",
+    "deleteClient": "Supprimer le client",
+    "deleteClientConfirm": "Archiver ce client ?",
+    "clientCreated": "Client créé",
+    "clientUpdated": "Client mis à jour",
+    "clientDeleted": "Client archivé",
+    "inactive": "Inactif",
     "noPurchases": "Aucun achat de carburant",
     "noLimits": "Aucune limite de carburant configurée",
     "noDocuments": "Aucun document",
@@ -755,6 +766,7 @@
       "drivers": "Conducteurs",
       "fuelLimits": "Limites de carburant",
       "assignments": "Affectations",
+      "clients": "Clients",
       "fuel": "Carburant",
       "maintenance": "Maintenance"
     },
@@ -788,6 +800,9 @@
       "currentMileage": "Kilométrage",
       "status": "Statut",
       "driver": "Conducteur",
+      "client": "Client",
+      "contact": "Contact",
+      "phone": "Téléphone",
       "period": "Période",
       "limit": "Limite",
       "effectiveFrom": "Valable à partir du",
@@ -893,6 +908,12 @@
       "multiSelectHint": "Maintenez Ctrl/Cmd pour sélectionner plusieurs catégories",
       "vehicle": "Véhicule",
       "driver": "Conducteur",
+      "client": "Client",
+      "clientName": "Nom du client",
+      "clientCode": "Code client",
+      "contactName": "Nom du contact",
+      "address": "Adresse",
+      "active": "Actif",
       "purpose": "Motif",
       "purchaseDate": "Date d'achat",
       "station": "Station",
@@ -1129,7 +1150,7 @@
     "name": "Nom du département",
     "managers": "Managers",
     "noManagers": "Aucun manager assigné",
-    "multiHint": "Ctrl/Cmd+clic pour sélection multiple",
+    "multiHint": "Sélectionnez un ou plusieurs managers actifs",
     "empty": "Aucun département. Créez-en un pour cadrer les validations.",
     "created": "Département créé",
     "updated": "Département mis à jour",
@@ -1147,7 +1168,9 @@
     "scopeCompany": "Toute l'entreprise",
     "scopeTeam": "Mon équipe",
     "allDepartments": "Tous les départements",
-    "empty": "Rien de planifié sur cette période."
+    "empty": "Rien de planifié sur cette période.",
+    "startDate": "Date de début",
+    "endDate": "Date de fin"
   },
   "audit": {
     "kicker": "Conformité",
@@ -1156,7 +1179,19 @@
     "loading": "Chargement du journal...",
     "loadFailed": "Échec du chargement du journal d'audit",
     "allTypes": "Tous les types",
-    "empty": "Aucune entrée d'audit pour le moment."
+    "empty": "Aucune entrée d'audit pour le moment.",
+    "entityTypes": {
+      "leave": "Congé",
+      "salary_advance": "Avance sur salaire",
+      "department": "Département",
+      "comment": "Commentaire"
+    },
+    "table": {
+      "when": "Date",
+      "action": "Action",
+      "entity": "Entité",
+      "actor": "Auteur"
+    }
   },
   "comments": {
     "title": "Commentaires",
@@ -1166,5 +1201,55 @@
     "empty": "Aucun commentaire.",
     "loadFailed": "Échec du chargement des commentaires",
     "saveFailed": "Impossible de publier le commentaire"
+  },
+  "workedHours": {
+    "kicker": "Temps & missions",
+    "title": "Heures travaillées",
+    "subtitle": "Déclarer les heures quotidiennes, lier missions et clients, suivre les heures supplémentaires",
+    "loading": "Chargement des heures…",
+    "loadFailed": "Impossible de charger les heures travaillées",
+    "saveFailed": "Impossible d'enregistrer les heures",
+    "created": "Heures soumises",
+    "approved": "Entrée approuvée",
+    "rejected": "Entrée rejetée",
+    "deleted": "Entrée archivée",
+    "delete": "Supprimer l'entrée",
+    "deleteConfirm": "Archiver cette entrée d'heures ?",
+    "attachmentFailed": "Impossible de télécharger la pièce jointe",
+    "add": "Ajouter des heures",
+    "allDrivers": "Tous les conducteurs",
+    "allStatuses": "Tous les statuts",
+    "selectDriver": "Sélectionner un conducteur",
+    "optionalClient": "Client (optionnel)",
+    "totalHours": "Heures totales",
+    "notes": "Notes",
+    "attachment": "Pièce jointe",
+    "approve": "Approuver",
+    "reject": "Rejeter",
+    "rejectReason": "Motif du rejet",
+    "empty": "Aucune entrée d'heures",
+    "missionFound": "Mission pour cette date",
+    "noMission": "Aucune mission pour cette date — vous pouvez choisir un client manuellement",
+    "noClient": "Aucun client",
+    "noPurpose": "Aucun motif",
+    "standardLabel": "Journée standard : {{hours}} h",
+    "extrasPreview": "Supplémentaires : {{hours}} h",
+    "status": {
+      "draft": "Brouillon",
+      "submitted": "Soumis",
+      "approved": "Approuvé",
+      "rejected": "Rejeté"
+    },
+    "table": {
+      "date": "Date",
+      "driver": "Conducteur",
+      "client": "Client",
+      "mission": "Mission",
+      "total": "Total",
+      "standard": "Standard",
+      "extras": "Extras",
+      "status": "Statut",
+      "actions": "Actions"
+    }
   }
 }

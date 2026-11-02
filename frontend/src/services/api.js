@@ -93,6 +93,10 @@ export const fleetAPI = {
   createDriver: (data) => apiClient.post('/fleet/drivers', data, { headers: { 'Content-Type': undefined } }),
   updateDriver: (id, data) => apiClient.put(`/fleet/drivers/${id}`, data, { headers: { 'Content-Type': undefined } }),
   deleteDriver: (id) => apiClient.delete(`/fleet/drivers/${id}`),
+  getClients: (params) => apiClient.get('/fleet/clients', { params }),
+  createClient: (data) => apiClient.post('/fleet/clients', data),
+  updateClient: (id, data) => apiClient.put(`/fleet/clients/${id}`, data),
+  deleteClient: (id) => apiClient.delete(`/fleet/clients/${id}`),
   getAssignments: (params) => apiClient.get('/fleet/assignments', { params }),
   getMyAssignments: (params) => apiClient.get('/fleet/assignments/mine', { params }),
   createAssignment: (data) => apiClient.post('/fleet/assignments', data),
@@ -184,6 +188,17 @@ export const calendarAPI = {
 
 export const auditAPI = {
   getLogs: (params) => apiClient.get('/audit', { params }),
+}
+
+export const workedHoursAPI = {
+  getEntries: (params) => apiClient.get('/worked-hours', { params }),
+  getMission: (params) => apiClient.get('/worked-hours/mission', { params }),
+  createEntry: (data) => apiClient.post('/worked-hours', data, { headers: { 'Content-Type': undefined } }),
+  updateEntry: (id, data) => apiClient.put(`/worked-hours/${id}`, data, { headers: { 'Content-Type': undefined } }),
+  approveEntry: (id) => apiClient.post(`/worked-hours/${id}/approve`),
+  rejectEntry: (id, reason) => apiClient.post(`/worked-hours/${id}/reject`, { reason }),
+  deleteEntry: (id) => apiClient.delete(`/worked-hours/${id}`),
+  downloadAttachment: (id) => apiClient.get(`/worked-hours/${id}/attachment`, { responseType: 'blob' }),
 }
 
 export const commentAPI = {

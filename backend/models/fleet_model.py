@@ -140,6 +140,16 @@ def create_assignment(data, company_id, actor_id):
             return None, 'Vehicle is already assigned during this period'
         if driver_conflict:
             return None, 'Driver is already assigned during this period'
+        client_id = data.get('clientId') or None
+        if client_id:
+            if not ObjectId.is_valid(client_id):
+                return None, 'Client not found'
+            client = db.fleet_clients.find_one({
+                '_id': ObjectId(client_id), 'companyId': company_id, 'deletedAt': None,
+            })
+            if not client:
+                return None, 'Client not found'
+            client_id = str(client['_id'])
         now = datetime.utcnow()
         document = {
             'companyId': company_id,
@@ -148,6 +158,7 @@ def create_assignment(data, company_id, actor_id):
             'startDate': data['startDate'],
             'endDate': end_date,
             'purpose': data.get('purpose'),
+            'clientId': client_id,
             'status': 'reserved',
             'checkOut': None,
             'checkIn': None,

@@ -52,9 +52,10 @@ def get_leaves_by_user(user_id):
         logger.error(f"Error getting leaves by user: {e}")
         return []
 
-def get_all_leaves(filters=None):
+def get_all_leaves(filters=None, limit=None):
     """
-    Get all leave requests with optional filters
+    Get leave requests with optional filters.
+    Pass limit to avoid loading the full collection (e.g. dashboard recent lists).
     """
     try:
         db = get_db()
@@ -68,13 +69,34 @@ def get_all_leaves(filters=None):
             if 'user_id' in filters:
                 query['user_id'] = filters['user_id']
         
-        leaves = list(db.leaves.find(query).sort('created_at', -1))
+        cursor = db.leaves.find(query).sort('created_at', -1)
+        if limit:
+            cursor = cursor.limit(int(limit))
+        leaves = list(cursor)
         for leave in leaves:
             leave['_id'] = str(leave['_id'])
         return leaves
     except Exception as e:
         logger.error(f"Error getting all leaves: {e}")
         return []
+
+
+def count_leaves(filters=None):
+    """Count leave documents matching filters without loading them."""
+    try:
+        db = get_db()
+        query = {}
+        if filters:
+            if 'company_id' in filters:
+                query['company_id'] = filters['company_id']
+            if 'status' in filters:
+                query['status'] = filters['status']
+            if 'user_id' in filters:
+                query['user_id'] = filters['user_id']
+        return db.leaves.count_documents(query)
+    except Exception as e:
+        logger.error(f"Error counting leaves: {e}")
+        return 0
 
 def update_leave_status(leave_id, status, reviewed_by=None, review_notes=None):
     """
@@ -117,34 +139,53 @@ def delete_leave(leave_id):
 
 def get_leave_statistics(user_id=None, company_id=None):
     """
-    Get leave statistics
+    Get leave statistics via aggregation (no full-collection load).
     """
+    empty = {
+        'total': 0,
+        'pending': 0,
+        'approved': 0,
+        'rejected': 0,
+        'total_days': 0,
+    }
     try:
         db = get_db()
-        query = {}
-        
+        match = {}
         if user_id:
-            query['user_id'] = user_id
+            match['user_id'] = user_id
         if company_id:
-            query['company_id'] = company_id
-        
-        leaves = list(db.leaves.find(query))
-        
-        stats = {
-            'total': len(leaves),
-            'pending': len([l for l in leaves if l.get('status') == 'pending']),
-            'approved': len([l for l in leaves if l.get('status') == 'approved']),
-            'rejected': len([l for l in leaves if l.get('status') == 'rejected']),
-            'total_days': sum(l.get('days', 0) for l in leaves if l.get('status') == 'approved')
-        }
-        
+            match['company_id'] = company_id
+
+        pipeline = []
+        if match:
+            pipeline.append({'$match': match})
+        pipeline.extend([
+            {
+                '$group': {
+                    '_id': '$status',
+                    'count': {'$sum': 1},
+                    'days': {
+                        '$sum': {
+                            '$cond': [
+                                {'$eq': ['$status', 'approved']},
+                                {'$ifNull': ['$days', 0]},
+                                0,
+                            ]
+                        }
+                    },
+                }
+            }
+        ])
+        stats = dict(empty)
+        for row in db.leaves.aggregate(pipeline):
+            status = row.get('_id') or 'unknown'
+            count = int(row.get('count') or 0)
+            stats['total'] += count
+            if status in ('pending', 'approved', 'rejected'):
+                stats[status] = count
+            if status == 'approved':
+                stats['total_days'] = float(row.get('days') or 0)
         return stats
     except Exception as e:
         logger.error(f"Error getting leave statistics: {e}")
-        return {
-            'total': 0,
-            'pending': 0,
-            'approved': 0,
-            'rejected': 0,
-            'total_days': 0
-        }
+        return empty
