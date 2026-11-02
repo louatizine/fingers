@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { XMarkIcon } from '../ui/icons';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { useDirection } from '../../hooks/useDirection';
+import { departmentAPI } from '../../services/api';
 
 const AddEmployeeModal = ({ isOpen, onClose, formData, setFormData, onSubmit, companies }) => {
   const { t } = useTranslation();
@@ -10,6 +11,14 @@ const AddEmployeeModal = ({ isOpen, onClose, formData, setFormData, onSubmit, co
   const { isRTL } = useDirection();
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
+  const [departments, setDepartments] = useState([]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    departmentAPI.getDepartments()
+      .then((response) => setDepartments(response.data.departments || []))
+      .catch(() => setDepartments([]));
+  }, [isOpen]);
 
   const validateForm = () => {
     const newErrors = {};
@@ -25,7 +34,7 @@ const AddEmployeeModal = ({ isOpen, onClose, formData, setFormData, onSubmit, co
     } else if (formData.password.length < 8) {
       newErrors.password = t('validation.passwordLength');
     }
-    if (!formData.department) newErrors.department = t('validation.required');
+    if (!formData.departmentId && !formData.department) newErrors.department = t('validation.required');
     if (!formData.position) newErrors.position = t('validation.required');
     if (user?.role === 'admin' && !formData.company_id) newErrors.company_id = t('validation.required');
 
@@ -38,7 +47,12 @@ const AddEmployeeModal = ({ isOpen, onClose, formData, setFormData, onSubmit, co
     if (!validateForm()) return;
     setSubmitting(true);
     try {
-      await onSubmit(formData);
+      const selected = departments.find((item) => item._id === formData.departmentId);
+      await onSubmit({
+        ...formData,
+        departmentId: formData.departmentId || undefined,
+        department: selected?.name || formData.department || '',
+      });
       onClose();
     } catch (error) {
     } finally {
@@ -162,16 +176,30 @@ const AddEmployeeModal = ({ isOpen, onClose, formData, setFormData, onSubmit, co
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <InputGroup label={t('employees.modal.department')} required error={errors.department}>
                   <select
-                    value={formData.department}
-                    onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                    value={formData.departmentId || ''}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      const selected = departments.find((item) => item._id === value);
+                      if (selected) {
+                        setFormData({ ...formData, departmentId: value, department: selected.name });
+                      } else {
+                        setFormData({ ...formData, departmentId: '', department: value });
+                      }
+                    }}
                     className={inputClass(errors.department, isRTL)}
                   >
                     <option value="">{t('employees.modal.selectDepartment')}</option>
-                    <option value="Engineering">{t('employees.departments.engineering')}</option>
-                    <option value="Sales">{t('employees.departments.sales')}</option>
-                    <option value="Marketing">{t('employees.departments.marketing')}</option>
-                    <option value="Human Resource">{t('employees.departments.hr')}</option>
-                    <option value="Finance">{t('employees.departments.finance')}</option>
+                    {departments.length ? departments.map((department) => (
+                      <option key={department._id} value={department._id}>{department.name}</option>
+                    )) : (
+                      <>
+                        <option value="Engineering">{t('employees.departments.engineering')}</option>
+                        <option value="Sales">{t('employees.departments.sales')}</option>
+                        <option value="Marketing">{t('employees.departments.marketing')}</option>
+                        <option value="Human Resource">{t('employees.departments.hr')}</option>
+                        <option value="Finance">{t('employees.departments.finance')}</option>
+                      </>
+                    )}
                   </select>
                 </InputGroup>
 

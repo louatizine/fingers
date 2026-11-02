@@ -170,19 +170,40 @@ def update_user_profile(user_id):
         current_user_id = get_jwt_identity()
         current_user = find_user_by_id(current_user_id)
         
-        # Users can update their own profile, admins can update all
-        if current_user_id != user_id and current_user['role'] != 'admin':
+        # Users can update their own profile; admins/supervisors can update others
+        if current_user_id != user_id and current_user['role'] not in ['admin', 'supervisor']:
             return jsonify({'error': 'Unauthorized'}), 403
         
         data = request.get_json()
+        before = find_user_by_id(user_id)
         
-        # Employees cannot change their role
+        # Only admins can change roles
         if current_user['role'] != 'admin' and 'role' in data:
             data.pop('role')
+        # Supervisors may only assign department within same company
+        if current_user['role'] == 'supervisor' and current_user_id != user_id:
+            if before and str(before.get('company_id') or '') != str(current_user.get('company_id') or ''):
+                return jsonify({'error': 'Unauthorized'}), 403
+            allowed = {
+                'department', 'departmentId', 'first_name', 'last_name', 'phone',
+                'position', 'hire_date', 'is_active',
+            }
+            data = {key: value for key, value in data.items() if key in allowed}
         
-        success = update_user(user_id, data)
+        result = update_user(user_id, data)
         
-        if success:
+        if result and result.get('success'):
+            if before and data.get('role') and data.get('role') != before.get('role'):
+                from models.audit_model import write_app_audit
+                write_app_audit(
+                    before.get('company_id') or current_user.get('company_id'),
+                    current_user_id,
+                    'user.role_changed',
+                    'user',
+                    user_id,
+                    before={'role': before.get('role')},
+                    after={'role': data.get('role')},
+                )
             return jsonify({'message': 'User updated successfully'}), 200
         else:
             return jsonify({'error': 'User not found'}), 404

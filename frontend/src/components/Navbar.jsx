@@ -90,8 +90,49 @@ export default function Navbar() {
   useEffect(() => {
     fetchUnreadCount()
     const interval = setInterval(fetchUnreadCount, 30000)
-    return () => clearInterval(interval)
-  }, [])
+    let aborted = false
+    let reader
+
+    const startStream = async () => {
+      const token = localStorage.getItem('token')
+      if (!token) return
+      try {
+        const base = import.meta.env.VITE_API_URL || '/api'
+        const response = await fetch(`${base}/notifications/stream`, {
+          headers: { Authorization: `Bearer ${token}`, Accept: 'text/event-stream' },
+        })
+        if (!response.ok || !response.body) return
+        reader = response.body.getReader()
+        const decoder = new TextDecoder()
+        let buffer = ''
+        while (!aborted) {
+          const { value, done } = await reader.read()
+          if (done) break
+          buffer += decoder.decode(value, { stream: true })
+          const chunks = buffer.split('\n\n')
+          buffer = chunks.pop() || ''
+          for (const chunk of chunks) {
+            if (chunk.includes('event: notification')) {
+              fetchUnreadCount()
+              if (showNotifications) fetchNotifications()
+            }
+          }
+        }
+      } catch {
+        /* polling remains active */
+      }
+    }
+
+    startStream()
+    const onFocus = () => fetchUnreadCount()
+    window.addEventListener('focus', onFocus)
+    return () => {
+      aborted = true
+      clearInterval(interval)
+      window.removeEventListener('focus', onFocus)
+      try { reader?.cancel?.() } catch { /* ignore */ }
+    }
+  }, [showNotifications])
 
   useEffect(() => {
     if (showNotifications) fetchNotifications()

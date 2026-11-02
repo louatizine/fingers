@@ -738,6 +738,17 @@ function Attendance() {
     return `${hh}:${mm}`;
   };
 
+  const getLateEarlyDifference = (row) => {
+    const lateMinutes = Number(row?.total_late_minutes) || 0;
+    const earlyMinutes = Number(row?.total_early_minutes) || 0;
+    return lateMinutes - earlyMinutes;
+  };
+
+  const formatLateEarlyDifference = (difference) => {
+    const sign = difference < 0 ? '-' : '';
+    return `${sign}${formatLateMinutesAsDisplay(Math.abs(difference))}`;
+  };
+
   const filteredDailySummaries = useMemo(() => {
     const rows = attendanceSummary?.daily_summaries || [];
     const q = summarySearch.trim().toLowerCase();
@@ -1303,13 +1314,14 @@ const formatTimestamp = (timestamp) => {
                         <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-400">{t('attendance:table.workedHours')}</th>
                         <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-400">{t('attendance:table.late')}</th>
                         <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-400">{t('attendance:table.early')}</th>
+                        <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-400">{t('attendance:table.lateEarlyDifference')}</th>
                         <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-400">{t('attendance:table.status')}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {filteredDailyRows.length === 0 ? (
                         <tr>
-                          <td colSpan={9} className="px-6 py-12 text-center text-slate-500">
+                          <td colSpan={10} className="px-6 py-12 text-center text-slate-500">
                             {t('attendance:daily.noMatches')}
                           </td>
                         </tr>
@@ -1318,6 +1330,7 @@ const formatTimestamp = (timestamp) => {
                           const status = row.status || (row.has_records ? 'partial' : (row.is_online_day ? 'online' : 'no_data'));
                           const isLate = (row.total_late_minutes || 0) > 0;
                           const isEarly = (row.total_early_minutes || 0) > 0;
+                          const lateEarlyDifference = getLateEarlyDifference(row);
                           return (
                             <tr
                               key={row.employee_id}
@@ -1369,6 +1382,38 @@ const formatTimestamp = (timestamp) => {
                                 <span className={`text-sm font-bold ${isEarly ? 'text-sky-600' : 'text-slate-400'}`}>
                                   {formatEarlyDisplay(row)}
                                 </span>
+                              </td>
+                              <td className="px-4 py-3" dir="ltr">
+                                <div className="flex flex-col">
+                                  <span
+                                    className={`text-sm font-bold ${
+                                      lateEarlyDifference !== 0 ? 'animate-pulse' : ''
+                                    } ${
+                                      lateEarlyDifference > 0
+                                        ? 'text-rose-600'
+                                        : lateEarlyDifference < 0
+                                          ? 'text-sky-600'
+                                          : 'text-slate-400'
+                                    }`}
+                                  >
+                                    {formatLateEarlyDifference(lateEarlyDifference)}
+                                  </span>
+                                  <span
+                                    className={`text-[10px] font-semibold whitespace-nowrap ${
+                                      lateEarlyDifference > 0
+                                        ? 'text-rose-500'
+                                        : lateEarlyDifference < 0
+                                          ? 'text-sky-500'
+                                          : 'text-slate-400'
+                                    }`}
+                                  >
+                                    {lateEarlyDifference > 0
+                                      ? t('attendance:table.arrivedLate', { minutes: lateEarlyDifference })
+                                      : lateEarlyDifference < 0
+                                        ? t('attendance:table.arrivedEarly', { minutes: Math.abs(lateEarlyDifference) })
+                                        : t('attendance:table.onTime')}
+                                  </span>
+                                </div>
                               </td>
                               <td className="px-4 py-3">
                                 <DailyStatusBadge status={status} />

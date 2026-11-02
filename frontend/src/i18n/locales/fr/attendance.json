@@ -148,6 +148,10 @@
     "workedHours": "Heures travaillées",
     "late": "Retard",
     "early": "Avance",
+    "lateEarlyDifference": "Différence",
+    "arrivedLate": "{{minutes}} min en retard",
+    "arrivedEarly": "{{minutes}} min en avance",
+    "onTime": "À l'heure",
     "records": "Enregistrements"
   },
   "summary": {

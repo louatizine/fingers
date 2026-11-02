@@ -7,7 +7,7 @@ import { useShell } from '../context/ShellContext'
 import {
   HomeIcon, UsersIcon, CalendarIcon, CurrencyDollarIcon,
   BriefcaseIcon, CogIcon, Bars3Icon, XMarkIcon,
-  ClockIcon, FlagIcon, ChevronLeftIcon, ChevronRightIcon
+  ClockIcon, FlagIcon, ChevronLeftIcon, ChevronRightIcon, TruckIcon
 } from './ui/icons'
 import { CubeBar, CUBE_COLORS } from './ui/CubeBar'
 import { CUBE, SECTION_COLORS, avatarFor } from '../config/brand'
@@ -26,12 +26,16 @@ export default function Sidebar() {
   const navigation = [
     { name: t('nav.dashboard'), href: '/dashboard', icon: HomeIcon, roles: ['admin', 'supervisor', 'employee'] },
     { name: t('nav.employees'), href: '/employees', icon: UsersIcon, roles: ['admin', 'supervisor'] },
+    { name: t('nav.departments'), href: '/departments', icon: UsersIcon, roles: ['admin', 'supervisor'] },
     { name: t('nav.leaves'), href: '/leaves', icon: CalendarIcon, roles: ['admin', 'supervisor', 'employee'] },
+    { name: t('nav.teamCalendar'), href: '/team-calendar', icon: CalendarIcon, roles: ['admin', 'supervisor', 'employee'] },
     { name: t('nav.holidays'), href: '/holidays', icon: FlagIcon, roles: ['admin', 'supervisor', 'employee'] },
     { name: t('nav.salary_advances'), href: '/salary-advances', icon: CurrencyDollarIcon, roles: ['admin', 'supervisor', 'employee'] },
+    { name: t('nav.fleet'), href: '/fleet', icon: TruckIcon, roles: ['admin', 'supervisor', 'employee'] },
     { name: t('nav.projects'), href: '/projects', icon: BriefcaseIcon, roles: ['admin', 'supervisor', 'employee'], employeeRequiresProjects: true },
     { name: t('nav.attendance'), href: '/attendance', icon: ClockIcon, roles: ['admin', 'supervisor'] },
-    { name: t('nav.settings'), href: '/settings', icon: CogIcon, roles: ['supervisor'] },
+    { name: t('nav.audit'), href: '/audit', icon: ClockIcon, roles: ['admin', 'supervisor'] },
+    { name: t('nav.settings'), href: '/settings', icon: CogIcon, roles: ['admin', 'supervisor'] },
   ]
 
   const filteredNavigation = navigation.filter(item => {
@@ -52,20 +56,26 @@ export default function Sidebar() {
       />
 
       <aside
-        className={`fixed inset-y-0 z-50 flex flex-col bg-paper-deep transition-[width,transform] duration-300 ease-out lg:translate-x-0 ${
+        className={`fixed inset-y-0 z-50 flex flex-col overflow-visible bg-gradient-to-b from-paper-deep via-white to-slate-50 shadow-xl shadow-slate-300/20 transition-[width,transform] duration-300 ease-out lg:translate-x-0 ${
           isRTL ? 'right-0 border-l' : 'left-0 border-r'
         } border-slate-200 ${sidebarOpen ? 'translate-x-0' : isRTL ? 'translate-x-full' : '-translate-x-full'} ${
           collapsed ? 'w-64 lg:w-20' : 'w-64'
         }`}
       >
-        <div className={`flex h-20 shrink-0 items-center gap-3 ${collapsed ? 'lg:justify-center lg:px-0' : ''} px-6`}>
+        <div className={`relative flex h-20 shrink-0 items-center gap-3 border-b border-slate-200/80 ${collapsed ? 'lg:justify-center lg:px-0' : ''} px-6`}>
+          <div
+            className="pointer-events-none absolute -top-20 start-1/2 h-36 w-36 -translate-x-1/2 rounded-full bg-primary-100/40 blur-3xl"
+            aria-hidden="true"
+          />
           <Link
             to="/dashboard"
             onClick={() => setSidebarOpen(false)}
             aria-label={t('nav.dashboard')}
-            className="flex items-center gap-3 rounded-lg outline-none transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+            className="relative flex items-center gap-3 rounded-xl outline-none transition-transform hover:scale-[1.02] focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           >
-            <img src="/cube.png" alt="" className="h-10 w-auto" />
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-slate-200/80">
+              <img src="/cube.png" alt="" className="h-8 w-auto" />
+            </span>
             <div className={`leading-none ${collapsed ? 'lg:hidden' : ''}`}>
               <p className="font-display text-[22px] font-medium tracking-tight text-primary">Dynamix</p>
               <p className="mt-1 font-mono text-[10px] font-medium uppercase tracking-[0.32em] text-brand-red">services</p>
@@ -93,9 +103,12 @@ export default function Sidebar() {
           </div>
         )}
 
-        <nav className={`flex-1 overflow-y-auto py-6 ${collapsed ? 'lg:px-2' : 'px-3'}`} aria-label={t('nav.main')}>
-          <ul className="space-y-0.5">
-            {filteredNavigation.map((item, index) => {
+        <nav className={`flex-1 overflow-y-auto py-5 ${collapsed ? 'lg:px-2' : 'px-3'}`} aria-label={t('nav.main')}>
+          <p className={`mb-3 px-4 font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400 ${collapsed ? 'lg:hidden' : ''}`}>
+            {t('nav.main')}
+          </p>
+          <ul className="space-y-1">
+            {filteredNavigation.map((item) => {
               const isActive = location.pathname === item.href
               const tone = CUBE[SECTION_COLORS[item.href] || 'violet']
               return (
@@ -105,35 +118,45 @@ export default function Sidebar() {
                     onClick={() => setSidebarOpen(false)}
                     title={collapsed ? item.name : undefined}
                     aria-current={isActive ? 'page' : undefined}
-                    style={{ '--tone-tint': tone.tint }}
-                    className={`group relative flex items-center gap-3 rounded-lg py-2.5 text-sm transition-colors duration-150 ${
-                      collapsed ? 'lg:justify-center lg:px-0 lg:pe-0 lg:ps-0' : 'pe-3 ps-4'
+                    style={{ '--tone-tint': tone.tint, '--tone-color': tone.color }}
+                    className={`group relative flex items-center gap-3 rounded-2xl py-2.5 text-sm transition-all duration-200 ${
+                      collapsed ? 'lg:justify-center lg:px-0 lg:pe-0 lg:ps-0' : 'pe-3 ps-3'
                     } ${
                       isActive
-                        ? 'bg-white font-semibold text-slate-900 shadow-soft ring-1 ring-slate-200'
-                        : 'font-medium text-slate-600 hover:bg-[var(--tone-tint)] hover:text-slate-900'
+                        ? 'bg-[var(--tone-tint)] font-semibold text-slate-900 shadow-sm ring-1 ring-[var(--tone-color)]/20'
+                        : 'font-medium text-slate-600 hover:-translate-y-px hover:bg-white hover:text-slate-900 hover:shadow-sm'
                     }`}
                   >
                     {isActive && (
                       <span
-                        className="absolute inset-y-2 start-0 w-[3px] rounded-full"
+                        className="absolute inset-y-3 start-0 w-1 rounded-full"
                         style={{ backgroundColor: tone.color }}
                         aria-hidden="true"
                       />
                     )}
                     <span
-                      className={`w-5 font-mono text-[10px] tabular-nums ${collapsed ? 'lg:hidden' : ''}`}
-                      style={{ color: tone.ink, opacity: isActive ? 1 : 0.55 }}
-                      aria-hidden="true"
+                      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-all duration-200 ${
+                        isActive
+                          ? 'bg-white shadow-sm ring-1 ring-black/5'
+                          : 'bg-slate-100/80 group-hover:bg-[var(--tone-tint)]'
+                      }`}
                     >
-                      {String(index + 1).padStart(2, '0')}
+                      <item.icon
+                        className={`h-[18px] w-[18px] transition-transform duration-150 ${
+                          isActive ? 'scale-110' : 'group-hover:scale-105'
+                        }`}
+                        style={{ color: tone.ink, opacity: isActive ? 1 : 0.7 }}
+                        strokeWidth={1.75}
+                      />
                     </span>
-                    <item.icon
-                      className="h-[18px] w-[18px] shrink-0 transition-opacity"
-                      style={{ color: tone.ink, opacity: isActive ? 1 : 0.6 }}
-                      strokeWidth={1.75}
-                    />
                     <span className={`flex-1 truncate ${collapsed ? 'lg:hidden' : ''}`}>{item.name}</span>
+                    {!collapsed && isActive && (
+                      <span
+                        className="h-1.5 w-1.5 shrink-0 rounded-full"
+                        style={{ backgroundColor: tone.color }}
+                        aria-hidden="true"
+                      />
+                    )}
                   </Link>
                 </li>
               )
@@ -141,7 +164,7 @@ export default function Sidebar() {
           </ul>
         </nav>
 
-        <div className={`shrink-0 border-t border-slate-200 ${collapsed ? 'lg:p-2' : 'p-3'}`}>
+        <div className={`shrink-0 border-t border-slate-200/80 bg-white/40 ${collapsed ? 'lg:p-2' : 'p-3'}`}>
           <button
             type="button"
             onClick={() => setCommandOpen(true)}
@@ -164,10 +187,10 @@ export default function Sidebar() {
             to="/profile"
             onClick={() => setSidebarOpen(false)}
             title={collapsed ? `${user?.first_name} ${user?.last_name}` : undefined}
-            className={`flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-white/70 ${collapsed ? 'lg:justify-center' : ''}`}
+            className={`group flex items-center gap-3 rounded-xl border border-transparent p-2 transition-all hover:border-slate-200 hover:bg-white hover:shadow-sm ${collapsed ? 'lg:justify-center' : ''}`}
           >
             <span
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg font-display text-sm font-semibold"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl font-display text-sm font-semibold shadow-sm ring-2 ring-white transition-transform group-hover:scale-105"
               style={{ backgroundColor: me.color, color: me.on }}
             >
               {initials}

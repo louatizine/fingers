@@ -4,6 +4,7 @@ Salary Advance Model - Database operations for salary advance management
 from database import get_db
 from bson.objectid import ObjectId
 from datetime import datetime
+from decimal import Decimal, ROUND_HALF_UP
 import logging
 
 logger = logging.getLogger(__name__)
@@ -101,6 +102,57 @@ def update_salary_advance_status(advance_id, status, reviewed_by=None, review_no
     except Exception as e:
         logger.error(f"Error updating salary advance status: {e}")
         return False
+
+def build_repayment_schedule(amount, request_date=None):
+    """Build equal monthly installments from the request month through December."""
+    try:
+        numeric_amount = Decimal(str(amount)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        if request_date:
+            if isinstance(request_date, datetime):
+                start = request_date
+            else:
+                start = datetime.fromisoformat(str(request_date).replace('Z', '+00:00'))
+        else:
+            start = datetime.utcnow()
+        months = 13 - start.month
+        installment = (numeric_amount / months).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        schedule = []
+        for offset in range(months):
+            month_number = start.month + offset
+            month_amount = numeric_amount - installment * (months - 1) if offset == months - 1 else installment
+            schedule.append({
+                'month': f'{start.year}-{month_number:02d}',
+                'amount': float(month_amount),
+                'paid': False,
+                'paid_at': None,
+                'paid_by': None,
+            })
+        return schedule
+    except (ValueError, TypeError, ArithmeticError):
+        return []
+
+def update_repayment_payment(advance_id, month, paid, user_id):
+    """Toggle one repayment month and record who confirmed it."""
+    try:
+        db = get_db()
+        advance = db.salary_advances.find_one({'_id': ObjectId(advance_id)})
+        if not advance:
+            return None
+        schedule = advance.get('repayment_schedule', [])
+        target = next((entry for entry in schedule if entry.get('month') == month), None)
+        if not target:
+            return None
+        target['paid'] = bool(paid)
+        target['paid_at'] = datetime.utcnow().isoformat() if paid else None
+        target['paid_by'] = user_id if paid else None
+        db.salary_advances.update_one(
+            {'_id': ObjectId(advance_id)},
+            {'$set': {'repayment_schedule': schedule}},
+        )
+        return target
+    except Exception as e:
+        logger.error(f"Error updating repayment payment: {e}")
+        return None
 
 def delete_salary_advance(advance_id):
     """

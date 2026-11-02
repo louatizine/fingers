@@ -56,7 +56,10 @@ export const userAPI = {
 export const leaveAPI = {
   getLeaves: () => apiClient.get('/leaves'),
   getLeave: (id) => apiClient.get(`/leaves/${id}`),
-  createLeave: (data) => apiClient.post('/leaves', data),
+  downloadAttachment: (id) => apiClient.get(`/leaves/${id}/attachment`, { responseType: 'blob' }),
+  createLeave: (data) => data instanceof FormData
+    ? apiClient.post('/leaves', data, { headers: { 'Content-Type': undefined } })
+    : apiClient.post('/leaves', data),
   approveLeave: (id, comment) => apiClient.post(`/leaves/${id}/approve`, { comment }),
   rejectLeave: (id, comment) => apiClient.post(`/leaves/${id}/reject`, { comment }),
   deleteLeave: (id) => apiClient.delete(`/leaves/${id}`),
@@ -69,9 +72,50 @@ export const salaryAdvanceAPI = {
   getAdvance: (id) => apiClient.get(`/salary-advances/${id}`),
   createAdvance: (data) => apiClient.post('/salary-advances', data),
   approveAdvance: (id, comment) => apiClient.post(`/salary-advances/${id}/approve`, { comment }),
+  updatePayment: (id, month, paid) => apiClient.post(`/salary-advances/${id}/payments`, { month, paid }),
   rejectAdvance: (id, comment) => apiClient.post(`/salary-advances/${id}/reject`, { comment }),
   deleteAdvance: (id) => apiClient.delete(`/salary-advances/${id}`),
   getStatistics: () => apiClient.get('/salary-advances/statistics')
+}
+
+export const fleetAPI = {
+  getDashboard: () => apiClient.get('/fleet/dashboard'),
+  getVehicles: (params) => apiClient.get('/fleet/vehicles', { params }),
+  getVehicle: (id) => apiClient.get(`/fleet/vehicles/${id}`),
+  getVehicleHistory: (id) => apiClient.get(`/fleet/vehicles/${id}/history`),
+  createVehicle: (data) => apiClient.post('/fleet/vehicles', data, { headers: { 'Content-Type': undefined } }),
+  updateVehicle: (id, data) => apiClient.put(`/fleet/vehicles/${id}`, data, { headers: { 'Content-Type': undefined } }),
+  deleteVehicle: (id) => apiClient.delete(`/fleet/vehicles/${id}`),
+  getVehicleDocuments: (id) => apiClient.get(`/fleet/vehicles/${id}/documents`),
+  createVehicleDocument: (id, data) => apiClient.post(`/fleet/vehicles/${id}/documents`, data, { headers: { 'Content-Type': undefined } }),
+  deleteVehicleDocument: (id) => apiClient.delete(`/fleet/documents/${id}`),
+  getDrivers: (params) => apiClient.get('/fleet/drivers', { params }),
+  createDriver: (data) => apiClient.post('/fleet/drivers', data, { headers: { 'Content-Type': undefined } }),
+  updateDriver: (id, data) => apiClient.put(`/fleet/drivers/${id}`, data, { headers: { 'Content-Type': undefined } }),
+  deleteDriver: (id) => apiClient.delete(`/fleet/drivers/${id}`),
+  getAssignments: (params) => apiClient.get('/fleet/assignments', { params }),
+  getMyAssignments: (params) => apiClient.get('/fleet/assignments/mine', { params }),
+  createAssignment: (data) => apiClient.post('/fleet/assignments', data),
+  cancelAssignment: (id) => apiClient.post(`/fleet/assignments/${id}/cancel`),
+  checkout: (id, data) => apiClient.post(`/fleet/assignments/${id}/checkout`, data, { headers: { 'Content-Type': undefined } }),
+  checkin: (id, data) => apiClient.post(`/fleet/assignments/${id}/checkin`, data, { headers: { 'Content-Type': undefined } }),
+  getFuelLimits: () => apiClient.get('/fleet/fuel/limits'),
+  getMyFuelLimits: () => apiClient.get('/fleet/fuel/limits/mine'),
+  createFuelLimit: (data) => apiClient.post('/fleet/fuel/limits', data),
+  updateFuelLimit: (id, data) => apiClient.put(`/fleet/fuel/limits/${id}`, data),
+  deleteFuelLimit: (id) => apiClient.delete(`/fleet/fuel/limits/${id}`),
+  getFuelPurchases: (params) => apiClient.get('/fleet/fuel/purchases', { params }),
+  createFuelPurchase: (data) => apiClient.post('/fleet/fuel/purchases', data, { headers: { 'Content-Type': undefined } }),
+  attachFuelReceipt: (id, data) => apiClient.post(`/fleet/fuel/purchases/${id}/receipt`, data, { headers: { 'Content-Type': undefined } }),
+  validateFuelPurchase: (id) => apiClient.post(`/fleet/fuel/purchases/${id}/validate`),
+  rejectFuelPurchase: (id, reason) => apiClient.post(`/fleet/fuel/purchases/${id}/reject`, { reason }),
+  getMaintenanceRecords: (params) => apiClient.get('/fleet/maintenance/records', { params }),
+  createMaintenanceRecord: (data) => apiClient.post('/fleet/maintenance/records', data, { headers: { 'Content-Type': undefined } }),
+  updateMaintenanceRecord: (id, data) => apiClient.put(`/fleet/maintenance/records/${id}`, data, { headers: { 'Content-Type': undefined } }),
+  deleteMaintenanceRecord: (id) => apiClient.delete(`/fleet/maintenance/records/${id}`),
+  getMaintenanceSchedules: (params) => apiClient.get('/fleet/maintenance/schedules', { params }),
+  createMaintenanceSchedule: (data) => apiClient.post('/fleet/maintenance/schedules', data),
+  deleteMaintenanceSchedule: (id) => apiClient.delete(`/fleet/maintenance/schedules/${id}`),
 }
 
 // Project API
@@ -125,6 +169,26 @@ export const holidaysAPI = {
   createReligiousHoliday: (data) => apiClient.post('/holidays/religious', data),
   updateReligiousHoliday: (id, data) => apiClient.put(`/holidays/religious/${id}`, data),
   deleteReligiousHoliday: (id) => apiClient.delete(`/holidays/religious/${id}`),
+}
+
+export const departmentAPI = {
+  getDepartments: (params) => apiClient.get('/departments', { params }),
+  createDepartment: (data) => apiClient.post('/departments', data),
+  updateDepartment: (id, data) => apiClient.put(`/departments/${id}`, data),
+  deleteDepartment: (id) => apiClient.delete(`/departments/${id}`),
+}
+
+export const calendarAPI = {
+  getTeamAbsences: (params) => apiClient.get('/calendar/team-absences', { params }),
+}
+
+export const auditAPI = {
+  getLogs: (params) => apiClient.get('/audit', { params }),
+}
+
+export const commentAPI = {
+  getComments: (entityType, entityId) => apiClient.get(`/comments/${entityType}/${entityId}`),
+  postComment: (entityType, entityId, body) => apiClient.post(`/comments/${entityType}/${entityId}`, { body }),
 }
 
 // Attendance API

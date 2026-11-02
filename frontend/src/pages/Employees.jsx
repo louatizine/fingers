@@ -29,6 +29,8 @@ import AddEmployeeModal from '../components/employees/AddEmployeeModal';
 import SortableHeader from '../components/employees/SortableHeader';
 import BulkActions from '../components/employees/BulkActions';
 import CreateAccountsModal from '../components/employees/CreateAccountsModal';
+import CreateLoanModal from '../components/employees/CreateLoanModal';
+import { salaryAdvanceAPI } from '../services/api';
 import PageHeader from '../components/ui/PageHeader';
 import StatCard from '../components/StatCard';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -117,6 +119,7 @@ const Employees = () => {
  */  ], [stats, t]);
 
   const [accountModalEmployees, setAccountModalEmployees] = useState([]);
+  const [loanEmployee, setLoanEmployee] = useState(null);
 
   const handleOpenCreateAccounts = useCallback((specificEmployee = null) => {
     const targets = specificEmployee
@@ -134,6 +137,18 @@ const Employees = () => {
     setAccountModalEmployees(targets);
     setIsCreateAccountsModalOpen(true);
   }, [filteredEmployees, selectedEmployees, setIsCreateAccountsModalOpen, toast, t]);
+
+  const handleCreateLoan = useCallback(async (data) => {
+    try {
+      await salaryAdvanceAPI.createAdvance(data);
+      toast.success(t('salaryAdvances.employeeLoan.success'));
+      setLoanEmployee(null);
+      handleCloseDrawer();
+    } catch (error) {
+      toast.error(error.response?.data?.error || t('salaryAdvances.employeeLoan.failed'));
+      throw error;
+    }
+  }, [handleCloseDrawer, t, toast]);
 
   const employeesWithoutAccount = useMemo(
     () => filteredEmployees.filter((emp) => !emp.has_web_account).length,
@@ -375,22 +390,21 @@ const Employees = () => {
       </div>
 
       {/* 5. MODALS & DRAWER */}
-{/*       <EmployeeDrawer
+      <EmployeeDrawer
         isOpen={isDetailDrawerOpen}
         onClose={handleCloseDrawer}
         employee={selectedEmployee}
         onDeactivate={handleDeactivate}
         onActivate={handleActivate}
         onCreateAccount={handleOpenCreateAccounts}
+        onCreateLoan={setLoanEmployee}
       />
 
-      <AddEmployeeModal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        formData={formData}
-        setFormData={setFormData}
-        onSubmit={handleCreateEmployee}
-        companies={companies}
+      <CreateLoanModal
+        isOpen={Boolean(loanEmployee)}
+        employee={loanEmployee}
+        onClose={() => setLoanEmployee(null)}
+        onSubmit={handleCreateLoan}
       />
 
       <CreateAccountsModal
@@ -401,7 +415,7 @@ const Employees = () => {
         }}
         employees={accountModalEmployees}
         onSubmit={handleBulkCreateAccounts}
-      /> */}
+      />
     </div>
     </div>
   );

@@ -14,6 +14,7 @@ const SECTION_KEYS = {
   '/leaves': 'nav.leaves',
   '/holidays': 'nav.holidays',
   '/salary-advances': 'nav.salary_advances',
+  '/fleet': 'nav.fleet',
   '/projects': 'nav.projects',
   '/attendance': 'nav.attendance',
   '/settings': 'nav.settings',

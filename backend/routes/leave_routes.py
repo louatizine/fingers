@@ -1,7 +1,7 @@
 """
 Leave Routes
 """
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, send_file
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models.leave_model import (
     create_leave_request, get_leave_by_id, get_leaves_by_user,
@@ -9,15 +9,22 @@ from models.leave_model import (
 )
 from models.user_model import find_user_by_id, update_leave_balance, get_vacation_balance, update_vacation_usage
 from utils.auth_utils import admin_or_supervisor_required
+from utils.org_permissions import can_approve_request, supervisor_visible_department_ids
 from services.email_service import send_leave_notification
 from datetime import datetime
 from models.notif_model import create_notification
+from models.audit_model import write_app_audit
 from database import get_db
 import logging
+from pathlib import Path
+from werkzeug.utils import secure_filename
+import uuid
 
 logger = logging.getLogger(__name__)
 
 leave_bp = Blueprint('leaves', __name__)
+LEAVE_ATTACHMENT_MAX_BYTES = 20 * 1024 * 1024
+LEAVE_ATTACHMENT_DIR = Path(__file__).resolve().parents[1] / 'uploads' / 'leaves'
 
 @leave_bp.route('', methods=['GET'])
 @jwt_required()
@@ -30,9 +37,25 @@ def get_leaves():
         # Employees see only their leaves
         if current_user['role'] == 'employee':
             leaves = get_leaves_by_user(current_user_id)
-        # Supervisors see leaves from their company
+        # Supervisors see leaves from their company (dept-scoped when they manage departments)
         elif current_user['role'] == 'supervisor':
             leaves = get_all_leaves({'company_id': current_user['company_id']})
+            managed = supervisor_visible_department_ids(current_user)
+            if managed is not None:
+                db = get_db()
+                allowed_users = {
+                    str(doc['_id'])
+                    for doc in db.users.find({
+                        'company_id': current_user['company_id'],
+                        '$or': [
+                            {'departmentId': {'$in': managed}},
+                            {'departmentId': None},
+                            {'departmentId': {'$exists': False}},
+                            {'departmentId': ''},
+                        ],
+                    }, {'_id': 1})
+                }
+                leaves = [leave for leave in leaves if str(leave.get('user_id')) in allowed_users]
         # Admins see all leaves
         else:
             leaves = get_all_leaves()
@@ -66,6 +89,42 @@ def get_leave(leave_id):
         logger.error(f"Get leave error: {e}")
         return jsonify({'error': 'An error occurred'}), 500
 
+@leave_bp.route('/<leave_id>/attachment', methods=['GET'])
+@jwt_required()
+def download_leave_attachment(leave_id):
+    """Download a leave attachment after checking the requester's access."""
+    try:
+        leave = get_leave_by_id(leave_id)
+        if not leave or not leave.get('attachment', {}).get('stored_name'):
+            return jsonify({'error': 'Attachment not found'}), 404
+
+        current_user = find_user_by_id(get_jwt_identity())
+        can_access = (
+            leave['user_id'] == get_jwt_identity()
+            or current_user['role'] == 'admin'
+            or (
+                current_user['role'] == 'supervisor'
+                and leave.get('company_id') == current_user.get('company_id')
+            )
+        )
+        if not can_access:
+            return jsonify({'error': 'Unauthorized'}), 403
+
+        stored_name = Path(leave['attachment']['stored_name']).name
+        attachment_path = LEAVE_ATTACHMENT_DIR / stored_name
+        if not attachment_path.is_file():
+            return jsonify({'error': 'Attachment file is unavailable'}), 404
+
+        return send_file(
+            attachment_path,
+            as_attachment=True,
+            download_name=leave['attachment'].get('original_name', stored_name),
+            mimetype=leave['attachment'].get('content_type') or 'application/octet-stream',
+        )
+    except Exception as e:
+        logger.error(f"Download leave attachment error: {e}")
+        return jsonify({'error': 'An error occurred'}), 500
+
 @leave_bp.route('', methods=['POST'])
 @jwt_required()
 def create_leave():
@@ -74,7 +133,7 @@ def create_leave():
         current_user_id = get_jwt_identity()
         current_user = find_user_by_id(current_user_id)
         
-        data = request.get_json()
+        data = request.form.to_dict() if request.content_type and request.content_type.startswith('multipart/form-data') else (request.get_json() or {})
         
         # Validate required fields
         required_fields = ['leave_type', 'start_date', 'end_date', 'days', 'reason']
@@ -104,6 +163,28 @@ def create_leave():
             if current_balance < days:
                 insufficient_balance = True
         
+        attachment = request.files.get('attachment')
+        attachment_data = None
+        if attachment and attachment.filename:
+            original_name = secure_filename(attachment.filename)
+            if not original_name:
+                return jsonify({'error': 'Attachment filename is invalid'}), 400
+
+            LEAVE_ATTACHMENT_DIR.mkdir(parents=True, exist_ok=True)
+            stored_name = f'{uuid.uuid4().hex}_{original_name}'
+            attachment_path = LEAVE_ATTACHMENT_DIR / stored_name
+            attachment.save(attachment_path)
+            file_size = attachment_path.stat().st_size
+            if file_size > LEAVE_ATTACHMENT_MAX_BYTES:
+                attachment_path.unlink(missing_ok=True)
+                return jsonify({'error': 'Attachment must be 20 MB or smaller'}), 400
+            attachment_data = {
+                'stored_name': stored_name,
+                'original_name': original_name,
+                'content_type': attachment.mimetype or 'application/octet-stream',
+                'size': file_size,
+            }
+
         # Create leave request
         leave_data = {
             'user_id': current_user_id,
@@ -118,6 +199,8 @@ def create_leave():
             'insufficient_balance': insufficient_balance,
             'balance_at_request': current_balance
         }
+        if attachment_data:
+            leave_data['attachment'] = attachment_data
         
         leave_id = create_leave_request(leave_data)
         
@@ -132,24 +215,34 @@ def create_leave():
         }
         create_notification(notification_data)
         
-        # Also notify supervisors in the company
+        # Notify department managers first, else company supervisors
         db = get_db()
-        supervisors = db.users.find({
-            'company_id': current_user['company_id'],
-            'role': 'supervisor',
-            'is_active': True
-        })
+        recipient_ids = set()
+        department_id = current_user.get('departmentId')
+        if department_id:
+            from models.department_model import get_department
+            department = get_department(department_id, current_user.get('company_id'))
+            for manager_id in (department or {}).get('managerIds') or []:
+                recipient_ids.add(str(manager_id))
+        if not recipient_ids:
+            supervisors = db.users.find({
+                'company_id': current_user['company_id'],
+                'role': 'supervisor',
+                'is_active': True
+            })
+            for supervisor in supervisors:
+                recipient_ids.add(str(supervisor['_id']))
         
-        for supervisor in supervisors:
-            supervisor_notification = {
-                'user_id': str(supervisor['_id']),
+        for recipient_id in recipient_ids:
+            create_notification({
+                'user_id': recipient_id,
                 'title': 'New Leave Request Needs Review',
                 'message': f'{current_user["first_name"]} {current_user["last_name"]} has requested {days} days of {leave_type} leave',
                 'type': 'leave_request',
                 'related_id': leave_id,
-                'priority': 'high'
-            }
-            create_notification(supervisor_notification)
+                'priority': 'high',
+                'company_id': current_user.get('company_id'),
+            })
         
         return jsonify({
             'message': 'Leave request created successfully',
@@ -179,6 +272,9 @@ def approve_leave(leave_id):
         
         if leave['status'] != 'pending':
             return jsonify({'error': 'Leave request already processed'}), 400
+
+        if not can_approve_request(current_user, leave):
+            return jsonify({'error': 'You are not allowed to approve this leave request'}), 403
         
         data = request.get_json() or {}
         review_comment = data.get('comment', '')
@@ -224,6 +320,8 @@ def approve_leave(leave_id):
                 )
             except Exception as e:
                 logger.error(f"Email notification error: {e}")
+
+            write_app_audit(leave.get('company_id'), current_user_id, 'leave.approved', 'leave', leave_id, after={'status': 'approved'})
             
             return jsonify({'message': 'Leave request approved'}), 200
         else:
@@ -249,6 +347,9 @@ def reject_leave(leave_id):
         
         if leave['status'] != 'pending':
             return jsonify({'error': 'Leave request already processed'}), 400
+
+        if not can_approve_request(current_user, leave):
+            return jsonify({'error': 'You are not allowed to reject this leave request'}), 403
         
         data = request.get_json() or {}
         review_comment = data.get('comment', '')
@@ -284,6 +385,8 @@ def reject_leave(leave_id):
                 )
             except Exception as e:
                 logger.error(f"Email notification error: {e}")
+
+            write_app_audit(leave.get('company_id'), current_user_id, 'leave.rejected', 'leave', leave_id, after={'status': 'rejected'})
             
             return jsonify({'message': 'Leave request rejected'}), 200
         else:

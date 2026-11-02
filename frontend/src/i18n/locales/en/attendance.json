@@ -148,6 +148,10 @@
     "workedHours": "Worked Hours",
     "late": "Lateness",
     "early": "Early",
+    "lateEarlyDifference": "Difference",
+    "arrivedLate": "{{minutes}} min late",
+    "arrivedEarly": "{{minutes}} min early",
+    "onTime": "On time",
     "records": "Records"
   },
   "summary": {

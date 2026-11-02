@@ -3,6 +3,7 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models.settings_model import get_settings, update_settings_data, create_default_settings
 from models.user_model import find_user_by_id, get_all_users
+from models.audit_model import write_app_audit
 from database import db
 from datetime import datetime
 from utils.auth_utils import admin_required
@@ -67,6 +68,14 @@ def update_app_settings():
         settings_data['updated_at'] = datetime.utcnow()
         
         updated_settings = update_settings_data(settings_data)
+        write_app_audit(
+            current_user.get('company_id'),
+            current_user_id,
+            'settings.updated',
+            'settings',
+            'global',
+            after=settings_data,
+        )
         
         return jsonify({'message': 'Settings updated successfully'}), 200
     except Exception as e:

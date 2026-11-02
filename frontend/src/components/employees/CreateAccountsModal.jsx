@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { XMarkIcon, KeyIcon } from '../ui/icons';
+import { XMarkIcon, KeyIcon, EyeIcon, EyeSlashIcon } from '../ui/icons';
 import { useTranslation } from 'react-i18next';
 import { useDirection } from '../../hooks/useDirection';
 
@@ -15,6 +15,8 @@ export default function CreateAccountsModal({
   const [confirmPassword, setConfirmPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const eligible = useMemo(
     () => employees.filter((emp) => !emp.has_web_account),
@@ -48,6 +50,8 @@ export default function CreateAccountsModal({
       });
       setPassword('');
       setConfirmPassword('');
+      setShowPassword(false);
+      setShowConfirmPassword(false);
       onClose();
     } catch {
       // toast handled by parent
@@ -115,26 +119,46 @@ export default function CreateAccountsModal({
                 <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-500">
                   {t('employees.createAccounts.password')} *
                 </label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-100"
-                  placeholder="••••••••"
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className={`w-full rounded-xl border border-slate-200 py-2.5 text-sm focus:border-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-100 ${isRTL ? 'pl-11 pr-4' : 'pl-4 pr-11'}`}
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((visible) => !visible)}
+                    aria-label={showPassword ? t('common.hidePassword', { defaultValue: 'Hide password' }) : t('common.showPassword', { defaultValue: 'Show password' })}
+                    className={`absolute top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-primary-50 hover:text-primary ${isRTL ? 'left-2' : 'right-2'}`}
+                  >
+                    {showPassword ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
+                  </button>
+                </div>
                 {errors.password && <p className="mt-1 text-xs text-rose-600">{errors.password}</p>}
               </div>
               <div>
                 <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-500">
                   {t('employees.createAccounts.confirmPassword')} *
                 </label>
-                <input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-100"
-                  placeholder="••••••••"
-                />
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className={`w-full rounded-xl border border-slate-200 py-2.5 text-sm focus:border-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-100 ${isRTL ? 'pl-11 pr-4' : 'pl-4 pr-11'}`}
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword((visible) => !visible)}
+                    aria-label={showConfirmPassword ? t('common.hidePassword', { defaultValue: 'Hide password' }) : t('common.showPassword', { defaultValue: 'Show password' })}
+                    className={`absolute top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-primary-50 hover:text-primary ${isRTL ? 'left-2' : 'right-2'}`}
+                  >
+                    {showConfirmPassword ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
+                  </button>
+                </div>
                 {errors.confirmPassword && <p className="mt-1 text-xs text-rose-600">{errors.confirmPassword}</p>}
               </div>
             </div>

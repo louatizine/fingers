@@ -10,11 +10,13 @@ import {
   XMarkIcon, 
   ChevronLeftIcon, 
   ChevronRightIcon, 
-  CalendarDaysIcon
+  CalendarDaysIcon,
+  DocumentArrowDownIcon
 } from '../components/ui/icons';
 import PageHeader from '../components/ui/PageHeader';
 import LoadingSpinner from '../components/LoadingSpinner';
 import StatusBadge from '../components/StatusBadge';
+import RequestComments from '../components/RequestComments';
 import { BRAND } from '../config/brand';
 
 export default function Leaves() {
@@ -32,6 +34,7 @@ export default function Leaves() {
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [selectedLeaveId, setSelectedLeaveId] = useState(null);
   const [rejectReason, setRejectReason] = useState('');
+  const [commentsLeaveId, setCommentsLeaveId] = useState(null);
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
@@ -41,7 +44,8 @@ export default function Leaves() {
     leave_type: 'annual',
     start_date: '',
     end_date: '',
-    reason: ''
+    reason: '',
+    attachment: null,
   });
 
   useEffect(() => {
@@ -75,7 +79,7 @@ export default function Leaves() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     // Calculate days between start_date and end_date (inclusive)
-    const { start_date, end_date, ...rest } = formData;
+    const { start_date, end_date, attachment, ...rest } = formData;
     let days = 0;
     if (start_date && end_date) {
       const start = new Date(start_date);
@@ -86,8 +90,17 @@ export default function Leaves() {
       toast.error(t('leaves.messages.invalid_days'));
       return;
     }
+    if (attachment && attachment.size > 20 * 1024 * 1024) {
+      toast.error(t('leaves.messages.attachmentTooLarge'));
+      return;
+    }
     try {
-      const response = await leaveAPI.createLeave({ ...rest, start_date, end_date, days });
+      const payload = new FormData();
+      Object.entries({ ...rest, start_date, end_date, days }).forEach(([key, value]) => {
+        payload.append(key, value);
+      });
+      if (attachment) payload.append('attachment', attachment);
+      const response = await leaveAPI.createLeave(payload);
       if (response.data.insufficient_balance) {
         toast.warning(t('leaves.messages.insufficient_warning', {
           available: Number(response.data.current_balance || 0).toFixed(2),
@@ -97,7 +110,7 @@ export default function Leaves() {
         toast.success(t('leaves.messages.success'));
       }
       setShowModal(false);
-      setFormData({ leave_type: 'annual', start_date: '', end_date: '', reason: '' });
+      setFormData({ leave_type: 'annual', start_date: '', end_date: '', reason: '', attachment: null });
       loadLeaves();
       loadVacationBalance();
     } catch (error) {
@@ -133,6 +146,22 @@ export default function Leaves() {
       setShowRejectModal(false);
     } catch (error) {
       toast.error(error.response?.data?.error || t('leaves.messages.failed'));
+    }
+  };
+
+  const handleDownloadAttachment = async (leave) => {
+    try {
+      const response = await leaveAPI.downloadAttachment(leave._id);
+      const url = window.URL.createObjectURL(response.data);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = leave.attachment?.original_name || 'medical-certificate';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      toast.error(error.response?.data?.error || t('leaves.messages.attachmentDownloadFailed'));
     }
   };
 
@@ -271,6 +300,8 @@ export default function Leaves() {
                 <th className="kicker px-6 py-3.5 text-start">{t('leaves.table.dates')}</th>
                 <th className="kicker px-6 py-3.5 text-start">{t('leaves.table.days')}</th>
                 <th className="kicker px-6 py-3.5 text-start">{t('leaves.table.status')}</th>
+                <th className="kicker px-6 py-3.5 text-start">{t('leaves.table.attachment')}</th>
+                <th className="kicker px-6 py-3.5 text-end">{t('comments.title')}</th>
                 {user.role !== 'employee' && <th className="kicker px-6 py-3.5 text-end">{t('leaves.table.actions')}</th>}
               </tr>
             </thead>
@@ -308,6 +339,32 @@ export default function Leaves() {
                     <StatusBadge status={leave.status} />
                   </td>
 
+                  <td className="px-6 py-4">
+                    {leave.attachment ? (
+                      <button
+                        type="button"
+                        onClick={() => handleDownloadAttachment(leave)}
+                        className="inline-flex items-center gap-2 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700 transition-colors hover:border-blue-200 hover:bg-blue-100"
+                        title={leave.attachment.original_name}
+                      >
+                        <DocumentArrowDownIcon className="h-4 w-4" />
+                        {t('leaves.table.downloadAttachment')}
+                      </button>
+                    ) : (
+                      <span className="text-xs text-slate-400">—</span>
+                    )}
+                  </td>
+
+                  <td className="px-6 py-4 text-end">
+                    <button
+                      type="button"
+                      onClick={() => setCommentsLeaveId(commentsLeaveId === leave._id ? null : leave._id)}
+                      className="text-xs font-bold text-primary"
+                    >
+                      {t('comments.title')}
+                    </button>
+                  </td>
+
                   {user.role !== 'employee' && (
                     <td className="px-6 py-4 text-end">
                       <ActionButtons leave={leave} />
@@ -318,6 +375,12 @@ export default function Leaves() {
             </tbody>
           </table>
         </div>
+
+        {commentsLeaveId && (
+          <div className="border-t border-slate-200 p-4">
+            <RequestComments entityType="leave" entityId={commentsLeaveId} />
+          </div>
+        )}
 
         {/* Pagination */}
         {leaves.length > 0 ? (
@@ -428,6 +491,24 @@ export default function Leaves() {
                         <option value="unpaid">{t('leaveTypes.unpaid')}</option>
                       </select>
                     </div>
+
+                    {formData.leave_type === 'sick' && (
+                      <div className="space-y-2 rounded-xl border border-blue-100 bg-blue-50/50 p-4">
+                        <label className="block text-xs font-semibold uppercase text-slate-500">
+                          {t('leaves.modal.attachment')}
+                        </label>
+                        <input
+                          type="file"
+                          onChange={(e) => setFormData({ ...formData, attachment: e.target.files?.[0] || null })}
+                          className="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-primary-50 file:px-3 file:py-2 file:font-semibold file:text-primary"
+                        />
+                        <p className="text-xs text-slate-500">
+                          {formData.attachment
+                            ? `${formData.attachment.name} (${(formData.attachment.size / (1024 * 1024)).toFixed(2)} MB)`
+                            : t('leaves.modal.attachmentHint')}
+                        </p>
+                      </div>
+                    )}
 
                     <div className="space-y-1">
                       <label className="text-xs font-semibold uppercase text-slate-500">{t('leaves.modal.reason')}</label>

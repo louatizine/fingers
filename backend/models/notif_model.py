@@ -21,6 +21,15 @@ def create_notification(notification_data):
     logger.info(f"[NOTIF_MODEL] Creating notification with user_id: {notification_data.get('user_id')}")
     result = db.notifications.insert_one(notification_data)
     logger.info(f"[NOTIF_MODEL] Created notification with _id: {result.inserted_id}")
+    try:
+        from services.realtime import publish
+        payload = dict(notification_data)
+        payload['_id'] = str(result.inserted_id)
+        if isinstance(payload.get('created_at'), datetime):
+            payload['created_at'] = payload['created_at'].isoformat()
+        publish(payload.get('user_id'), {'type': 'notification', 'notification': payload})
+    except Exception as error:
+        logger.warning(f"[NOTIF_MODEL] Realtime publish skipped: {error}")
     return str(result.inserted_id)
 
 def get_notifications_by_user(user_id, limit=50):

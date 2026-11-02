@@ -176,6 +176,13 @@ export const BriefcaseIcon = make(
     <P d="M3 8h18v12H3zM9 8V4h6v4M3 13h18" />
   </>,
 )
+export const TruckIcon = make(
+  'TruckIcon',
+  <>
+    {tint('M3 6h11v10H3zM14 10h4l3 3v3h-7z')}
+    <P d="M3 6h11v10H3zM14 10h4l3 3v3h-7M7 16a2 2 0 1 1-4 0M18 16a2 2 0 1 1-4 0M14 13h7" />
+  </>,
+)
 export const MapPinIcon = make(
   'MapPinIcon',
   <>

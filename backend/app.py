@@ -58,6 +58,11 @@ def create_app(config_class=Config):
     from routes.terminal_routes import terminal_bp
     from routes.device_sync_routes import device_sync_bp
     from routes.holiday_routes import holiday_bp
+    from routes.fleet_routes import fleet_bp
+    from routes.department_routes import department_bp
+    from routes.audit_routes import audit_bp
+    from routes.comment_routes import comment_bp
+    from routes.calendar_routes import calendar_bp
     
     # Register the IN-APP notification routes (for navbar)
     from routes.notif_routes import notif_bp  # This should have /unread-count route
@@ -81,6 +86,14 @@ def create_app(config_class=Config):
     app.register_blueprint(terminal_bp, url_prefix='/api/terminal')
     app.register_blueprint(device_sync_bp, url_prefix='/api/device-sync')
     app.register_blueprint(holiday_bp, url_prefix='/api/holidays')
+    app.register_blueprint(fleet_bp, url_prefix='/api/fleet')
+    app.register_blueprint(department_bp, url_prefix='/api/departments')
+    app.register_blueprint(audit_bp, url_prefix='/api/audit')
+    app.register_blueprint(comment_bp, url_prefix='/api/comments')
+    app.register_blueprint(calendar_bp, url_prefix='/api/calendar')
+
+    from migrations.migration_runner import run_migrations
+    run_migrations()
 
     # Start automatic ZKTeco device sync (users + attendance)
     from services.zk_sync_scheduler import ZKSyncScheduler

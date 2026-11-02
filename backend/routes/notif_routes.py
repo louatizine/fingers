@@ -50,20 +50,23 @@ def get_filtered_notifications(user_id, user_role, company_id=None, limit=20):
             query = {'user_id': user_id_str}
             
     elif user_role == 'admin':
-        # Admins see:
-        # 1. Their personal notifications
-        # 2. All company-wide notifications
-        # 3. System notifications
-        query = {
-            '$or': [
-                # Personal notifications
-                {'user_id': user_id_str},
-                # Company-wide notifications for admins/supervisors
-                {'target_roles': {'$in': ['admin', 'supervisor']}},
-                # All notifications (admins can see everything)
-                {}
-            ]
-        }
+        # Admins: personal + role-targeted notifications (scoped to company when set)
+        if company_id:
+            query = {
+                '$or': [
+                    {'user_id': user_id_str},
+                    {'company_id': company_id, 'target_roles': {'$in': ['admin', 'supervisor']}},
+                    {'company_id': {'$exists': False}, 'target_roles': {'$in': ['admin', 'supervisor']}},
+                    {'company_id': None, 'target_roles': {'$in': ['admin', 'supervisor']}},
+                ]
+            }
+        else:
+            query = {
+                '$or': [
+                    {'user_id': user_id_str},
+                    {'target_roles': {'$in': ['admin', 'supervisor']}},
+                ]
+            }
     
     # Get notifications
     cursor = db.notifications.find(query).sort('created_at', -1).limit(limit)
@@ -104,15 +107,18 @@ def get_filtered_unread_count(user_id, user_role, company_id=None):
             query['user_id'] = user_id_str
             
     elif user_role == 'admin':
-        # Admins count personal + all admin-level unread notifications
-        query['$or'] = [
-            # Personal unread notifications
-            {'user_id': user_id_str},
-            # Company-wide unread notifications for admins/supervisors
-            {'target_roles': {'$in': ['admin', 'supervisor']}},
-            # All unread notifications
-            {}
-        ]
+        if company_id:
+            query['$or'] = [
+                {'user_id': user_id_str},
+                {'company_id': company_id, 'target_roles': {'$in': ['admin', 'supervisor']}},
+                {'company_id': {'$exists': False}, 'target_roles': {'$in': ['admin', 'supervisor']}},
+                {'company_id': None, 'target_roles': {'$in': ['admin', 'supervisor']}},
+            ]
+        else:
+            query['$or'] = [
+                {'user_id': user_id_str},
+                {'target_roles': {'$in': ['admin', 'supervisor']}},
+            ]
     
     count = db.notifications.count_documents(query)
     logger.info(f"[NOTIF_ROUTE] User {user_id_str} (role: {user_role}) - Unread count: {count}")
@@ -279,12 +285,18 @@ def mark_all_notifications_read():
                 query['user_id'] = user_id_str
                 
         elif user_role == 'admin':
-            # Admins mark personal + all admin-level notifications
-            query['$or'] = [
-                {'user_id': user_id_str},
-                {'target_roles': {'$in': ['admin', 'supervisor']}},
-                {}
-            ]
+            if company_id:
+                query['$or'] = [
+                    {'user_id': user_id_str},
+                    {'company_id': company_id, 'target_roles': {'$in': ['admin', 'supervisor']}},
+                    {'company_id': {'$exists': False}, 'target_roles': {'$in': ['admin', 'supervisor']}},
+                    {'company_id': None, 'target_roles': {'$in': ['admin', 'supervisor']}},
+                ]
+            else:
+                query['$or'] = [
+                    {'user_id': user_id_str},
+                    {'target_roles': {'$in': ['admin', 'supervisor']}},
+                ]
         
         # Update all matching notifications
         result = db.notifications.update_many(
@@ -361,3 +373,37 @@ def delete_user_notification(notification_id):
     except Exception as e:
         logger.error(f"Delete notification error: {e}", exc_info=True)
         return jsonify({'success': False, 'error': 'An error occurred'}), 500
+
+
+@notif_bp.route('/stream', methods=['GET'])
+@jwt_required()
+def notification_stream():
+    """Server-Sent Events stream for live notifications (poll fallback remains)."""
+    import json
+    from flask import Response, stream_with_context
+    from services.realtime import subscribe, unsubscribe, wait_event
+
+    user_id = get_jwt_identity()
+    queue = subscribe(user_id)
+
+    def generate():
+        try:
+            yield 'event: connected\ndata: {"ok": true}\n\n'
+            while True:
+                event = wait_event(queue, timeout=25)
+                if event is None:
+                    yield 'event: ping\ndata: {}\n\n'
+                    continue
+                yield f"event: notification\ndata: {json.dumps(event)}\n\n"
+        finally:
+            unsubscribe(user_id, queue)
+
+    return Response(
+        stream_with_context(generate()),
+        mimetype='text/event-stream',
+        headers={
+            'Cache-Control': 'no-cache',
+            'X-Accel-Buffering': 'no',
+            'Connection': 'keep-alive',
+        },
+    )

@@ -36,12 +36,16 @@ export const CUBE_ORDER = ['violet', 'blue', 'green', 'yellow', 'red']
 export const SECTION_COLORS = {
   '/dashboard': 'violet',
   '/employees': 'blue',
+  '/departments': 'blue',
   '/leaves': 'green',
+  '/team-calendar': 'green',
   '/holidays': 'red',
   '/salary-advances': 'yellow',
+  '/fleet': 'blue',
   '/projects': 'violet',
   '/attendance': 'blue',
   '/fingerprint': 'green',
+  '/audit': 'violet',
   '/settings': 'red',
   '/profile': 'yellow',
 }

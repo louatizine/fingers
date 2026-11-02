@@ -148,6 +148,10 @@
     "workedHours": "ساعات العمل",
     "late": "التأخير",
     "early": "التبكير",
+    "lateEarlyDifference": "الفرق",
+    "arrivedLate": "متأخر بـ {{minutes}} دقيقة",
+    "arrivedEarly": "مبكر بـ {{minutes}} دقيقة",
+    "onTime": "في الوقت المحدد",
     "records": "السجلات"
   },
   "summary": {

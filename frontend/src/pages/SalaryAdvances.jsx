@@ -17,6 +17,7 @@ import {
 } from '../components/ui/icons'
 import PageHeader from '../components/ui/PageHeader'
 import LoadingSpinner from '../components/LoadingSpinner'
+import RequestComments from '../components/RequestComments'
 
 export default function SalaryAdvances() {
   const { t } = useTranslation()
@@ -34,6 +35,7 @@ export default function SalaryAdvances() {
   const [selectedAdvance, setSelectedAdvance] = useState(null)
   const [rejectReason, setRejectReason] = useState('')
   const [actionLoading, setActionLoading] = useState(false)
+  const [commentsAdvanceId, setCommentsAdvanceId] = useState(null)
 
   useEffect(() => {
     loadAdvances()
@@ -93,6 +95,19 @@ export default function SalaryAdvances() {
     }
   }
 
+  const handlePaymentToggle = async (item, payment) => {
+    try {
+      setActionLoading(true)
+      await salaryAdvanceAPI.updatePayment(item._id, payment.month, !payment.paid)
+      toast.success(t('salaryAdvances.messages.paymentUpdated'))
+      await loadAdvances()
+    } catch (error) {
+      toast.error(error.response?.data?.error || t('salaryAdvances.messages.paymentFailed'))
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
   const handleApprove = async (id) => {
     const confirmed = await confirm({
       title: t('actions.approve'),
@@ -123,6 +138,7 @@ export default function SalaryAdvances() {
       toast.error(t('salaryAdvances.messages.reasonRequired'))
       return
     }
+
     try {
       setActionLoading(true)
       await salaryAdvanceAPI.rejectAdvance(selectedAdvance._id, rejectReason)
@@ -221,7 +237,7 @@ export default function SalaryAdvances() {
           user.role === 'employee' && (
             <button onClick={() => setShowModal(true)} className="btn-primary">
               <PlusIcon className="h-5 w-5" />
-              <span>{t('salaryAdvances.newRequest')}</span>
+              <span>{t('salaryAdvances.employeeRequest.action')}</span>
             </button>
           )
         }
@@ -273,6 +289,12 @@ export default function SalaryAdvances() {
                 <th className="kicker px-8 py-3.5 text-start">
                   {t('salaryAdvances.table.status')}
                 </th>
+                <th className="kicker px-8 py-3.5 text-start">
+                  {t('salaryAdvances.table.repayment')}
+                </th>
+                <th className="kicker px-8 py-3.5 text-end">
+                  {t('comments.title')}
+                </th>
                 {user.role !== 'employee' && (
                   <th className="kicker px-8 py-3.5 text-end">
                     {t('salaryAdvances.table.actions')}
@@ -315,6 +337,43 @@ export default function SalaryAdvances() {
                     <StatusBadge status={item.status} />
                   </td>
 
+                  <td className="px-8 py-5">
+                    {item.status === 'approved' && item.repayment_schedule?.length > 0 ? (
+                      <div className="flex min-w-[260px] flex-wrap gap-1.5">
+                        {item.repayment_schedule.map((payment) => (
+                          <button
+                            key={payment.month}
+                            type="button"
+                            disabled={actionLoading || user.role === 'employee'}
+                            onClick={() => handlePaymentToggle(item, payment)}
+                            title={`${payment.month} · ${payment.amount} ${t('currency.dinar')}`}
+                            className={`rounded-lg px-2 py-1 text-[11px] font-bold transition-all ${
+                              payment.paid
+                                ? 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200'
+                                : 'bg-amber-50 text-amber-700 ring-1 ring-amber-200'
+                            } ${user.role === 'employee' ? 'cursor-default' : 'hover:-translate-y-px hover:shadow-sm'}`}
+                          >
+                            {payment.month.slice(5)} · {payment.amount} {t('currency.dinar')} · {payment.paid ? t('salaryAdvances.table.paid') : t('salaryAdvances.table.unpaid')}
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="text-xs text-slate-400">
+                        {item.status === 'approved' ? t('salaryAdvances.table.noSchedule') : '—'}
+                      </span>
+                    )}
+                  </td>
+
+                  <td className="px-8 py-5 text-end">
+                    <button
+                      type="button"
+                      onClick={() => setCommentsAdvanceId(commentsAdvanceId === item._id ? null : item._id)}
+                      className="text-xs font-bold text-primary"
+                    >
+                      {t('comments.title')}
+                    </button>
+                  </td>
+
                   {user.role !== 'employee' && (
                     <td className="px-8 py-5 text-end">
                       <ActionButtons item={item} />
@@ -325,6 +384,12 @@ export default function SalaryAdvances() {
             </tbody>
           </table>
         </div>
+
+        {commentsAdvanceId && (
+          <div className="border-t border-slate-200 p-4">
+            <RequestComments entityType="salary_advance" entityId={commentsAdvanceId} />
+          </div>
+        )}
       </div>
 
       {/* Modern Pagination */}
@@ -382,10 +447,10 @@ export default function SalaryAdvances() {
             <div className="flex justify-between items-start mb-8">
               <div>
                 <h3 className="text-2xl font-black text-slate-900 tracking-tight">
-                  {showModal ? t('salaryAdvances.modal.title') : t('salaryAdvances.rejectModal.title')}
+                  {showModal ? t('salaryAdvances.employeeRequest.title') : t('salaryAdvances.rejectModal.title')}
                 </h3>
                 <p className="text-slate-400 font-bold text-xs uppercase tracking-widest mt-1">
-                  {t('salaryAdvances.actionRequired')}
+                  {showModal ? t('salaryAdvances.employeeRequest.subtitle') : t('salaryAdvances.actionRequired')}
                 </p>
               </div>
 
