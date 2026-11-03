@@ -7,7 +7,8 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple
 from zoneinfo import ZoneInfo
 
-from pymongo import InsertOne, UpdateOne
+from pymongo import UpdateOne
+from pymongo.errors import BulkWriteError
 
 from config import Config
 from models.daily_attendance_model import DailyAttendanceModel
@@ -46,6 +47,68 @@ def _local_today_str() -> str:
     return datetime.now(tz).strftime('%Y-%m-%d')
 
 
+def _summary_filter(doc: Dict[str, Any]) -> Dict[str, Any]:
+    return {'employee_id': doc['employee_id'], 'date': doc['date']}
+
+
+def _upsert_operation(doc: Dict[str, Any]) -> UpdateOne:
+    """Atomic upsert keyed by (employee_id, date); never plain-insert."""
+    return UpdateOne(
+        _summary_filter(doc),
+        {
+            '$set': doc,
+            '$setOnInsert': {'created_at': doc['updated_at']},
+        },
+        upsert=True,
+    )
+
+
+def _apply_bulk_upserts(collection, operations: List[UpdateOne]) -> Dict[str, int]:
+    """
+    Run bulk upserts. Concurrent races on the unique index can still raise
+    E11000; retry those ops as plain updates so sync does not fail.
+    """
+    counts = {'created': 0, 'updated': 0}
+    if not operations:
+        return counts
+
+    try:
+        result = collection.bulk_write(operations, ordered=False)
+    except BulkWriteError as exc:
+        details = exc.details or {}
+        write_errors = details.get('writeErrors', [])
+        if any(err.get('code') != 11000 for err in write_errors):
+            raise
+
+        counts['created'] += details.get('nUpserted', 0)
+        counts['updated'] += details.get('nModified', 0)
+
+        retry_ops: List[UpdateOne] = []
+        for err in write_errors:
+            idx = err.get('index')
+            if idx is None or idx >= len(operations):
+                continue
+            original = operations[idx]
+            filter_doc = getattr(original, '_filter', None)
+            update_doc = getattr(original, '_doc', None) or {}
+            set_fields = update_doc.get('$set') if isinstance(update_doc, dict) else None
+            if filter_doc and set_fields:
+                retry_ops.append(UpdateOne(filter_doc, {'$set': set_fields}))
+
+        if retry_ops:
+            logger.warning(
+                'Retried %s daily summary write(s) after duplicate-key race',
+                len(retry_ops),
+            )
+            retry_result = collection.bulk_write(retry_ops, ordered=False)
+            counts['updated'] += retry_result.modified_count
+        return counts
+
+    counts['created'] += result.upserted_count
+    counts['updated'] += result.modified_count
+    return counts
+
+
 def upsert_daily_summaries(
     db,
     summaries: List[DailyWorkedSummary],
@@ -57,7 +120,8 @@ def upsert_daily_summaries(
     Idempotently upsert daily summaries keyed by (employee_id, date).
 
     Existing rows for the affected dates are loaded once, then writes are
-    sent in batches. Unchanged days are not written.
+    sent in batches as atomic upserts (never InsertOne). Unchanged days
+    are not written.
 
     Returns counts: created, updated, unchanged.
     """
@@ -81,9 +145,7 @@ def upsert_daily_summaries(
         existing = existing_by_key.get((summary.employee_id, summary.date))
 
         if not existing:
-            doc['created_at'] = doc['updated_at']
-            operations.append(InsertOne(doc))
-            stats['created'] += 1
+            operations.append(_upsert_operation(doc))
             continue
 
         changed = any(
@@ -91,16 +153,17 @@ def upsert_daily_summaries(
             for field in _SUMMARY_COMPARE_FIELDS
         )
         if changed:
-            operations.append(UpdateOne({'_id': existing['_id']}, {'$set': doc}))
-            stats['updated'] += 1
+            operations.append(_upsert_operation(doc))
         else:
             stats['unchanged'] += 1
 
     for offset in range(0, len(operations), _UPSERT_BATCH_SIZE):
-        collection.bulk_write(
+        batch_counts = _apply_bulk_upserts(
+            collection,
             operations[offset:offset + _UPSERT_BATCH_SIZE],
-            ordered=False,
         )
+        stats['created'] += batch_counts['created']
+        stats['updated'] += batch_counts['updated']
 
     return stats
 

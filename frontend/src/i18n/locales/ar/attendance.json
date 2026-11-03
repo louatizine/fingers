@@ -72,6 +72,15 @@
   "export": "تصدير إلى CSV",
   "refresh": "تحديث",
   "retry": "إعادة المحاولة",
+  "holiday": {
+    "label": "عطلة",
+    "loadFailed": "تعذر تحميل معلومات العطلات."
+  },
+  "calendar": {
+    "legend": "دليل التقويم",
+    "saturday": "السبت",
+    "sunday": "الأحد"
+  },
   "loading": "جارٍ تحميل الحضور...",
   "tryAdjustFilters": "جرّب فترة أوسع أو زامن من جهاز البصمة لاستيراد البيانات التاريخية.",
   "errors": {
@@ -179,6 +188,8 @@
     "filterComplete": "مكتمل",
     "filterPartial": "جزئي",
     "filterNoData": "بدون بيانات",
+    "showWeekends": "إظهار عطلة نهاية الأسبوع",
+    "hideWeekends": "إخفاء عطلة نهاية الأسبوع",
     "showingCount": "عرض {{count}} من {{total}} يوم",
     "noMatches": "لا توجد أيام تطابق بحثك أو الفلتر"
   },

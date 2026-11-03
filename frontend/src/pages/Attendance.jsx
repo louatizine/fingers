@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import apiClient, { userAPI, attendanceAPI } from '../services/api';
+import { fetchHolidayMap } from '../services/holidayCalendar';
 import {
   getAttendanceLocale,
   translateWeekday,
@@ -152,6 +153,26 @@ const shiftDate = (dateStr, days) => {
   return formatDateInput(date);
 };
 
+const getWeekendClass = (dateStr) => {
+  if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return '';
+
+  const [year, month, day] = dateStr.split('-').map(Number);
+  const dayOfWeek = new Date(year, month - 1, day).getDay();
+
+  if (dayOfWeek === 6) return 'bg-amber-50/70';
+  if (dayOfWeek === 0) return 'bg-violet-50/70';
+  return '';
+};
+
+const getWeekendType = (dateStr) => {
+  if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return null;
+  const [year, month, day] = dateStr.split('-').map(Number);
+  const dayOfWeek = new Date(year, month - 1, day).getDay();
+  return dayOfWeek === 6 ? 'saturday' : dayOfWeek === 0 ? 'sunday' : null;
+};
+
+const isWeekend = (dateStr) => Boolean(getWeekendClass(dateStr));
+
 function DatePresetBar({ activePreset, onSelect, t }) {
   const presets = [
     { id: 'today', label: t('attendance:presets.today') },
@@ -244,6 +265,9 @@ function Attendance() {
   const [dailySearch, setDailySearch] = useState('');
   const [dailyStatusFilter, setDailyStatusFilter] = useState('all');
   const [dailyLastFetched, setDailyLastFetched] = useState(null);
+  const [holidayMap, setHolidayMap] = useState({});
+  const [holidayLoading, setHolidayLoading] = useState(false);
+  const [holidayError, setHolidayError] = useState(null);
   const dailyAbortRef = useRef(null);
   const [syncLoading, setSyncLoading] = useState(false);
   const [syncStatus, setSyncStatus] = useState(null);
@@ -254,6 +278,7 @@ function Attendance() {
   const [summaryDatePreset, setSummaryDatePreset] = useState('since2022');
   const [summarySearch, setSummarySearch] = useState('');
   const [summaryStatusFilter, setSummaryStatusFilter] = useState('all');
+  const [showSummaryWeekends, setShowSummaryWeekends] = useState(false);
   const [userStatsSearch, setUserStatsSearch] = useState('');
   const [filters, setFilters] = useState({
     employeeId: '',
@@ -292,6 +317,42 @@ function Attendance() {
       prev.employeeId ? prev : { ...prev, employeeId: resolvedEmployeeId }
     );
   }, [authLoading, user, employees]);
+
+  useEffect(() => {
+    const years = new Set([dailyDate.slice(0, 4)]);
+    (attendanceSummary?.daily_summaries || []).forEach((day) => {
+      if (day.date) years.add(day.date.slice(0, 4));
+    });
+
+    let cancelled = false;
+    setHolidayLoading(true);
+    setHolidayError(null);
+
+    Promise.all([...years].map((year) => fetchHolidayMap(year, isRTL)))
+      .then((maps) => {
+        if (cancelled) return;
+        const merged = {};
+        maps.forEach((map) => {
+          Object.entries(map).forEach(([date, holidays]) => {
+            merged[date] = [...(merged[date] || []), ...holidays];
+          });
+        });
+        setHolidayMap(merged);
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        console.error('Error fetching attendance holidays:', error);
+        setHolidayMap({});
+        setHolidayError(error);
+      })
+      .finally(() => {
+        if (!cancelled) setHolidayLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [dailyDate, attendanceSummary, isRTL]);
 
   const fetchDailyAttendance = useCallback(async (date = dailyDate, options = {}) => {
     const { signal, silent = false } = options;
@@ -724,6 +785,7 @@ function Attendance() {
 
   const dailyTotals = dailyAttendance?.totals || null;
   const isViewingToday = dailyDate === getLocalToday();
+  const dailyHolidays = holidayMap[dailyDate] || [];
 
   const formatWorkedHours = (hours) =>
     t('attendance:formats.hoursValue', { value: hours ?? 0 });
@@ -749,6 +811,9 @@ function Attendance() {
     return `${sign}${formatLateMinutesAsDisplay(Math.abs(difference))}`;
   };
 
+  const getHolidayNames = (date) =>
+    (holidayMap[date] || []).map((holiday) => holiday.name).join(' · ');
+
   const filteredDailySummaries = useMemo(() => {
     const rows = attendanceSummary?.daily_summaries || [];
     const q = summarySearch.trim().toLowerCase();
@@ -756,6 +821,8 @@ function Attendance() {
     return [...rows]
       .sort((a, b) => b.date.localeCompare(a.date))
       .filter((day) => {
+        if (!showSummaryWeekends && isWeekend(day.date)) return false;
+
         const status = getDayStatus(day);
 
         if (summaryStatusFilter === 'complete' && status !== 'complete') return false;
@@ -772,7 +839,7 @@ function Attendance() {
         }).toLowerCase();
         return day.date.includes(q) || weekday.includes(q);
       });
-  }, [attendanceSummary, summarySearch, summaryStatusFilter, displayLocale, t]);
+  }, [attendanceSummary, summarySearch, summaryStatusFilter, showSummaryWeekends, displayLocale, t]);
 
   const filteredUserStats = useMemo(() => {
     const q = userStatsSearch.trim().toLowerCase();
@@ -1236,6 +1303,38 @@ const formatTimestamp = (timestamp) => {
               <p className="text-sm font-semibold text-slate-700 mb-4">
                 {formatLocalizedLongDate(dailyDate, displayLocale)}
               </p>
+              <div className="mb-4 flex flex-wrap items-center gap-2">
+                {dailyHolidays.length > 0 && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-900 ring-1 ring-amber-300">
+                    <span className="h-2 w-2 rounded-full bg-amber-500" />
+                    {t('attendance:holiday.label')}
+                  </span>
+                )}
+                {getWeekendType(dailyDate) === 'saturday' && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-100 px-3 py-1 text-xs font-bold text-sky-900 ring-1 ring-sky-300">
+                    <span className="h-2 w-2 rounded-full bg-sky-500" />
+                    {t('attendance:calendar.saturday')}
+                  </span>
+                )}
+                {getWeekendType(dailyDate) === 'sunday' && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-violet-100 px-3 py-1 text-xs font-bold text-violet-900 ring-1 ring-violet-300">
+                    <span className="h-2 w-2 rounded-full bg-violet-500" />
+                    {t('attendance:calendar.sunday')}
+                  </span>
+                )}
+              </div>
+              {dailyHolidays.length > 0 && (
+                <div className="mb-4 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-900">
+                  <InformationCircleIcon className="mt-0.5 h-5 w-5 shrink-0" />
+                  <div>
+                    <p className="text-sm font-bold">{t('attendance:holiday.label')}</p>
+                    <p className="text-sm">{dailyHolidays.map((holiday) => holiday.name).join(' · ')}</p>
+                  </div>
+                </div>
+              )}
+              {holidayError && !holidayLoading && (
+                <p className="mb-4 text-xs text-amber-700">{t('attendance:holiday.loadFailed')}</p>
+              )}
 
               <div className="flex flex-wrap gap-2 mb-2">
                 {[
@@ -1334,7 +1433,7 @@ const formatTimestamp = (timestamp) => {
                           return (
                             <tr
                               key={row.employee_id}
-                              className={`group transition-colors ${
+                              className={`group transition-colors ${getWeekendClass(dailyAttendance.date)} ${
                                 row.has_records
                                   ? 'hover:bg-emerald-50/30'
                                   : status === 'online'
@@ -1545,6 +1644,7 @@ const formatTimestamp = (timestamp) => {
                     />
                   </div>
                 </div>
+
               </div>
 
               <div className="mt-4 flex items-center justify-end">
@@ -1596,42 +1696,6 @@ const formatTimestamp = (timestamp) => {
                           {attendanceSummary.totals?.total_days || attendanceSummary.daily_summaries.length}
                         </p>
                       </div>
-                      <div className="text-center">
-                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t('attendance:summary.daysWithRecords')}</p>
-                        <p className="text-2xl font-black text-primary">
-                          {attendanceSummary.totals?.days_with_records || attendanceSummary.daily_summaries.filter(d => d.total_records > 0).length}
-                        </p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t('attendance:summary.completeDays')}</p>
-                        <p className="text-2xl font-black text-emerald-600">
-                          {attendanceSummary.totals?.complete_days || attendanceSummary.daily_summaries.filter(d => d.is_complete).length}
-                        </p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t('attendance:summary.totalHours')}</p>
-                        <p className="text-2xl font-black text-purple-600">
-                          {attendanceSummary.totals?.worked_hours || attendanceSummary.daily_summaries.reduce((sum, d) => sum + (d.worked_hours || 0), 0)}
-                        </p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t('attendance:summary.totalLate')}</p>
-                        <p className="text-2xl font-black text-rose-600">
-                          {formatLateMinutesAsDisplay(
-                            attendanceSummary.totals?.total_late_minutes
-                            ?? attendanceSummary.daily_summaries.reduce((sum, d) => sum + (d.total_late_minutes || 0), 0)
-                          )}
-                        </p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t('attendance:summary.totalEarly')}</p>
-                        <p className="text-2xl font-black text-sky-600">
-                          {formatLateMinutesAsDisplay(
-                            attendanceSummary.totals?.total_early_minutes
-                            ?? attendanceSummary.daily_summaries.reduce((sum, d) => sum + (d.total_early_minutes || 0), 0)
-                          )}
-                        </p>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -1681,6 +1745,35 @@ const formatTimestamp = (timestamp) => {
                           {chip.label}
                         </button>
                       ))}
+                      <button
+                        type="button"
+                        onClick={() => setShowSummaryWeekends((visible) => !visible)}
+                        aria-pressed={showSummaryWeekends}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                          showSummaryWeekends
+                            ? 'bg-primary text-white shadow-md shadow-primary-200'
+                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                        }`}
+                      >
+                        {showSummaryWeekends
+                          ? t('attendance:summary.hideWeekends')
+                          : t('attendance:summary.showWeekends')}
+                      </button>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-3 border-t border-slate-100 pt-3 text-xs font-semibold text-slate-600">
+                      <span className="text-slate-400">{t('attendance:calendar.legend')}</span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className="h-2.5 w-2.5 rounded-full bg-amber-500" />
+                        {t('attendance:holiday.label')}
+                      </span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className="h-2.5 w-2.5 rounded-full bg-sky-500" />
+                        {t('attendance:calendar.saturday')}
+                      </span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className="h-2.5 w-2.5 rounded-full bg-violet-500" />
+                        {t('attendance:calendar.sunday')}
+                      </span>
                     </div>
                   </div>
                   <div className="overflow-x-auto">
@@ -1697,13 +1790,12 @@ const formatTimestamp = (timestamp) => {
                           <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('attendance:table.late')}</th>
                           <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('attendance:table.early')}</th>
                           <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('attendance:table.status')}</th>
-                          <th className="px-6 py-5 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('attendance:table.records')}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
                         {filteredDailySummaries.length === 0 ? (
                           <tr>
-                            <td colSpan={11} className="px-6 py-10 text-center text-sm text-slate-500">
+                            <td colSpan={10} className="px-6 py-10 text-center text-sm text-slate-500">
                               {t('attendance:summary.noMatches')}
                             </td>
                           </tr>
@@ -1711,16 +1803,50 @@ const formatTimestamp = (timestamp) => {
                           const status = getDayStatus(day) || 'no_data';
                           const isLate = (day.total_late_minutes || 0) > 0;
                           const isEarly = (day.total_early_minutes || 0) > 0;
+                          const holidayNames = getHolidayNames(day.date);
+                          const isHoliday = Boolean(holidayNames);
+                          const weekendType = getWeekendType(day.date);
+                          const weekendLabel = weekendType === 'saturday'
+                            ? t('attendance:calendar.saturday')
+                            : weekendType === 'sunday'
+                              ? t('attendance:calendar.sunday')
+                              : '';
                           return (
-                            <tr key={index} className="group hover:bg-slate-50/30 transition-colors">
+                            <tr
+                              key={index}
+                              className={`group transition-colors ${
+                                isHoliday
+                                  ? 'border-l-4 border-amber-500 bg-amber-50/90'
+                                  : weekendType === 'saturday'
+                                    ? 'border-l-4 border-sky-300 bg-sky-50/70'
+                                    : weekendType === 'sunday'
+                                      ? 'border-l-4 border-violet-300 bg-violet-50/70'
+                                      : ''
+                              } hover:bg-slate-50/30`}
+                            >
                               <td className="px-6 py-4">
-                                <div className="text-sm font-semibold text-slate-700">
-                                  {formatLocalizedShortDate(day.date, displayLocale)}
+                                <div className="flex flex-col gap-1">
+                                  <div className="text-sm font-semibold text-slate-700">
+                                    {formatLocalizedShortDate(day.date, displayLocale)}
+                                  </div>
+                                  {isHoliday && (
+                                    <span className="inline-flex w-fit items-center gap-1 rounded-full bg-amber-200 px-2 py-0.5 text-xs font-bold text-amber-900" title={holidayNames}>
+                                      <span className="h-1.5 w-1.5 rounded-full bg-amber-600" />
+                                      {holidayNames}
+                                    </span>
+                                  )}
                                 </div>
                               </td>
                               <td className="px-6 py-4">
-                                <div className="text-sm text-slate-600">
+                                <div className={`flex flex-wrap items-center gap-2 text-sm font-semibold ${
+                                  isHoliday ? 'text-amber-900' : weekendType === 'saturday' ? 'text-sky-900' : weekendType === 'sunday' ? 'text-violet-900' : 'text-slate-600'
+                                }`}>
                                   {getWeekdayLabel(day.date, day.day_of_week)}
+                                  {weekendLabel && (
+                                    <span className="text-[10px] uppercase tracking-wide opacity-75">
+                                      {weekendLabel}
+                                    </span>
+                                  )}
                                 </div>
                               </td>
                               <td className="px-6 py-4" dir="ltr">
@@ -1760,11 +1886,6 @@ const formatTimestamp = (timestamp) => {
                               </td>
                               <td className="px-6 py-4">
                                 <DailyStatusBadge status={status} />
-                              </td>
-                              <td className="px-6 py-4">
-                                <span className="text-sm font-medium text-slate-700">
-                                  {day.total_records || 0}
-                                </span>
                               </td>
                             </tr>
                           );

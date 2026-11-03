@@ -72,6 +72,15 @@
   "export": "Export to CSV",
   "refresh": "Refresh",
   "retry": "Retry",
+  "holiday": {
+    "label": "Holiday",
+    "loadFailed": "Holiday information could not be loaded."
+  },
+  "calendar": {
+    "legend": "Calendar key",
+    "saturday": "Saturday",
+    "sunday": "Sunday"
+  },
   "loading": "Loading attendance...",
   "tryAdjustFilters": "Try a wider date range or sync from the fingerprint device to import historical data.",
   "errors": {
@@ -179,6 +188,8 @@
     "filterComplete": "Complete",
     "filterPartial": "Partial",
     "filterNoData": "No data",
+    "showWeekends": "Show weekends",
+    "hideWeekends": "Hide weekends",
     "showingCount": "Showing {{count}} of {{total}} days",
     "noMatches": "No days match your search or filter"
   },

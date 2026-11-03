@@ -29,7 +29,6 @@ const PAGES = [
   { id: 'holidays', href: '/holidays', icon: FlagIcon, labelKey: 'nav.holidays', roles: ['admin', 'supervisor', 'employee'] },
   { id: 'advances', href: '/salary-advances', icon: CurrencyDollarIcon, labelKey: 'nav.salary_advances', roles: ['admin', 'supervisor', 'employee'] },
   { id: 'projects', href: '/projects', icon: BriefcaseIcon, labelKey: 'nav.projects', roles: ['admin', 'supervisor', 'employee'], employeeRequiresProjects: true },
-  { id: 'worked-hours', href: '/worked-hours', icon: ClockIcon, labelKey: 'nav.workedHours', roles: ['admin', 'supervisor', 'employee'] },
   { id: 'attendance', href: '/attendance', icon: ClockIcon, labelKey: 'nav.attendance', roles: ['admin', 'supervisor'] },
   { id: 'settings', href: '/settings', icon: CogIcon, labelKey: 'nav.settings', roles: ['supervisor'] },
   { id: 'profile', href: '/profile', icon: UserCircleIcon, labelKey: 'nav.profile', roles: ['admin', 'supervisor', 'employee'] },

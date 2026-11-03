@@ -72,7 +72,16 @@
   "export": "Exporter en CSV",
   "refresh": "Actualiser",
   "retry": "Réessayer",
-  "loading": "Chargement des présences…",
+  "holiday": {
+    "label": "Jour férié",
+    "loadFailed": "Les informations sur les jours fériés n'ont pas pu être chargées."
+  },
+  "calendar": {
+    "legend": "Légende du calendrier",
+    "saturday": "Samedi",
+    "sunday": "Dimanche"
+  },
+  "loading": "Chargement des présences...",
   "tryAdjustFilters": "Essayez une période plus large ou synchronisez depuis l'appareil biométrique.",
   "errors": {
     "loadFailed": "Échec du chargement des présences. Veuillez réessayer.",
@@ -179,6 +188,8 @@
     "filterComplete": "Complets",
     "filterPartial": "Partiels",
     "filterNoData": "Sans données",
+    "showWeekends": "Afficher les week-ends",
+    "hideWeekends": "Masquer les week-ends",
     "showingCount": "{{count}} jours affichés sur {{total}}",
     "noMatches": "Aucun jour ne correspond à votre recherche ou filtre"
   },

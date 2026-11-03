@@ -26,17 +26,18 @@ export default function Sidebar() {
   const navigation = [
     { name: t('nav.dashboard'), href: '/dashboard', icon: HomeIcon, roles: ['admin', 'supervisor', 'employee'] },
     { name: t('nav.employees'), href: '/employees', icon: UsersIcon, roles: ['admin', 'supervisor'] },
-    { name: t('nav.departments'), href: '/departments', icon: UsersIcon, roles: ['admin', 'supervisor'] },
-    { name: t('nav.leaves'), href: '/leaves', icon: CalendarIcon, roles: ['admin', 'supervisor', 'employee'] },
-    { name: t('nav.teamCalendar'), href: '/team-calendar', icon: CalendarIcon, roles: ['admin', 'supervisor', 'employee'] },
-    { name: t('nav.holidays'), href: '/holidays', icon: FlagIcon, roles: ['admin', 'supervisor', 'employee'] },
+/*     { name: t('nav.departments'), href: '/departments', icon: UsersIcon, roles: ['admin', 'supervisor'] },
+ */    { name: t('nav.leaves'), href: '/leaves', icon: CalendarIcon, roles: ['admin', 'supervisor', 'employee'] },
+/*     { name: t('nav.teamCalendar'), href: '/team-calendar', icon: CalendarIcon, roles: ['admin', 'supervisor', 'employee'] },
+ */    { name: t('nav.holidays'), href: '/holidays', icon: FlagIcon, roles: ['admin', 'supervisor', 'employee'] },
     { name: t('nav.salary_advances'), href: '/salary-advances', icon: CurrencyDollarIcon, roles: ['admin', 'supervisor', 'employee'] },
-    { name: t('nav.fleet'), href: '/fleet', icon: TruckIcon, roles: ['admin', 'supervisor', 'employee'] },
-    { name: t('nav.workedHours'), href: '/worked-hours', icon: ClockIcon, roles: ['admin', 'supervisor', 'employee'] },
+/*     { name: t('nav.fleet'), href: '/fleet', icon: TruckIcon, roles: ['admin', 'supervisor', 'employee'] },
+ */    // Worked hours: keep route for later; hide from sidebar until ready to ship
+    // { name: t('nav.workedHours'), href: '/worked-hours', icon: ClockIcon, roles: ['admin', 'supervisor', 'employee'] },
     { name: t('nav.projects'), href: '/projects', icon: BriefcaseIcon, roles: ['admin', 'supervisor', 'employee'], employeeRequiresProjects: true },
     { name: t('nav.attendance'), href: '/attendance', icon: ClockIcon, roles: ['admin', 'supervisor'] },
-    { name: t('nav.audit'), href: '/audit', icon: ClockIcon, roles: ['admin', 'supervisor'] },
-    { name: t('nav.settings'), href: '/settings', icon: CogIcon, roles: ['admin', 'supervisor'] },
+/*     { name: t('nav.audit'), href: '/audit', icon: ClockIcon, roles: ['admin', 'supervisor'] },
+ */    { name: t('nav.settings'), href: '/settings', icon: CogIcon, roles: ['admin', 'supervisor'] },
   ]
 
   const filteredNavigation = navigation.filter(item => {
